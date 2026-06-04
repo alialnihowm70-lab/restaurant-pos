@@ -50,5 +50,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Expose HTTP port
 EXPOSE 80
 
-# Execute database setup, migrations, and start Apache web server
-CMD sh -c "if [ \"\$DB_CONNECTION\" = \"sqlite\" ]; then mkdir -p /var/www/html/storage/db && touch /var/www/html/storage/db/database.sqlite && chown -R www-data:www-data /var/www/html/storage/db; fi && php artisan migrate --force && apache2-foreground"
+# Execute database setup, migrations, seeding, and start Apache web server
+CMD sh -c "if [ \"\$DB_CONNECTION\" = \"sqlite\" ]; then mkdir -p /var/www/html/storage/db && touch /var/www/html/storage/db/database.sqlite && chown -R www-data:www-data /var/www/html/storage/db; fi && php artisan migrate --force && php artisan db:seed --force && apache2-foreground"

@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (User::count() > 0) {
+            return;
+        }
+
         // 1. Create Default Users for Roles
         User::factory()->create([
             'name' => 'POS Administrator (المدير)',
