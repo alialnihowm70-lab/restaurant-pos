@@ -309,7 +309,7 @@
                                 <!-- Product Thumbnail Image -->
                                 <div class="w-full h-32 relative overflow-hidden rounded-2xl bg-slate-100">
                                     <img :src="product.image_url || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'" 
-                                         @error="$event.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'"
+                                         x-on:error="$event.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'"
                                          alt="Food image"
                                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                     <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
