@@ -87,7 +87,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Espresso',
             'base_price' => 5.00,
             'category' => 'Coffee',
-            'image_url' => 'https://images.unsplash.com/photo-151097252790b-a49ef2a24316?w=500&auto=format&fit=crop',
+            'image_url' => 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&auto=format&fit=crop',
         ]);
 
         $orangeJuice = Product::create([
