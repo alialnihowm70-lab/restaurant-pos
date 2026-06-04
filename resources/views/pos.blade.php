@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المدينة POS - واجهة الكاشير</title>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;850&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS (Tailwind CDN) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;650;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;850&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -26,28 +26,36 @@
             font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
             color: #1e293b;
-            background-image: radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.03) 0%, transparent 45%),
-                              radial-gradient(circle at 100% 100%, rgba(241, 245, 249, 1) 0%, transparent 45%);
+            background-image: radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.04) 0%, transparent 45%),
+                              radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.04) 0%, transparent 45%);
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: rgba(241, 245, 249, 0.5);
         }
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 4px;
+            border-radius: 6px;
+        }
+        /* Frosted Glass Panels */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
         /* Paper receipt styling for high-end preview */
         .paper-receipt {
             background: #ffffff;
-            color: #1e293b;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-radius: 8px;
+            color: #0f172a;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
             font-family: monospace;
             position: relative;
+            border: 1px solid #e2e8f0;
         }
         .paper-receipt::before {
             content: "";
@@ -91,32 +99,36 @@
         }
     </style>
 </head>
-<body class="h-screen overflow-hidden flex" x-data="posApp()">
+<body class="h-screen overflow-hidden flex relative" x-data="posApp()">
+
+    <!-- Decorative Glow Circles -->
+    <div class="absolute -top-40 -right-40 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-indigo-500/5 rounded-full blur-[150px] pointer-events-none"></div>
 
     <!-- Unified left navigation sidebar -->
     @include('partials.sidebar')
 
     <!-- Main Content Area -->
-    <div class="flex-grow flex flex-col overflow-hidden h-screen">
+    <div class="flex-grow flex flex-col overflow-hidden h-screen relative z-10">
 
         <!-- Top Navigation Bar -->
-        <header class="bg-white border-b border-slate-200 px-4 lg:px-6 py-3 lg:py-4 flex flex-col md:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-lg shadow-amber-500/10 text-xl">
+        <header class="glass-header px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4 flex-shrink-0">
+            <div class="flex items-center gap-4 text-right">
+                <div class="w-12 h-12 rounded-[20px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-lg shadow-orange-550/20 text-2xl animate-pulse">
                     M
                 </div>
                 <div>
-                    <h1 class="text-base font-extrabold tracking-tight text-slate-800">منظومة المدينة POS</h1>
-                    <span class="text-xs text-slate-400 font-medium">النظام v1.0 • يدعم العمل بدون اتصال بالشبكة</span>
+                    <h1 class="text-base font-black tracking-tight text-slate-900 leading-none">منظومة المدينة POS</h1>
+                    <span class="text-[10px] text-amber-600 font-extrabold uppercase tracking-wider block mt-1">واجهة الكاشير ونقاط البيع المزامنة</span>
                 </div>
             </div>
 
             <!-- Sync & Connection Info -->
-            <div class="flex items-center gap-4" dir="rtl">
+            <div class="flex flex-wrap items-center gap-4" dir="rtl">
                 <!-- Active Location Selector -->
                 <div class="flex items-center gap-2">
-                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">الفرع:</span>
-                    <select x-model="selectedLocation" @change="changeLocation()" class="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-slate-800 font-bold">
+                    <span class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">الفرع:</span>
+                    <select x-model="selectedLocation" @change="changeLocation()" class="bg-white/80 border border-slate-200 text-xs rounded-2xl px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-slate-800 font-bold shadow-sm transition-all">
                         <option value="">اختر الفرع</option>
                         @foreach($locations as $location)
                             <option value="{{ $location->id }}">{{ $location->name }}</option>
@@ -126,25 +138,25 @@
 
                 <!-- Printer IP Configuration -->
                 <div class="flex items-center gap-2">
-                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">طابعة IP:</span>
-                    <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-32 bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-slate-800 text-center" dir="ltr" />
+                    <span class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">طابعة IP:</span>
+                    <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-36 bg-white/80 border border-slate-200 text-xs rounded-2xl px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-slate-800 text-center font-mono shadow-sm transition-all" dir="ltr" />
                 </div>
 
                 <!-- Network Connection Status -->
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider border"
-                     :class="isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'">
-                    <span class="w-2 h-2 rounded-full" :class="isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'"></span>
-                    <span x-text="isOnline ? 'متصل بالشبكة' : 'غير متصل بالشبكة'"></span>
+                <div class="flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black tracking-wider border shadow-sm"
+                     :class="isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-250' : 'bg-rose-50 text-rose-700 border-rose-250'">
+                    <span class="w-2.5 h-2.5 rounded-full" :class="isOnline ? 'bg-emerald-550 animate-pulse' : 'bg-rose-550'"></span>
+                    <span x-text="isOnline ? 'متصل بالشبكة' : 'الوضع المحلي'"></span>
                 </div>
 
                 <!-- Sync Button -->
-                <button @click="triggerManualSync()" :disabled="syncing" class="relative bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md shadow-amber-500/10">
-                    <svg x-show="syncing" class="animate-spin h-3 w-3 text-slate-950" fill="none" viewBox="0 0 24 24">
+                <button @click="triggerManualSync()" :disabled="syncing" class="relative bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-black text-xs px-5 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-orange-550/15 hover:shadow-orange-550/25 active:scale-[0.98] disabled:scale-100">
+                    <svg x-show="syncing" class="animate-spin h-3.5 w-3.5 text-slate-950" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span x-text="syncing ? 'جاري المزامنة...' : 'مزامنة النظام'"></span>
-                    <span x-show="pendingSyncCount > 0" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black animate-bounce" x-text="pendingSyncCount"></span>
+                    <span x-text="syncing ? 'مزامنة...' : 'مزامنة'"></span>
+                    <span x-show="pendingSyncCount > 0" class="absolute -top-2 -right-2 bg-rose-550 text-white text-[9px] w-6 h-6 rounded-full flex items-center justify-center font-black border-2 border-white animate-bounce" x-text="pendingSyncCount"></span>
                 </button>
             </div>
         </header>
@@ -152,77 +164,81 @@
         <!-- Main Workspace -->
         <main class="flex-grow flex overflow-hidden">
 
-            <!-- Right Column: Checkout Cart (Width 400px) -->
-            <section class="w-[400px] bg-white border-l border-slate-200 flex flex-col flex-shrink-0 text-right">
+            <!-- Right Column: Checkout Cart -->
+            <section class="w-[400px] bg-white/95 backdrop-blur-xl border-l border-slate-200/80 flex flex-col flex-shrink-0 text-right shadow-2xl relative z-10">
                 <!-- Active Customer / Cart Metadata -->
-                <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-                    <h2 class="font-extrabold text-sm text-slate-800 uppercase tracking-wider">الفاتورة الحالية</h2>
-                    <button @click="clearCart()" class="text-xs font-bold text-slate-400 hover:text-red-650 transition-colors">مسح الكل</button>
+                <div class="p-5 border-b border-slate-150 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="font-black text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🛒</span> السلة الحالية
+                    </h2>
+                    <button @click="clearCart()" class="text-[11px] font-black text-rose-500 hover:text-rose-700 transition-colors bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl">مسح السلة</button>
                 </div>
 
                 <!-- Cart Items List (Scrollable) -->
-                <div class="flex-grow overflow-y-auto p-5 space-y-3">
+                <div class="flex-grow overflow-y-auto p-5 space-y-3.5">
                     <template x-if="cart.length === 0">
                         <div class="h-full flex flex-col items-center justify-center text-slate-400 gap-3 py-20">
-                            <span class="text-4xl">🛒</span>
-                            <span class="text-xs font-semibold uppercase tracking-wider">سلة المشتريات فارغة</span>
+                            <span class="text-5xl animate-bounce">🍕</span>
+                            <span class="text-xs font-black text-slate-400 uppercase tracking-wider">سلة المشتريات فارغة</span>
                         </div>
                     </template>
 
                     <template x-for="(item, index) in cart" :key="item.product.id">
-                        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm hover:border-amber-500/30 transition-all duration-300">
+                        <div class="bg-slate-50/80 border border-slate-200/60 hover:bg-white hover:border-amber-500/30 rounded-[22px] p-4 flex items-center justify-between gap-3 shadow-sm hover:shadow transition-all duration-300">
                             <div class="min-w-0 flex-grow text-right">
-                                <h3 class="font-bold text-sm text-slate-800 truncate" x-text="item.product.name"></h3>
-                                <span class="text-xs text-amber-600 font-bold" x-text="formatCurrency(item.product.base_price)"></span>
+                                <h3 class="font-extrabold text-xs text-slate-850 truncate" x-text="item.product.name"></h3>
+                                <span class="text-[11px] text-amber-600 font-extrabold block mt-0.5" x-text="formatCurrency(item.product.base_price)"></span>
                             </div>
-                            <div class="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm" dir="ltr">
-                                <button @click="decrementQty(index)" class="w-6 h-6 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold rounded-lg flex items-center justify-center text-xs border border-slate-200 transition-colors">-</button>
-                                <span class="w-6 text-center font-bold text-xs text-slate-800" x-text="item.quantity"></span>
-                                <button @click="incrementQty(index)" class="w-6 h-6 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold rounded-lg flex items-center justify-center text-xs border border-slate-200 transition-colors">+</button>
+                            <div class="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-inner" dir="ltr">
+                                <button @click="decrementQty(index)" class="w-7 h-7 bg-slate-50 hover:bg-slate-100 active:scale-90 text-slate-650 font-black rounded-xl flex items-center justify-center text-sm border border-slate-250 transition-all">-</button>
+                                <span class="w-6 text-center font-extrabold text-xs text-slate-850" x-text="item.quantity"></span>
+                                <button @click="incrementQty(index)" class="w-7 h-7 bg-slate-50 hover:bg-slate-100 active:scale-90 text-slate-650 font-black rounded-xl flex items-center justify-center text-sm border border-slate-250 transition-all">+</button>
                             </div>
                             <div class="text-left w-20 flex-shrink-0" dir="ltr">
-                                <span class="font-extrabold text-sm text-slate-800" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
+                                <span class="font-black text-xs text-slate-850" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
                             </div>
                         </div>
                     </template>
                 </div>
 
                 <!-- Tax, Discount, Subtotal & Total Controls -->
-                <div class="p-5 bg-slate-50/50 border-t border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between text-xs text-slate-550">
+                <div class="p-6 bg-slate-950 border-t border-slate-900 space-y-4 rounded-t-[32px] text-white shadow-[0_-12px_40px_rgba(15,23,42,0.15)] relative z-20">
+                    <div class="flex items-center justify-between text-xs text-slate-400">
                         <span class="font-bold">المجموع الفرعي</span>
-                        <span class="font-bold text-slate-850" x-text="formatCurrency(getSubtotal())"></span>
+                        <span class="font-black text-slate-300" x-text="formatCurrency(getSubtotal())"></span>
                     </div>
 
-                    <!-- Discount Input -->
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="text-slate-550 font-bold">الخصم الممنوح (د.ل)</span>
-                        <input type="number" min="0" x-model.number="discount" class="w-24 bg-white border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl px-3 py-1.5 text-center text-amber-600 font-extrabold focus:outline-none" />
-                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Discount Input -->
+                        <div class="flex flex-col gap-1.5 text-right">
+                            <span class="text-[9px] text-slate-400 font-extrabold">الخصم الممنوح (د.ل)</span>
+                            <input type="number" min="0" x-model.number="discount" class="w-full bg-slate-900 border border-slate-850 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-3 py-2 text-center text-amber-500 font-black focus:outline-none text-xs transition-all shadow-inner" />
+                        </div>
 
-                    <!-- Tax Input -->
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="text-slate-550 font-bold">الضريبة المضافة (د.ل)</span>
-                        <input type="number" min="0" x-model.number="tax" class="w-24 bg-white border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl px-3 py-1.5 text-center text-red-650 font-extrabold focus:outline-none" />
+                        <!-- Tax Input -->
+                        <div class="flex flex-col gap-1.5 text-right">
+                            <span class="text-[9px] text-slate-400 font-extrabold">الضريبة المضافة (د.ل)</span>
+                            <input type="number" min="0" x-model.number="tax" class="w-full bg-slate-900 border border-slate-850 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-3 py-2 text-center text-rose-500 font-black focus:outline-none text-xs transition-all shadow-inner" />
+                        </div>
                     </div>
 
                     <!-- Order Type Selector -->
                     <div class="flex flex-col gap-1.5 text-right">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
-                        <div class="bg-slate-100 border border-slate-200 p-1 rounded-2xl flex gap-1" dir="rtl">
+                        <label class="text-[9px] font-black text-slate-450 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
+                        <div class="bg-slate-900/60 border border-slate-850 p-1.5 rounded-2xl flex gap-1.5" dir="rtl">
                             <button @click="orderType = 'dinein'" type="button"
-                                    :class="orderType === 'dinein' ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'text-slate-650 hover:text-slate-900'"
-                                    class="w-1/3 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1">
+                                    :class="orderType === 'dinein' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
+                                    class="w-1/3 py-2.5 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1">
                                 <span>🛋️</span> محلي
                             </button>
                             <button @click="orderType = 'takeaway'" type="button"
-                                    :class="orderType === 'takeaway' ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'text-slate-650 hover:text-slate-900'"
-                                    class="w-1/3 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1">
+                                    :class="orderType === 'takeaway' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
+                                    class="w-1/3 py-2.5 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1">
                                 <span>🛍️</span> سفري
                             </button>
                             <button @click="orderType = 'delivery'" type="button"
-                                    :class="orderType === 'delivery' ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'text-slate-650 hover:text-slate-900'"
-                                    class="w-1/3 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1">
+                                    :class="orderType === 'delivery' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
+                                    class="w-1/3 py-2.5 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1">
                                 <span>🚗</span> توصيل
                             </button>
                         </div>
@@ -230,39 +246,39 @@
 
                     <!-- Order Notes Input -->
                     <div class="flex flex-col gap-1.5 text-right">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">ملاحظات التحضير الخاصة</label>
+                        <label class="text-[9px] font-black text-slate-450 uppercase tracking-wider block">ملاحظات التحضير الخاصة</label>
                         <textarea x-model="notes" placeholder="مثال: بدون بصل، زيادة جبنة، إلخ..." 
-                                  class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none h-14 resize-none text-right"></textarea>
+                                  class="w-full bg-slate-900 border border-slate-850 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none h-14 resize-none text-right placeholder-slate-600 transition-all"></textarea>
                     </div>
 
                     <!-- Grand Total -->
-                    <div class="flex items-center justify-between border-t border-slate-200/80 pt-4 text-sm">
-                        <span class="font-extrabold text-slate-600 uppercase tracking-wider text-xs">إجمالي الفاتورة الكلي</span>
-                        <span class="text-xl font-black text-amber-600" x-text="formatCurrency(getTotal())"></span>
+                    <div class="flex items-center justify-between border-t border-slate-850 pt-4 text-sm">
+                        <span class="font-extrabold text-slate-450 uppercase tracking-wider text-[10px]">إجمالي الفاتورة النهائي</span>
+                        <span class="text-2xl font-black text-amber-550" x-text="formatCurrency(getTotal())"></span>
                     </div>
 
                     <!-- Checkout Button -->
                     <button @click="openPaymentModal()" :disabled="cart.length === 0 || !selectedLocation"
-                            class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-extrabold py-3.5 rounded-2xl shadow-lg shadow-amber-500/10 transition-all flex items-center justify-center gap-2 text-sm tracking-wide">
-                        <span x-text="!selectedLocation ? 'الرجاء تحديد الفرع أولاً' : 'إتمام الطلب ودفع الفاتورة'"></span>
+                            class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-800 disabled:to-slate-800 text-slate-950 disabled:text-slate-500 font-black py-4 rounded-2xl shadow-xl shadow-orange-550/15 transition-all flex items-center justify-center gap-2 text-xs tracking-wider uppercase">
+                        <span x-text="!selectedLocation ? 'الرجاء تحديد الفرع أولاً' : 'إتمام الدفع وطباعة الفاتورة'"></span>
                     </button>
                 </div>
             </section>
 
             <!-- Left Column: Menu Products Grid -->
-            <section class="flex-grow flex flex-col bg-slate-50 text-right">
+            <section class="flex-grow flex flex-col bg-slate-50/50 text-right relative">
                 <!-- Category Horizontal Scroll Bar -->
-                <div class="p-4 bg-white border-b border-slate-200 flex items-center gap-2 overflow-x-auto flex-shrink-0" dir="rtl">
+                <div class="p-4 bg-white/70 backdrop-blur-md border-b border-slate-200/60 flex items-center gap-3 overflow-x-auto flex-shrink-0" dir="rtl">
                     <button @click="selectedCategory = 'All'"
-                            class="px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2"
-                            :class="selectedCategory === 'All' ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'">
+                            class="px-5 py-3 rounded-2xl text-xs font-black transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2"
+                            :class="selectedCategory === 'All' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-orange-500/20' : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200/50 hover:scale-[1.02]'">
                         <span>🍽️</span>
                         <span>جميع الوجبات</span>
                     </button>
                     <template x-for="cat in categories" :key="cat">
                         <button @click="selectedCategory = cat"
-                                class="px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2"
-                                :class="selectedCategory === cat ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'">
+                                class="px-5 py-3 rounded-2xl text-xs font-black transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2"
+                                :class="selectedCategory === cat ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-orange-500/20' : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200/50 hover:scale-[1.02]'">
                             <span x-text="getCategoryIcon(cat)"></span>
                             <span x-text="cat"></span>
                         </button>
@@ -270,28 +286,28 @@
                 </div>
 
                 <!-- Product Card Grid (Scrollable) -->
-                <div class="flex-grow overflow-y-auto p-6" dir="rtl">
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div class="flex-grow overflow-y-auto p-6 relative z-10" dir="rtl">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                         <template x-for="product in filteredProducts()" :key="product.id">
                             <div @click="addToCart(product)"
-                                 class="bg-white hover:bg-slate-50/50 border border-slate-200 hover:border-amber-500/50 rounded-3xl p-3 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-sm group relative overflow-hidden h-52 text-right">
+                                 class="bg-white/90 backdrop-blur-sm border border-slate-200 hover:border-amber-500/40 rounded-[28px] p-3 flex flex-col justify-between cursor-pointer transition-all duration-350 hover:-translate-y-1 shadow-[0_4px_20px_rgba(241,245,249,0.5)] hover:shadow-[0_12px_32px_rgba(245,158,11,0.12)] group relative overflow-hidden h-56 text-right">
                                 
                                 <!-- Product Thumbnail Image -->
-                                <div class="w-full h-28 relative overflow-hidden rounded-2xl bg-slate-100">
+                                <div class="w-full h-32 relative overflow-hidden rounded-2xl bg-slate-100">
                                     <img :src="product.image_url || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'" 
                                          alt="Food image"
                                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent"></div>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
                                     <!-- Floating category -->
-                                    <span class="absolute top-2 right-2 text-[8px] uppercase font-black text-slate-700 tracking-widest bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md border border-slate-150 shadow-sm" x-text="product.category"></span>
+                                    <span class="absolute top-2.5 right-2.5 text-[8px] uppercase font-black text-amber-500 tracking-widest bg-slate-950/80 backdrop-blur-sm px-2 py-0.5 rounded-lg border border-slate-800 shadow" x-text="product.category"></span>
                                 </div>
                                 
                                 <!-- Product Meta Details -->
-                                <div class="mt-2.5 flex flex-col justify-between flex-grow">
+                                <div class="mt-3 flex flex-col justify-between flex-grow">
                                     <h3 class="font-extrabold text-slate-800 text-xs leading-snug group-hover:text-amber-600 transition-colors truncate text-right" x-text="product.name"></h3>
                                     <div class="flex items-center justify-between mt-1">
                                         <p class="text-amber-600 font-black text-xs" x-text="formatCurrency(product.base_price)"></p>
-                                        <span class="text-[9px] text-slate-450 group-hover:text-amber-600 font-bold transition-all">إضافة +</span>
+                                        <span class="text-[9px] font-black bg-amber-500/10 text-amber-600 group-hover:bg-amber-500 group-hover:text-slate-950 px-2.5 py-1 rounded-xl transition-all duration-300">إضافة +</span>
                                     </div>
                                 </div>
                             </div>
@@ -304,78 +320,78 @@
         <!-- Payment Gateway & Receipt Preview Modal -->
         <div x-show="showPaymentModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-transition>
             <!-- Backdrop -->
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="checkoutState !== 'receipt' && closePaymentModal()"></div>
+            <div class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm" @click="checkoutState !== 'receipt' && closePaymentModal()"></div>
 
             <!-- Modal Container -->
-            <div class="flex items-center justify-center min-h-screen p-6">
+            <div class="flex items-center justify-center min-h-screen p-6 relative">
                 
                 <!-- Standard Payment Select Screen -->
-                <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl relative z-10 space-y-6 text-right" x-show="checkoutState !== 'receipt'">
+                <div class="bg-white border border-slate-200 rounded-[32px] max-w-md w-full p-6 shadow-2xl relative z-10 space-y-6 text-right" x-show="checkoutState !== 'receipt'">
                     <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-                        <h3 class="text-base font-bold text-slate-800 uppercase tracking-wider">اختر طريقة دفع الفاتورة</h3>
-                        <button @click="closePaymentModal()" class="text-slate-400 hover:text-slate-650">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <h3 class="text-sm font-black text-slate-850 uppercase tracking-wider">اختر طريقة دفع الفاتورة</h3>
+                        <button @click="closePaymentModal()" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
 
-                    <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center border border-slate-200">
+                    <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center border border-slate-200/80 shadow-inner">
                         <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">القيمة الإجمالية المطلوبة</span>
                         <span class="text-xl font-black text-amber-600" x-text="formatCurrency(getTotal())"></span>
                     </div>
 
                     <!-- Selection Grid -->
-                    <div class="grid grid-cols-2 gap-3" x-show="!checkoutState">
+                    <div class="grid grid-cols-2 gap-4" x-show="!checkoutState">
                         <!-- Cash -->
-                        <button @click="processCashPayment()" class="flex flex-col items-center justify-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all shadow-sm">
-                            <span class="text-3xl">💵</span>
-                            <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wide">نقداً (كاش)</span>
+                        <button @click="processCashPayment()" class="flex flex-col items-center justify-center gap-3.5 p-5 bg-slate-50/60 hover:bg-white border border-slate-200/85 hover:border-amber-500 rounded-3xl transition-all hover:shadow-[0_8px_24px_rgba(245,158,11,0.08)] group hover:-translate-y-0.5">
+                            <span class="text-4xl group-hover:scale-110 transition-transform">💵</span>
+                            <span class="text-[10px] font-black text-slate-700 uppercase tracking-wide">نقداً (كاش)</span>
                         </button>
                         <!-- Sadad -->
-                        <button @click="processSadadPayment()" class="flex flex-col items-center justify-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all shadow-sm">
-                            <span class="text-3xl">📱</span>
-                            <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wide">خدمة سداد (Sadad)</span>
+                        <button @click="processSadadPayment()" class="flex flex-col items-center justify-center gap-3.5 p-5 bg-slate-50/60 hover:bg-white border border-slate-200/85 hover:border-amber-500 rounded-3xl transition-all hover:shadow-[0_8px_24px_rgba(245,158,11,0.08)] group hover:-translate-y-0.5">
+                            <span class="text-4xl group-hover:scale-110 transition-transform">📱</span>
+                            <span class="text-[10px] font-black text-slate-700 uppercase tracking-wide">بوابة سداد الإلكترونية</span>
                         </button>
                         <!-- MobiCash -->
-                        <button @click="processMobiCashPayment()" class="flex flex-col items-center justify-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all shadow-sm">
-                            <span class="text-3xl">📲</span>
-                            <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wide">موبي كاش (MobiCash)</span>
+                        <button @click="processMobiCashPayment()" class="flex flex-col items-center justify-center gap-3.5 p-5 bg-slate-50/60 hover:bg-white border border-slate-200/85 hover:border-amber-500 rounded-3xl transition-all hover:shadow-[0_8px_24px_rgba(245,158,11,0.08)] group hover:-translate-y-0.5">
+                            <span class="text-4xl group-hover:scale-110 transition-transform">📲</span>
+                            <span class="text-[10px] font-black text-slate-700 uppercase tracking-wide">موبي كاش (MobiCash)</span>
                         </button>
                         <!-- Tadawul POS -->
-                        <button @click="processTadawulPayment()" class="flex flex-col items-center justify-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all shadow-sm">
-                            <span class="text-3xl">💳</span>
-                            <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wide">تداول (Tadawul)</span>
+                        <button @click="processTadawulPayment()" class="flex flex-col items-center justify-center gap-3.5 p-5 bg-slate-50/60 hover:bg-white border border-slate-200/85 hover:border-amber-500 rounded-3xl transition-all hover:shadow-[0_8px_24px_rgba(245,158,11,0.08)] group hover:-translate-y-0.5">
+                            <span class="text-4xl group-hover:scale-110 transition-transform">💳</span>
+                            <span class="text-[10px] font-black text-slate-700 uppercase tracking-wide">جهاز تداول (Tadawul)</span>
                         </button>
                     </div>
 
                     <!-- Process States -->
                     <div class="space-y-4 text-center py-4" x-show="checkoutState">
                         <div class="flex flex-col items-center justify-center gap-4">
-                            <div x-show="checkoutState === 'mobicash'" class="bg-white p-3 rounded-2xl shadow-lg border-2 border-amber-500">
+                            <div x-show="checkoutState === 'mobicash'" class="bg-white p-4 rounded-3xl shadow-xl border border-amber-500/20">
                                 <!-- Simulating QR code -->
-                                <div class="w-40 h-40 bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-800 p-2 break-all" x-text="mobicashPayload"></div>
+                                <div class="w-44 h-44 bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-800 p-3 break-all border border-slate-200 shadow-inner rounded-2xl" x-text="mobicashPayload"></div>
                             </div>
 
                             <div x-show="checkoutState === 'tadawul'" class="space-y-2">
-                                <span class="text-4xl animate-bounce inline-block">💳</span>
+                                <span class="text-5xl animate-bounce inline-block">💳</span>
                                 <p class="text-xs font-bold text-slate-650" x-text="tadawulMsg"></p>
                             </div>
 
-                            <div x-show="checkoutState === 'sadad'" class="space-y-2">
-                                <span class="text-4xl animate-pulse inline-block">🔗</span>
+                            <div x-show="checkoutState === 'sadad'" class="space-y-3">
+                                <span class="text-5xl animate-pulse inline-block">🔗</span>
                                 <p class="text-xs font-bold text-slate-650">جاري إنشاء رابط الدفع الآمن لسداد...</p>
-                                <a :href="sadadUrl" target="_blank" class="inline-block bg-amber-500 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg mt-2 shadow shadow-amber-500/10">فتح بوابة الدفع الإلكتروني</a>
+                                <a :href="sadadUrl" target="_blank" class="inline-block bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-655 text-slate-950 text-xs font-black px-6 py-3 rounded-2xl mt-2 shadow-lg shadow-orange-550/15 active:scale-95 transition-all">فتح بوابة الدفع الإلكتروني</a>
                             </div>
 
-                            <div class="flex items-center gap-2 text-[10px] text-amber-600 font-extrabold tracking-wider uppercase animate-pulse">
-                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            <div class="flex items-center gap-2 text-[10px] text-amber-600 font-extrabold tracking-wider uppercase animate-pulse bg-amber-50 border border-amber-200/50 px-4 py-2 rounded-xl">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                                 <span x-text="checkoutStatusText"></span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex gap-2" x-show="checkoutState">
-                        <button @click="cancelCheckout()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition-all">إلغاء</button>
-                        <button @click="forceMockApprove()" class="w-full bg-emerald-650 hover:bg-emerald-700 text-xs font-bold py-2.5 rounded-xl text-white transition-all">محاكاة نجاح الدفع</button>
+                    <div class="flex gap-3" x-show="checkoutState">
+                        <button @click="cancelCheckout()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black py-3.5 rounded-2xl transition-all">إلغاء</button>
+                        <button @click="forceMockApprove()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-xs font-black py-3.5 rounded-2xl text-white transition-all shadow-lg shadow-emerald-500/10">محاكاة نجاح الدفع</button>
                     </div>
                 </div>
 
@@ -384,19 +400,19 @@
                     <!-- Real-looking invoice receipt -->
                     <div id="printable-receipt-card" class="paper-receipt p-6 space-y-4 text-right" dir="rtl">
                         <div class="text-center space-y-1">
-                            <h2 class="text-base font-extrabold tracking-tight">مطعم المدينة المنورة</h2>
+                            <h2 class="text-base font-black tracking-tight text-slate-900">مطعم المدينة المنورة</h2>
                             <p class="text-[10px] text-slate-500 font-bold" x-text="receiptData.locationName"></p>
                             <p class="text-[9px] text-slate-400">الهاتف: 091-0000000</p>
                         </div>
 
                         <!-- Cut line design -->
-                        <div class="border-t border-dashed border-gray-300 my-2"></div>
+                        <div class="border-t border-dashed border-slate-300 my-2"></div>
 
                         <!-- Order Metadata -->
-                        <div class="text-[10px] space-y-1">
+                        <div class="text-[10px] space-y-1 text-slate-700">
                             <div class="flex justify-between">
                                 <span>رقم الفاتورة:</span>
-                                <span class="font-bold" x-text="receiptData.orderId"></span>
+                                <span class="font-bold text-slate-900" x-text="receiptData.orderId"></span>
                             </div>
                             <div class="flex justify-between">
                                 <span>تاريخ العملية:</span>
@@ -404,92 +420,92 @@
                             </div>
                             <div class="flex justify-between">
                                 <span>طريقة الدفع:</span>
-                                <span class="font-bold" x-text="translatePaymentMethod(receiptData.paymentMethod)"></span>
+                                <span class="font-bold text-slate-900" x-text="translatePaymentMethod(receiptData.paymentMethod)"></span>
                             </div>
                         </div>
 
                         <!-- Notes display if exists -->
                         <template x-if="receiptData.notes">
-                            <div class="bg-amber-50 text-amber-955 border border-amber-200 p-2 rounded-xl text-[9px] font-sans font-bold flex flex-col gap-0.5 mt-2 text-right">
+                            <div class="bg-amber-50 text-amber-955 border border-amber-250/60 p-2.5 rounded-2xl text-[9px] font-sans font-bold flex flex-col gap-0.5 mt-2 text-right">
                                 <span class="text-[8px] text-amber-700 uppercase">ملاحظات التحضير:</span>
                                 <span x-text="receiptData.notes"></span>
                             </div>
                         </template>
 
-                        <div class="border-t border-dashed border-gray-400 my-2"></div>
+                        <div class="border-t border-dashed border-slate-350 my-2"></div>
 
                         <!-- Receipt items -->
                         <div class="text-[10px] space-y-1">
-                            <div class="flex justify-between font-bold text-slate-650 mb-1">
+                            <div class="flex justify-between font-black text-slate-650 mb-1 border-b border-slate-100 pb-1">
                                 <span class="w-1/2 text-right">الصنف الوجبة</span>
                                 <span class="w-1/4 text-center">الكمية</span>
                                 <span class="w-1/4 text-left">السعر</span>
                             </div>
                             <template x-for="item in receiptData.items" :key="item.product.id">
-                                <div class="flex justify-between">
-                                    <span class="w-1/2 text-right truncate" x-text="item.product.name"></span>
-                                    <span class="w-1/4 text-center" x-text="item.quantity"></span>
-                                    <span class="w-1/4 text-left" x-text="parseFloat(item.product.base_price * item.quantity).toFixed(2) + ' د.ل'"></span>
+                                <div class="flex justify-between py-0.5 text-slate-800">
+                                    <span class="w-1/2 text-right truncate font-medium" x-text="item.product.name"></span>
+                                    <span class="w-1/4 text-center font-bold" x-text="item.quantity"></span>
+                                    <span class="w-1/4 text-left font-bold" x-text="parseFloat(item.product.base_price * item.quantity).toFixed(2) + ' د.ل'"></span>
                                 </div>
                             </template>
                         </div>
 
-                        <div class="border-t border-dashed border-gray-400 my-2"></div>
+                        <div class="border-t border-dashed border-slate-350 my-2"></div>
 
                         <!-- Calculations -->
-                        <div class="text-[10px] space-y-1">
+                        <div class="text-[10px] space-y-1 text-slate-700">
                             <div class="flex justify-between">
                                 <span>المجموع الفرعي:</span>
                                 <span x-text="parseFloat(receiptData.subtotal).toFixed(2) + ' د.ل'"></span>
                             </div>
-                            <div class="flex justify-between" x-show="receiptData.discount > 0">
+                            <div class="flex justify-between text-amber-600 font-bold" x-show="receiptData.discount > 0">
                                 <span>الخصم:</span>
                                 <span x-text="'-' + parseFloat(receiptData.discount).toFixed(2) + ' د.ل'"></span>
                             </div>
-                            <div class="flex justify-between">
+                            <div class="flex justify-between text-rose-600 font-bold">
                                 <span>الضريبة المضافة:</span>
                                 <span x-text="parseFloat(receiptData.tax).toFixed(2) + ' د.ل'"></span>
                             </div>
-                            <div class="flex justify-between font-bold text-sm pt-1.5 border-t border-gray-200">
+                            <div class="flex justify-between font-black text-sm pt-2 border-t border-slate-200 text-slate-900">
                                 <span>الإجمالي النهائي:</span>
-                                <span x-text="parseFloat(receiptData.total).toFixed(2) + ' د.ل'"></span>
+                                <span class="text-amber-650" x-text="parseFloat(receiptData.total).toFixed(2) + ' د.ل'"></span>
                             </div>
                         </div>
 
-                        <div class="border-t border-dashed border-gray-400 my-2"></div>
+                        <div class="border-t border-dashed border-slate-350 my-2"></div>
 
                         <!-- Receipt Footer: Mock Barcode & Shukran -->
                         <div class="text-center space-y-2">
-                            <p class="text-[10px] font-bold">شكراً لزيارتكم • صحتين وعافية!</p>
+                            <p class="text-[10px] font-black">شكراً لزيارتكم • صحتين وعافية!</p>
                             <!-- Simulated Barcode in HTML -->
-                            <div class="flex justify-center items-center gap-0.5 h-8 w-44 mx-auto bg-slate-50 p-1 rounded border border-slate-100">
-                                <div class="w-1 bg-slate-800 h-full"></div>
-                                <div class="w-0.5 bg-slate-800 h-full"></div>
-                                <div class="w-1.5 bg-slate-800 h-full"></div>
-                                <div class="w-0.5 bg-slate-800 h-full"></div>
-                                <div class="w-1 bg-slate-800 h-full"></div>
-                                <div class="w-2 bg-slate-800 h-full"></div>
-                                <div class="w-0.5 bg-slate-800 h-full"></div>
-                                <div class="w-1 bg-slate-800 h-full"></div>
-                                <div class="w-1.5 bg-slate-800 h-full"></div>
-                                <div class="w-0.5 bg-slate-800 h-full"></div>
+                            <div class="flex justify-center items-center gap-0.5 h-8 w-44 mx-auto bg-slate-50 p-1 rounded-xl border border-slate-100 shadow-inner">
+                                <div class="w-1 bg-slate-850 h-full"></div>
+                                <div class="w-0.5 bg-slate-850 h-full"></div>
+                                <div class="w-1.5 bg-slate-850 h-full"></div>
+                                <div class="w-0.5 bg-slate-850 h-full"></div>
+                                <div class="w-1 bg-slate-850 h-full"></div>
+                                <div class="w-2 bg-slate-850 h-full"></div>
+                                <div class="w-0.5 bg-slate-850 h-full"></div>
+                                <div class="w-1 bg-slate-850 h-full"></div>
+                                <div class="w-1.5 bg-slate-850 h-full"></div>
+                                <div class="w-0.5 bg-slate-850 h-full"></div>
                             </div>
                             <p class="text-[8px] text-slate-400 font-mono" x-text="receiptData.orderId"></p>
                         </div>
                     </div>
 
                     <!-- Print & Continue Buttons -->
-                    <div class="flex flex-col gap-2">
+                    <div class="flex flex-col gap-2 relative z-25">
                         <div class="flex gap-2">
-                            <button @click="triggerLocalPrinter(receiptData.orderIdRaw)" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl text-[10px] tracking-wider shadow-lg shadow-amber-500/10 transition-all">
+                            <button @click="triggerLocalPrinter(receiptData.orderIdRaw)" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-[10px] tracking-wider shadow-lg shadow-orange-550/15 transition-all">
                                 🖨️ طابعة الشبكة IP
                             </button>
-                            <button @click="printViaBrowser()" class="w-1/2 bg-blue-600 hover:bg-blue-750 text-white font-bold py-3 rounded-xl text-[10px] tracking-wider shadow-lg shadow-blue-500/10 transition-all">
+                            <button @click="printViaBrowser()" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-black py-3.5 rounded-2xl text-[10px] tracking-wider shadow-lg shadow-blue-500/10 transition-all">
                                 📄 طباعة المتصفح
                             </button>
                         </div>
-                        <button @click="finishReceiptAndReset()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl text-xs tracking-wider border border-slate-700 shadow transition-all">
-                            فاتورة جديدة (New Order)
+                        <button @click="finishReceiptAndReset()" class="w-full bg-slate-900 hover:bg-slate-950 text-white font-black py-3.5 rounded-2xl text-xs tracking-wider border border-slate-800 shadow-lg transition-all">
+                            فتح فاتورة جديدة (New Order)
                         </button>
                     </div>
                 </div>

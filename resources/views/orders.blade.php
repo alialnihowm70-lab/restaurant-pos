@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المدينة POS - سجل المبيعات والطلبات</title>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;650;750;850;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -25,8 +25,30 @@
             font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
             color: #1e293b;
-            background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.03) 0%, transparent 40%),
-                              radial-gradient(circle at 90% 80%, rgba(241, 245, 249, 1) 0%, transparent 40%);
+            background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
+        }
+        /* Paper receipt styling for high-end preview */
+        .paper-receipt {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            font-family: monospace;
+            position: relative;
+            border: 1px solid #e2e8f0;
+        }
+        .paper-receipt::before {
+            content: "";
+            position: absolute;
+            top: -8px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background-size: 16px 8px;
+            background-repeat: repeat-x;
+            background-image: linear-gradient(45deg, transparent 33.333%, #ffffff 33.333%, #ffffff 66.667%, transparent 66.667%),
+                              linear-gradient(-45deg, transparent 33.333%, #ffffff 33.333%, #ffffff 66.667%, transparent 66.667%);
         }
         @media print {
             body * {
@@ -48,6 +70,9 @@
                 box-shadow: none !important;
                 border: none !important;
             }
+            #printable-receipt-card::before {
+                display: none !important;
+            }
             @page {
                 size: auto;
                 margin: 0mm;
@@ -55,140 +80,143 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex" x-data="ordersHistoryApp()">
+<body class="min-h-screen flex relative overflow-x-hidden" x-data="ordersHistoryApp()">
+
+    <!-- Decorative Glow Circles -->
+    <div class="absolute top-10 right-10 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-10 left-10 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none"></div>
 
     <!-- Unified left navigation sidebar -->
     @include('partials.sidebar')
 
     <!-- Main Workspace -->
-    <main class="flex-grow p-4 lg:p-8 space-y-6 lg:space-y-8" dir="rtl">
+    <main class="flex-grow p-6 lg:p-8 space-y-6 relative z-10" dir="rtl">
         
         <!-- Header Bar -->
-        <div class="flex items-center justify-between border-b border-slate-200 pb-5 text-right">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between border-b border-slate-200/80 pb-5 gap-4 text-right">
             <div>
-                <h1 class="text-xl font-black text-slate-800">سجل المبيعات والطلبات</h1>
-                <span class="text-xs text-slate-400 font-medium">متابعة فواتير وحالة الطلبات، الدفع، وإعادة طباعة الإيصالات</span>
+                <h1 class="text-base font-black text-slate-900">سجل الفواتير والمبيعات اليومية</h1>
+                <span class="text-[10px] text-slate-400 font-extrabold mt-1 block">استعراض أرشيف الفواتير المصدرة، إعادة طباعة الإيصالات الورقية، ومراقبة حالة المطبخ</span>
             </div>
             
             <div class="flex items-center gap-3">
-                <span class="text-xs text-slate-500 font-bold uppercase">عنوان IP للطابعة:</span>
-                <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-32 bg-white border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none transition-all duration-300 text-center" dir="ltr" />
+                <span class="text-xs text-slate-500 font-bold">طابعة IP:</span>
+                <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-36 bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-xs rounded-2xl px-4 py-2.5 text-slate-800 text-center font-mono focus:outline-none shadow-sm transition-all" dir="ltr" />
             </div>
         </div>
 
         <!-- Metrics Overview Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Total Completed Revenue -->
-            <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-3xl p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+            <div class="bg-gradient-to-br from-amber-500/10 to-orange-550/10 border border-amber-500/20 rounded-[28px] p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">إجمالي الإيرادات المكتملة</span>
-                    <h3 class="text-2xl font-black text-amber-600 mt-1" dir="ltr">
-                        {{ number_format($orders->where('status', 'completed')->sum('total_amount'), 2) }} <span class="text-xs font-bold">د.ل</span>
+                    <span class="text-[9px] font-black uppercase text-slate-500 tracking-wider">إجمالي الإيرادات المكتملة</span>
+                    <h3 class="text-2xl font-black text-amber-650 mt-1.5" dir="ltr">
+                        {{ number_format($orders->where('status', 'completed')->sum('total_amount'), 2) }} <span class="text-xs font-black">د.ل</span>
                     </h3>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl">
+                <div class="w-12 h-12 rounded-[20px] bg-amber-550/10 border border-amber-500/20 flex items-center justify-center text-2xl shadow-inner">
                     💰
                 </div>
             </div>
 
             <!-- Completed Orders Count -->
-            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-3xl p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-[28px] p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">الطلبات المكتملة (المسلمة)</span>
-                    <h3 class="text-2xl font-black text-emerald-650 mt-1">
+                    <span class="text-[9px] font-black uppercase text-slate-500 tracking-wider">الفواتير المكتملة المسلمة</span>
+                    <h3 class="text-2xl font-black text-emerald-650 mt-1.5">
                         {{ $orders->where('status', 'completed')->count() }} <span class="text-xs font-bold text-slate-400">فاتورة</span>
                     </h3>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-2xl">
+                <div class="w-12 h-12 rounded-[20px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl shadow-inner">
                     ✅
                 </div>
             </div>
 
             <!-- Active Orders Queue -->
-            <div class="bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-3xl p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+            <div class="bg-gradient-to-br from-blue-500/10 to-indigo-550/10 border border-blue-500/20 rounded-[28px] p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">الطلبات النشطة (تحت التحضير)</span>
-                    <h3 class="text-2xl font-black text-blue-600 mt-1">
+                    <span class="text-[9px] font-black uppercase text-slate-500 tracking-wider">الطلبات النشطة في المطبخ</span>
+                    <h3 class="text-2xl font-black text-blue-650 mt-1.5">
                         {{ $orders->whereIn('status', ['pending', 'cooking', 'ready'])->count() }} <span class="text-xs font-bold text-slate-400">طلب نشط</span>
                     </h3>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-2xl">
+                <div class="w-12 h-12 rounded-[20px] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-2xl shadow-inner">
                     ⏳
                 </div>
             </div>
         </div>
 
         <!-- Orders Table Grid -->
-        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
-                <h2 class="text-sm font-bold text-slate-800">سجل الفواتير والمعاملات المالية</h2>
-                <!-- Total active counter -->
-                <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-lg">إجمالي الطلبات: {{ count($orders) }}</span>
+        <div class="bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 shadow-sm space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-150 pb-3 flex-wrap gap-2">
+                <h2 class="text-sm font-black text-slate-800">أرشيف الفواتير والمعاملات</h2>
+                <span class="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200/50 px-3.5 py-1.5 rounded-xl shadow-sm">إجمالي الفواتير: {{ count($orders) }}</span>
             </div>
 
             <!-- Status filter tabs -->
-            <div class="flex flex-wrap gap-2 pb-2">
+            <div class="bg-slate-100 border border-slate-205 p-1.5 rounded-2xl flex flex-wrap gap-1" dir="rtl">
                 <button @click="currentFilter = 'all'" 
-                        :class="currentFilter === 'all' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
-                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                        :class="currentFilter === 'all' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
                     الكل ({{ count($orders) }})
                 </button>
                 <button @click="currentFilter = 'pending'" 
-                        :class="currentFilter === 'pending' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
-                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                        :class="currentFilter === 'pending' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
                     معلقة ({{ $orders->where('status', 'pending')->count() }})
                 </button>
                 <button @click="currentFilter = 'cooking'" 
-                        :class="currentFilter === 'cooking' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
-                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                        :class="currentFilter === 'cooking' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
                     قيد التحضير ({{ $orders->where('status', 'cooking')->count() }})
                 </button>
                 <button @click="currentFilter = 'ready'" 
-                        :class="currentFilter === 'ready' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
-                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                        :class="currentFilter === 'ready' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
                     جاهزة للتسليم ({{ $orders->where('status', 'ready')->count() }})
                 </button>
                 <button @click="currentFilter = 'completed'" 
-                        :class="currentFilter === 'completed' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
-                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                        :class="currentFilter === 'completed' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
                     مكتملة ({{ $orders->where('status', 'completed')->count() }})
                 </button>
                 <button @click="currentFilter = 'cancelled'" 
-                        :class="currentFilter === 'cancelled' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
-                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                        :class="currentFilter === 'cancelled' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
                     ملغية ({{ $orders->where('status', 'cancelled')->count() }})
                 </button>
             </div>
 
-            <div class="overflow-x-auto rounded-2xl border border-slate-200">
-                <table class="w-full text-right text-sm text-slate-650" dir="rtl">
-                    <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 tracking-wider border-b border-slate-200">
+            <div class="overflow-x-auto rounded-[24px] border border-slate-200">
+                <table class="w-full text-right text-xs text-slate-650" dir="rtl">
+                    <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-500 tracking-wider border-b border-slate-200">
                         <tr>
-                            <th class="px-6 py-4 text-right">رمز الطلب</th>
-                            <th class="px-6 py-4 text-right">الفرع</th>
-                            <th class="px-6 py-4 text-right">حالة الوجبة</th>
-                            <th class="px-6 py-4 text-right">حالة الدفع</th>
-                            <th class="px-6 py-4 text-right">ملاحظات</th>
-                            <th class="px-6 py-4 text-left">عدد الأصناف</th>
-                            <th class="px-6 py-4 text-left">إجمالي الفاتورة</th>
-                            <th class="px-6 py-4 text-right">تاريخ الطلب</th>
-                            <th class="px-6 py-4 text-center">الإجراءات</th>
+                            <th class="px-6 py-4.5 text-right">رقم الفاتورة</th>
+                            <th class="px-6 py-4.5 text-right">الفرع</th>
+                            <th class="px-6 py-4.5 text-right">حالة التحضير</th>
+                            <th class="px-6 py-4.5 text-right">حالة السداد</th>
+                            <th class="px-6 py-4.5 text-right">ملاحظات التحضير</th>
+                            <th class="px-6 py-4.5 text-left">عدد الوجبات</th>
+                            <th class="px-6 py-4.5 text-left">إجمالي القيمة</th>
+                            <th class="px-6 py-4.5 text-right">تاريخ المعاملة</th>
+                            <th class="px-6 py-4.5 text-center">الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 bg-white">
                         @forelse($orders as $order)
                             <tr class="hover:bg-slate-50/50 transition-colors"
                                 x-show="currentFilter === 'all' || '{{ $order->status }}' === currentFilter">
-                                <td class="px-6 py-4 font-mono font-bold text-slate-800">
+                                <td class="px-6 py-4 font-mono font-bold text-slate-800 text-[11px]">
                                     #{{ strtoupper(substr($order->id, 0, 8)) }}
                                 </td>
-                                <td class="px-6 py-4 text-xs text-slate-600">{{ $order->location->name }}</td>
+                                <td class="px-6 py-4 text-xs text-slate-600 font-extrabold">{{ $order->location->name }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="text-[9px] px-2.5 py-0.5 rounded font-black uppercase border
-                                        @if($order->status === 'completed') bg-emerald-50 text-emerald-700 border-emerald-250
-                                        @elseif($order->status === 'cooking') bg-amber-50 text-amber-700 border-amber-250
-                                        @elseif($order->status === 'ready') bg-blue-50 text-blue-700 border-blue-250
-                                        @else bg-rose-50 text-rose-700 border-rose-250 @endif">
+                                    <span class="text-[8px] px-2.5 py-0.5 rounded-md font-black uppercase border
+                                        @if($order->status === 'completed') bg-emerald-500/10 text-emerald-600 border-emerald-500/20
+                                        @elseif($order->status === 'cooking') bg-amber-500/10 text-amber-600 border-amber-500/20
+                                        @elseif($order->status === 'ready') bg-blue-500/10 text-blue-600 border-blue-500/20
+                                        @else bg-rose-500/10 text-rose-600 border-rose-500/20 @endif">
                                         @if($order->status === 'completed') مكتمل
                                         @elseif($order->status === 'cooking') قيد التحضير
                                         @elseif($order->status === 'ready') جاهز للتسليم
@@ -197,8 +225,8 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-[9px] px-2.5 py-0.5 rounded font-black uppercase border
-                                        @if($order->payment_status === 'paid') bg-emerald-50 text-emerald-700 border-emerald-250
+                                    <span class="text-[8px] px-2.5 py-0.5 rounded-md font-black uppercase border
+                                        @if($order->payment_status === 'paid') bg-emerald-500/10 text-emerald-600 border-emerald-500/20
                                         @else bg-slate-100 text-slate-400 border-slate-200 @endif">
                                         {{ $order->payment_status === 'paid' ? 'مدفوع' : 'غير مدفوع' }}
                                     </span>
@@ -206,23 +234,23 @@
                                 <td class="px-6 py-4 text-xs text-slate-600 max-w-[150px] truncate" title="{{ $order->notes }}">
                                     {{ $order->notes ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 text-left font-bold text-slate-800">
+                                <td class="px-6 py-4 text-left font-extrabold text-slate-800">
                                     {{ $order->items->sum('quantity') }}
                                 </td>
-                                <td class="px-6 py-4 text-left font-extrabold text-amber-600" dir="ltr">
-                                    {{ number_format($order->total_amount, 2) }} LYD
+                                <td class="px-6 py-4 text-left font-black text-amber-600" dir="ltr">
+                                    {{ number_format($order->total_amount, 2) }} د.ل
                                 </td>
-                                <td class="px-6 py-4 text-xs text-slate-400 font-mono">
+                                <td class="px-6 py-4 text-[10px] text-slate-400 font-bold font-mono">
                                     {{ $order->created_at->format('Y-m-d H:i:s') }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         <button @click="reprintReceipt('{{ $order->id }}')"
-                                                 class="bg-slate-50 hover:bg-amber-500 hover:text-slate-950 text-[10px] font-bold px-2 py-1.5 rounded-lg border border-slate-200 hover:border-amber-500 transition-all shadow-sm">
+                                                 class="bg-slate-50 hover:bg-amber-500 hover:text-slate-950 text-[9px] font-black px-3 py-2 rounded-xl border border-slate-250 hover:border-amber-500 transition-all shadow-sm">
                                              🖨️ طباعة IP
                                          </button>
                                          <button @click="printBrowser('{{ $order->id }}')"
-                                                  class="bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white text-[10px] font-bold px-2 py-1.5 rounded-lg border border-blue-200 hover:border-blue-600 transition-all shadow-sm">
+                                                  class="bg-blue-500/10 hover:bg-blue-650 text-blue-600 hover:text-white text-[9px] font-black px-3 py-2 rounded-xl border border-blue-500/20 hover:border-blue-600 transition-all shadow-sm">
                                              📄 طباعة المتصفح
                                          </button>
                                     </div>
@@ -230,7 +258,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-6 py-12 text-center text-sm text-slate-400">لا يوجد حركات أو فواتير مبيعات مسجلة بالدفاتر حالياً.</td>
+                                <td colspan="9" class="px-6 py-12 text-center text-slate-450 font-bold">لا يوجد فواتير مبيعات مسجلة في المنظومة حالياً.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -246,7 +274,7 @@
             <div>
                 <div class="text-center space-y-1">
                     <h2 class="text-base font-extrabold tracking-tight">مطعم المدينة المنورة</h2>
-                    <p class="text-[10px] text-gray-500 font-bold" x-text="selectedOrder.location ? selectedOrder.location.name : 'فرع طرابلس'"></p>
+                    <p class="text-[10px] text-gray-550 font-bold" x-text="selectedOrder.location ? selectedOrder.location.name : 'فرع طرابلس'"></p>
                     <p class="text-[9px] text-gray-400">الهاتف: 091-0000000</p>
                 </div>
 
@@ -330,7 +358,7 @@
                         <div class="w-1.5 bg-gray-900 h-full"></div>
                         <div class="w-0.5 bg-gray-900 h-full"></div>
                     </div>
-                    <p class="text-[8px] text-gray-550 font-mono" x-text="selectedOrder.id"></p>
+                    <p class="text-[8px] text-gray-555 font-mono" x-text="selectedOrder.id"></p>
                 </div>
             </div>
         </template>
