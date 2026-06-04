@@ -1,5 +1,8 @@
 <!-- Premium Arabic-English Shared Navigation Sidebar -->
 <div x-data="sidebarNotificationApp()" class="contents">
+    <!-- Global Top Progress Loading Bar -->
+    <div id="global-top-loader" class="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 z-[9999] opacity-0 transition-all duration-300 ease-out pointer-events-none" style="width: 0%;"></div>
+
     <aside class="fixed lg:sticky top-0 right-0 h-screen z-50 w-72 bg-slate-950/95 backdrop-blur-xl border-l border-slate-800/80 flex flex-col justify-between flex-shrink-0 transition-all duration-350 ease-out transform lg:transform-none shadow-2xl"
            :class="isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'">
         
@@ -89,7 +92,7 @@
                     <!-- Order Sales History Link (Admin & Cashier only) -->
                     @if(in_array(auth()->user()->role, ['admin', 'cashier']))
                         <a href="/admin/orders" 
-                           class="flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-300 group {{ request()->is('admin/orders*') ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 shadow-lg shadow-orange-500/20 scale-[1.01]' : 'text-slate-400 hover:bg-slate-900/60 hover:text-white border border-transparent hover:border-slate-800/40' }}">
+                           class="flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-300 group {{ request()->is('admin/orders*') ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 shadow-lg shadow-orange-550/20 scale-[1.01]' : 'text-slate-400 hover:bg-slate-900/60 hover:text-white border border-transparent hover:border-slate-800/40' }}">
                             <div class="flex items-center gap-3">
                                 <span class="text-base group-hover:scale-110 transition-transform group-hover:rotate-6">📜</span>
                                 <div class="flex flex-col text-right">
@@ -152,7 +155,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex flex-col text-right">
                     <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">سيرفر الفرع المحلي</span>
-                    <span class="text-[8px] text-slate-600 font-medium">عقدة طرابلس، ليبيا</span>
+                    <span class="text-[8px] text-slate-655 font-medium">عقدة طرابلس، ليبيا</span>
                 </div>
                 <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></div>
             </div>
@@ -201,6 +204,40 @@
                 setInterval(() => {
                     this.checkLowStock();
                 }, 30000);
+
+                // Add page unload progress bar trigger
+                window.addEventListener('beforeunload', () => {
+                    const loader = document.getElementById('global-top-loader');
+                    if (loader) {
+                        loader.style.opacity = '1';
+                        loader.style.width = '90%';
+                    }
+                });
+
+                // Add instant click interceptors on sidebar links to show progress immediately
+                this.$nextTick(() => {
+                    const links = document.querySelectorAll('aside a[href]');
+                    links.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            if (!e.ctrlKey && !e.metaKey && !e.shiftKey && link.getAttribute('target') !== '_blank') {
+                                const loader = document.getElementById('global-top-loader');
+                                if (loader) {
+                                    loader.style.opacity = '1';
+                                    loader.style.width = '60%';
+                                    let w = 60;
+                                    const interval = setInterval(() => {
+                                        if (w < 95) {
+                                            w += 5;
+                                            loader.style.width = w + '%';
+                                        } else {
+                                            clearInterval(interval);
+                                        }
+                                    }, 100);
+                                }
+                            }
+                        });
+                    });
+                });
             },
 
             requestPermission() {

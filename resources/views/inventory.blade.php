@@ -28,6 +28,13 @@
             background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
                               radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
         }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-animate {
+            animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
         .glass-card {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(16px);
@@ -35,7 +42,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex relative overflow-x-hidden" x-data="{ 
+<body class="min-h-screen flex relative overflow-x-hidden page-animate" x-data="{ 
     tab: 'stock', 
     editingIngredient: null,
     selectedReconcileLocation: '{{ $locations->first()?->id }}',
@@ -131,7 +138,11 @@
             @endif
 
             <!-- TAB 1: Stock Levels & Restock Form -->
-            <div x-show="tab === 'stock'" class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div x-show="tab === 'stock'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <!-- Right (List - 2 cols) -->
                 <div class="xl:col-span-2 space-y-6">
                     <div class="bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 shadow-sm space-y-4">
@@ -215,7 +226,11 @@
             </div>
 
             <!-- TAB 1.5: Stocktake Reconciliation -->
-            <div x-show="tab === 'reconcile'" class="space-y-6" style="display: none;">
+            <div x-show="tab === 'reconcile'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="space-y-6" style="display: none;">
                 <div class="bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 shadow-sm space-y-6 text-right">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-150 pb-4">
                         <div>
@@ -307,7 +322,11 @@
             </div>
 
             <!-- TAB 2: Products Manager CRUD -->
-            <div x-show="tab === 'products'" class="grid grid-cols-1 xl:grid-cols-3 gap-6" style="display: none;">
+            <div x-show="tab === 'products'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="grid grid-cols-1 xl:grid-cols-3 gap-6" style="display: none;">
                 <!-- Product List -->
                 <div class="xl:col-span-2 bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 shadow-sm space-y-4">
                     <h2 class="text-sm font-black text-slate-800">كتالوج المنتجات وأصناف قائمة المبيعات</h2>
@@ -397,7 +416,11 @@
             </div>
 
             <!-- TAB 3: Ingredients Manager CRUD -->
-            <div x-show="tab === 'ingredients'" class="grid grid-cols-1 xl:grid-cols-3 gap-6" style="display: none;">
+            <div x-show="tab === 'ingredients'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="grid grid-cols-1 xl:grid-cols-3 gap-6" style="display: none;">
                 
                 <!-- Alert box for low stock ingredients -->
                 @if(isset($lowStockIngredients) && count($lowStockIngredients) > 0)
@@ -498,7 +521,11 @@
             </div>
 
             <!-- TAB 4: Recipes Map CRUD -->
-            <div x-show="tab === 'recipes'" class="grid grid-cols-1 xl:grid-cols-3 gap-6" style="display: none;">
+            <div x-show="tab === 'recipes'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="grid grid-cols-1 xl:grid-cols-3 gap-6" style="display: none;">
                 <!-- Recipe Map details -->
                 <div class="xl:col-span-2 bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 shadow-sm space-y-6 text-right">
                     <div>
@@ -583,7 +610,11 @@
             </div>
 
             <!-- TAB 5: Branches/Locations Manager CRUD -->
-            <div x-show="tab === 'locations'" class="grid grid-cols-1 xl:grid-cols-3 gap-6" style="display: none;">
+            <div x-show="tab === 'locations'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="grid grid-cols-1 xl:grid-cols-3 gap-6" style="display: none;">
                 <!-- Locations List -->
                 <div class="xl:col-span-2 bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 shadow-sm space-y-4">
                     <h2 class="text-sm font-black text-slate-800">الفروع والمواقع المسجلة بالمنظومة</h2>
@@ -644,7 +675,11 @@
             </div>
 
             <!-- TAB 6: Transactions Audit Ledger History -->
-            <div x-show="tab === 'history'" style="display: none;">
+            <div x-show="tab === 'history'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 style="display: none;">
                 <div class="bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 shadow-sm space-y-4 text-right">
                     <h2 class="text-sm font-black text-slate-800">سجل حركات وعمليات المخازن التفصيلي (Audit Ledger)</h2>
                     

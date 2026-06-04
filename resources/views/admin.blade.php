@@ -28,6 +28,13 @@
             background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
                               radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
         }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-animate {
+            animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
         .glass-card {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(16px);
@@ -57,7 +64,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex relative overflow-x-hidden">
+<body class="min-h-screen flex relative overflow-x-hidden page-animate">
 
     <!-- Decorative Glow Circles -->
     <div class="absolute top-10 right-10 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none"></div>
@@ -293,7 +300,11 @@
             </div>
 
             <!-- TAB 1: Supplier List -->
-            <div x-show="supplierTab === 'list'" class="p-6">
+            <div x-show="supplierTab === 'list'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="p-6">
                 <div class="overflow-x-auto rounded-[24px] border border-slate-200">
                     <table class="w-full text-right text-xs text-slate-650" dir="rtl">
                         <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-500 tracking-wider border-b border-slate-200">
@@ -328,7 +339,11 @@
             </div>
 
             <!-- TAB 2: Add Supplier Form -->
-            <div x-show="supplierTab === 'add'" class="p-6 max-w-2xl mx-auto py-10" style="display: none;">
+            <div x-show="supplierTab === 'add'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="p-6 max-w-2xl mx-auto py-10" style="display: none;">
                 <form action="/admin/suppliers" method="POST" class="space-y-6" dir="rtl">
                     @csrf
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -373,7 +388,11 @@
             </div>
 
             <!-- TAB 3: Users/Staff List -->
-            <div x-show="supplierTab === 'users'" class="p-6" style="display: none;">
+            <div x-show="supplierTab === 'users'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="p-6" style="display: none;">
                 <div class="overflow-x-auto rounded-[24px] border border-slate-200">
                     <table class="w-full text-right text-xs text-slate-650" dir="rtl">
                         <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-500 tracking-wider border-b border-slate-200">
@@ -421,7 +440,11 @@
             </div>
 
             <!-- TAB 4: Add User Form -->
-            <div x-show="supplierTab === 'add_user'" class="p-6 max-w-2xl mx-auto py-10" style="display: none;">
+            <div x-show="supplierTab === 'add_user'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 class="p-6 max-w-2xl mx-auto py-10" style="display: none;">
                 <form action="/admin/users" method="POST" class="space-y-6" dir="rtl">
                     @csrf
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

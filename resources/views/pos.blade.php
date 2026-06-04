@@ -29,6 +29,20 @@
             background-image: radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.04) 0%, transparent 45%),
                               radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.04) 0%, transparent 45%);
         }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-animate {
+            animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(6px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .card-animate {
+            animation: cardFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -99,7 +113,7 @@
         }
     </style>
 </head>
-<body class="h-screen overflow-hidden flex relative" x-data="posApp()">
+<body class="h-screen overflow-hidden flex relative page-animate" x-data="posApp()">
 
     <!-- Decorative Glow Circles -->
     <div class="absolute -top-40 -right-40 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none"></div>
@@ -290,7 +304,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                         <template x-for="product in filteredProducts()" :key="product.id">
                             <div @click="addToCart(product)"
-                                 class="bg-white/90 backdrop-blur-sm border border-slate-200 hover:border-amber-500/40 rounded-[28px] p-3 flex flex-col justify-between cursor-pointer transition-all duration-350 hover:-translate-y-1 shadow-[0_4px_20px_rgba(241,245,249,0.5)] hover:shadow-[0_12px_32px_rgba(245,158,11,0.12)] group relative overflow-hidden h-56 text-right">
+                                 class="bg-white/90 backdrop-blur-sm border border-slate-200 hover:border-amber-500/40 rounded-[28px] p-3 flex flex-col justify-between cursor-pointer transition-all duration-350 hover:-translate-y-1 shadow-[0_4px_20px_rgba(241,245,249,0.5)] hover:shadow-[0_12px_32px_rgba(245,158,11,0.12)] group relative overflow-hidden h-56 text-right card-animate">
                                 
                                 <!-- Product Thumbnail Image -->
                                 <div class="w-full h-32 relative overflow-hidden rounded-2xl bg-slate-100">

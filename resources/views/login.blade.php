@@ -18,9 +18,16 @@
             background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.03) 0%, transparent 40%),
                               radial-gradient(circle at 90% 80%, rgba(241, 245, 249, 1) 0%, transparent 40%);
         }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-animate {
+            animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-slate-50" x-data="loginApp()">
+<body class="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-slate-550 page-animate" x-data="loginApp()">
 
     <!-- Decorative Blurred Glows -->
     <div class="absolute -top-40 -right-40 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>

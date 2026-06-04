@@ -28,6 +28,13 @@
             background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
                               radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
         }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-animate {
+            animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
         /* Grid height adjustment */
         .kds-grid {
             height: calc(100vh - 80px);
@@ -39,7 +46,7 @@
         }
     </style>
 </head>
-<body class="h-screen overflow-hidden flex relative" x-data="kdsApp()">
+<body class="h-screen overflow-hidden flex relative page-animate" x-data="kdsApp()">
 
     <!-- Decorative Glow Circles -->
     <div class="absolute top-10 right-10 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none"></div>

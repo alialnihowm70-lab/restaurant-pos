@@ -78,9 +78,16 @@
                 margin: 0mm;
             }
         }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-animate {
+            animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
-<body class="min-h-screen flex relative overflow-x-hidden" x-data="ordersHistoryApp()">
+<body class="min-h-screen flex relative overflow-x-hidden page-animate" x-data="ordersHistoryApp()">
 
     <!-- Decorative Glow Circles -->
     <div class="absolute top-10 right-10 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none"></div>
