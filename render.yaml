@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: almadina-pos
+    env: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: almadina-db
+          property: host
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        fromDatabase:
+          name: almadina-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: almadina-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: almadina-db
+          property: password
+
+databases:
+  - name: almadina-db
+    plan: free

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المدينة POS - واجهة الكاشير</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;850&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS (Tailwind CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="manifest" href="/manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered successfully!', reg))
+                    .catch(err => console.log('Service Worker registration failed: ', err));
+            });
+        }
+    </script>
+    <!-- Custom styling -->
+    <style>
+        body {
+            font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            background-image: radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.03) 0%, transparent 45%),
+                              radial-gradient(circle at 100% 100%, rgba(241, 245, 249, 1) 0%, transparent 45%);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        /* Paper receipt styling for high-end preview */
+        .paper-receipt {
+            background: #ffffff;
+            color: #1e293b;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-radius: 8px;
+            font-family: monospace;
+            position: relative;
+        }
+        .paper-receipt::before {
+            content: "";
+            position: absolute;
+            top: -8px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background-size: 16px 8px;
+            background-repeat: repeat-x;
+            background-image: linear-gradient(45deg, transparent 33.333%, #ffffff 33.333%, #ffffff 66.667%, transparent 66.667%),
+                              linear-gradient(-45deg, transparent 33.333%, #ffffff 33.333%, #ffffff 66.667%, transparent 66.667%);
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable-receipt-card, #printable-receipt-card * {
+                visibility: visible;
+            }
+            #printable-receipt-card {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-width: 80mm;
+                margin: 0;
+                padding: 10px;
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            #printable-receipt-card::before {
+                display: none !important;
+            }
+            @page {
+                size: auto;
+                margin: 0mm;
+            }
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex" x-data="posApp()">
+
+    <!-- Unified left navigation sidebar -->
+    @include('partials.sidebar')
+
+    <!-- Main Content Area -->
+    <div class="flex-grow flex flex-col overflow-hidden h-screen">
+
+        <!-- Top Navigation Bar -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0 text-right">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-lg shadow-amber-500/10 text-xl">
+                    M
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold tracking-tight text-slate-800">منظومة المدينة POS</h1>
+                    <span class="text-xs text-slate-400 font-medium">النظام v1.0 • يدعم العمل بدون اتصال بالشبكة</span>
+                </div>
+            </div>
+
+            <!-- Sync & Connection Info -->
+            <div class="flex items-center gap-4" dir="rtl">
+                <!-- Active Location Selector -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">الفرع:</span>
+                    <select x-model="selectedLocation" @change="changeLocation()" class="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-slate-800 font-bold">
+                        <option value="">اختر الفرع</option>
+                        @foreach($locations as $location)
+                            <option value="{{ $location->id }}">{{ $location->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Printer IP Configuration -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">طابعة IP:</span>
+                    <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-32 bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-slate-800 text-center" dir="ltr" />
+                </div>
+
+                <!-- Network Connection Status -->
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider border"
+                     :class="isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'">
+                    <span class="w-2 h-2 rounded-full" :class="isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'"></span>
+                    <span x-text="isOnline ? 'متصل بالشبكة' : 'غير متصل بالشبكة'"></span>
+                </div>
+
+                <!-- Sync Button -->
+                <button @click="triggerManualSync()" :disabled="syncing" class="relative bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md shadow-amber-500/10">
+                    <svg x-show="syncing" class="animate-spin h-3 w-3 text-slate-950" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span x-text="syncing ? 'جاري المزامنة...' : 'مزامنة النظام'"></span>
+                    <span x-show="pendingSyncCount > 0" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black animate-bounce" x-text="pendingSyncCount"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="flex-grow flex overflow-hidden">
+
+            <!-- Right Column: Checkout Cart (Width 400px) -->
+            <section class="w-[400px] bg-white border-l border-slate-200 flex flex-col flex-shrink-0 text-right">
+                <!-- Active Customer / Cart Metadata -->
+                <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="font-extrabold text-sm text-slate-800 uppercase tracking-wider">الفاتورة الحالية</h2>
+                    <button @click="clearCart()" class="text-xs font-bold text-slate-400 hover:text-red-650 transition-colors">مسح الكل</button>
+                </div>
+
+                <!-- Cart Items List (Scrollable) -->
+                <div class="flex-grow overflow-y-auto p-5 space-y-3">
+                    <template x-if="cart.length === 0">
+                        <div class="h-full flex flex-col items-center justify-center text-slate-400 gap-3 py-20">
+                            <span class="text-4xl">🛒</span>
+                            <span class="text-xs font-semibold uppercase tracking-wider">سلة المشتريات فارغة</span>
+                        </div>
+                    </template>
+
+                    <template x-for="(item, index) in cart" :key="item.product.id">
+                        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm hover:border-amber-500/30 transition-all duration-300">
+                            <div class="min-w-0 flex-grow text-right">
+                                <h3 class="font-bold text-sm text-slate-800 truncate" x-text="item.product.name"></h3>
+                                <span class="text-xs text-amber-600 font-bold" x-text="formatCurrency(item.product.base_price)"></span>
+                            </div>
+                            <div class="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm" dir="ltr">
+                                <button @click="decrementQty(index)" class="w-6 h-6 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold rounded-lg flex items-center justify-center text-xs border border-slate-200 transition-colors">-</button>
+                                <span class="w-6 text-center font-bold text-xs text-slate-800" x-text="item.quantity"></span>
+                                <button @click="incrementQty(index)" class="w-6 h-6 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold rounded-lg flex items-center justify-center text-xs border border-slate-200 transition-colors">+</button>
+                            </div>
+                            <div class="text-left w-20 flex-shrink-0" dir="ltr">
+                                <span class="font-extrabold text-sm text-slate-800" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Tax, Discount, Subtotal & Total Controls -->
+                <div class="p-5 bg-slate-50/50 border-t border-slate-200 space-y-4">
+                    <div class="flex items-center justify-between text-xs text-slate-550">
+                        <span class="font-bold">المجموع الفرعي</span>
+                        <span class="font-bold text-slate-850" x-text="formatCurrency(getSubtotal())"></span>
+                    </div>
+
+                    <!-- Discount Input -->
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-550 font-bold">الخصم الممنوح (د.ل)</span>
+                        <input type="number" min="0" x-model.number="discount" class="w-24 bg-white border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl px-3 py-1.5 text-center text-amber-600 font-extrabold focus:outline-none" />
+                    </div>
+
+                    <!-- Tax Input -->
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-550 font-bold">الضريبة المضافة (د.ل)</span>
+                        <input type="number" min="0" x-model.number="tax" class="w-24 bg-white border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl px-3 py-1.5 text-center text-red-650 font-extrabold focus:outline-none" />
+                    </div>
+
+                    <!-- Order Notes Input -->
+                    <div class="flex flex-col gap-1.5 text-right">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">ملاحظات التحضير الخاصة</label>
+                        <textarea x-model="notes" placeholder="مثال: بدون بصل، زيادة جبنة، إلخ..." 
+                                  class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none h-14 resize-none text-right"></textarea>
+                    </div>
+
+                    <!-- Grand Total -->
+                    <div class="flex items-center justify-between border-t border-slate-200/80 pt-4 text-sm">
+                        <span class="font-extrabold text-slate-600 uppercase tracking-wider text-xs">إجمالي الفاتورة الكلي</span>
+                        <span class="text-xl font-black text-amber-600" x-text="formatCurrency(getTotal())"></span>
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <button @click="openPaymentModal()" :disabled="cart.length === 0 || !selectedLocation"
+                            class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-extrabold py-3.5 rounded-2xl shadow-lg shadow-amber-500/10 transition-all flex items-center justify-center gap-2 text-sm tracking-wide">
+                        <span x-text="!selectedLocation ? 'الرجاء تحديد الفرع أولاً' : 'إتمام الطلب ودفع الفاتورة'"></span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Left Column: Menu Products Grid -->
+            <section class="flex-grow flex flex-col bg-slate-50 text-right">
+                <!-- Category Horizontal Scroll Bar -->
+                <div class="p-4 bg-white border-b border-slate-200 flex items-center gap-2 overflow-x-auto flex-shrink-0" dir="rtl">
+                    <button @click="selectedCategory = 'All'"
+                            class="px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 uppercase tracking-wider"
+                            :class="selectedCategory === 'All' ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'">
+                        جميع الوجبات
+                    </button>
+                    <template x-for="cat in categories" :key="cat">
+                        <button @click="selectedCategory = cat"
+                                class="px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 uppercase tracking-wider"
+                                :class="selectedCategory === cat ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'"
+                                x-text="cat">
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Product Card Grid (Scrollable) -->
+                <div class="flex-grow overflow-y-auto p-6" dir="rtl">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        <template x-for="product in filteredProducts()" :key="product.id">
+                            <div @click="addToCart(product)"
+                                 class="bg-white hover:bg-slate-50/50 border border-slate-200 hover:border-amber-500/50 rounded-3xl p-3 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-sm group relative overflow-hidden h-52 text-right">
+                                
+                                <!-- Product Thumbnail Image -->
+                                <div class="w-full h-28 relative overflow-hidden rounded-2xl bg-slate-100">
+                                    <img :src="product.image_url || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'" 
+                                         alt="Food image"
+                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent"></div>
+                                    <!-- Floating category -->
+                                    <span class="absolute top-2 right-2 text-[8px] uppercase font-black text-slate-700 tracking-widest bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md border border-slate-150 shadow-sm" x-text="product.category"></span>
+                                </div>
+                                
+                                <!-- Product Meta Details -->
+                                <div class="mt-2.5 flex flex-col justify-between flex-grow">
+                                    <h3 class="font-extrabold text-slate-800 text-xs leading-snug group-hover:text-amber-600 transition-colors truncate text-right" x-text="product.name"></h3>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <p class="text-amber-600 font-black text-xs" x-text="formatCurrency(product.base_price)"></p>
+                                        <span class="text-[9px] text-slate-450 group-hover:text-amber-600 font-bold transition-all">إضافة +</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Payment Gateway & Receipt Preview Modal -->
+        <div x-show="showPaymentModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-transition>
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="checkoutState !== 'receipt' && closePaymentModal()"></div>
+
+            <!-- Modal Container -->
+            <div class="flex items-center justify-center min-h-screen p-6">
+                
+                <!-- Standard Payment Select Screen -->
+                <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl relative z-10 space-y-6 text-right" x-show="checkoutState !== 'receipt'">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                        <h3 class="text-base font-bold text-slate-800 uppercase tracking-wider">اختر طريقة دفع الفاتورة</h3>
+                        <button @click="closePaymentModal()" class="text-slate-400 hover:text-slate-650">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center border border-slate-200">
+                        <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">القيمة الإجمالية المطلوبة</span>
+                        <span class="text-xl font-black text-amber-600" x-text="formatCurrency(getTotal())"></span>
+                    </div>
+
+                    <!-- Selection Grid -->
+                    <div class="grid grid-cols-2 gap-3" x-show="!checkoutState">
+                        <!-- Cash -->
+                        <button @click="processCashPayment()" class="flex flex-col items-center justify-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all shadow-sm">
+                            <span class="text-3xl">💵</span>
+                            <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wide">نقداً (كاش)</span>
+                        </button>
+                        <!-- Sadad -->
+                        <button @click="processSadadPayment()" class="flex flex-col items-center justify-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all shadow-sm">
+                            <span class="text-3xl">📱</span>
+                            <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wide">خدمة سداد (Sadad)</span>
+                        </button>
+                        <!-- MobiCash -->
+                        <button @click="processMobiCashPayment()" class="flex flex-col items-center justify-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all shadow-sm">
+                            <span class="text-3xl">📲</span>
+                            <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wide">موبي كاش (MobiCash)</span>
+                        </button>
+                        <!-- Tadawul POS -->
+                        <button @click="processTadawulPayment()" class="flex flex-col items-center justify-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all shadow-sm">
+                            <span class="text-3xl">💳</span>
+                            <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wide">تداول (Tadawul)</span>
+                        </button>
+                    </div>
+
+                    <!-- Process States -->
+                    <div class="space-y-4 text-center py-4" x-show="checkoutState">
+                        <div class="flex flex-col items-center justify-center gap-4">
+                            <div x-show="checkoutState === 'mobicash'" class="bg-white p-3 rounded-2xl shadow-lg border-2 border-amber-500">
+                                <!-- Simulating QR code -->
+                                <div class="w-40 h-40 bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-800 p-2 break-all" x-text="mobicashPayload"></div>
+                            </div>
+
+                            <div x-show="checkoutState === 'tadawul'" class="space-y-2">
+                                <span class="text-4xl animate-bounce inline-block">💳</span>
+                                <p class="text-xs font-bold text-slate-650" x-text="tadawulMsg"></p>
+                            </div>
+
+                            <div x-show="checkoutState === 'sadad'" class="space-y-2">
+                                <span class="text-4xl animate-pulse inline-block">🔗</span>
+                                <p class="text-xs font-bold text-slate-650">جاري إنشاء رابط الدفع الآمن لسداد...</p>
+                                <a :href="sadadUrl" target="_blank" class="inline-block bg-amber-500 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg mt-2 shadow shadow-amber-500/10">فتح بوابة الدفع الإلكتروني</a>
+                            </div>
+
+                            <div class="flex items-center gap-2 text-[10px] text-amber-600 font-extrabold tracking-wider uppercase animate-pulse">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                <span x-text="checkoutStatusText"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2" x-show="checkoutState">
+                        <button @click="cancelCheckout()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition-all">إلغاء</button>
+                        <button @click="forceMockApprove()" class="w-full bg-emerald-650 hover:bg-emerald-700 text-xs font-bold py-2.5 rounded-xl text-white transition-all">محاكاة نجاح الدفع</button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Customer Paper Invoice Receipt Ticket -->
+                <div class="max-w-sm w-full p-4 relative z-10 space-y-6" x-show="checkoutState === 'receipt'" style="display: none;">
+                    <!-- Real-looking invoice receipt -->
+                    <div id="printable-receipt-card" class="paper-receipt p-6 space-y-4 text-right" dir="rtl">
+                        <div class="text-center space-y-1">
+                            <h2 class="text-base font-extrabold tracking-tight">مطعم المدينة المنورة</h2>
+                            <p class="text-[10px] text-slate-500 font-bold" x-text="receiptData.locationName"></p>
+                            <p class="text-[9px] text-slate-400">الهاتف: 091-0000000</p>
+                        </div>
+
+                        <!-- Cut line design -->
+                        <div class="border-t border-dashed border-gray-300 my-2"></div>
+
+                        <!-- Order Metadata -->
+                        <div class="text-[10px] space-y-1">
+                            <div class="flex justify-between">
+                                <span>رقم الفاتورة:</span>
+                                <span class="font-bold" x-text="receiptData.orderId"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>تاريخ العملية:</span>
+                                <span x-text="receiptData.date"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>طريقة الدفع:</span>
+                                <span class="font-bold" x-text="translatePaymentMethod(receiptData.paymentMethod)"></span>
+                            </div>
+                        </div>
+
+                        <!-- Notes display if exists -->
+                        <template x-if="receiptData.notes">
+                            <div class="bg-amber-50 text-amber-955 border border-amber-200 p-2 rounded-xl text-[9px] font-sans font-bold flex flex-col gap-0.5 mt-2 text-right">
+                                <span class="text-[8px] text-amber-700 uppercase">ملاحظات التحضير:</span>
+                                <span x-text="receiptData.notes"></span>
+                            </div>
+                        </template>
+
+                        <div class="border-t border-dashed border-gray-400 my-2"></div>
+
+                        <!-- Receipt items -->
+                        <div class="text-[10px] space-y-1">
+                            <div class="flex justify-between font-bold text-slate-650 mb-1">
+                                <span class="w-1/2 text-right">الصنف الوجبة</span>
+                                <span class="w-1/4 text-center">الكمية</span>
+                                <span class="w-1/4 text-left">السعر</span>
+                            </div>
+                            <template x-for="item in receiptData.items" :key="item.product.id">
+                                <div class="flex justify-between">
+                                    <span class="w-1/2 text-right truncate" x-text="item.product.name"></span>
+                                    <span class="w-1/4 text-center" x-text="item.quantity"></span>
+                                    <span class="w-1/4 text-left" x-text="parseFloat(item.product.base_price * item.quantity).toFixed(2) + ' د.ل'"></span>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="border-t border-dashed border-gray-400 my-2"></div>
+
+                        <!-- Calculations -->
+                        <div class="text-[10px] space-y-1">
+                            <div class="flex justify-between">
+                                <span>المجموع الفرعي:</span>
+                                <span x-text="parseFloat(receiptData.subtotal).toFixed(2) + ' د.ل'"></span>
+                            </div>
+                            <div class="flex justify-between" x-show="receiptData.discount > 0">
+                                <span>الخصم:</span>
+                                <span x-text="'-' + parseFloat(receiptData.discount).toFixed(2) + ' د.ل'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>الضريبة المضافة:</span>
+                                <span x-text="parseFloat(receiptData.tax).toFixed(2) + ' د.ل'"></span>
+                            </div>
+                            <div class="flex justify-between font-bold text-sm pt-1.5 border-t border-gray-200">
+                                <span>الإجمالي النهائي:</span>
+                                <span x-text="parseFloat(receiptData.total).toFixed(2) + ' د.ل'"></span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-dashed border-gray-400 my-2"></div>
+
+                        <!-- Receipt Footer: Mock Barcode & Shukran -->
+                        <div class="text-center space-y-2">
+                            <p class="text-[10px] font-bold">شكراً لزيارتكم • صحتين وعافية!</p>
+                            <!-- Simulated Barcode in HTML -->
+                            <div class="flex justify-center items-center gap-0.5 h-8 w-44 mx-auto bg-slate-50 p-1 rounded border border-slate-100">
+                                <div class="w-1 bg-slate-800 h-full"></div>
+                                <div class="w-0.5 bg-slate-800 h-full"></div>
+                                <div class="w-1.5 bg-slate-800 h-full"></div>
+                                <div class="w-0.5 bg-slate-800 h-full"></div>
+                                <div class="w-1 bg-slate-800 h-full"></div>
+                                <div class="w-2 bg-slate-800 h-full"></div>
+                                <div class="w-0.5 bg-slate-800 h-full"></div>
+                                <div class="w-1 bg-slate-800 h-full"></div>
+                                <div class="w-1.5 bg-slate-800 h-full"></div>
+                                <div class="w-0.5 bg-slate-800 h-full"></div>
+                            </div>
+                            <p class="text-[8px] text-slate-400 font-mono" x-text="receiptData.orderId"></p>
+                        </div>
+                    </div>
+
+                    <!-- Print & Continue Buttons -->
+                    <div class="flex flex-col gap-2">
+                        <div class="flex gap-2">
+                            <button @click="triggerLocalPrinter(receiptData.orderIdRaw)" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl text-[10px] tracking-wider shadow-lg shadow-amber-500/10 transition-all">
+                                🖨️ طابعة الشبكة IP
+                            </button>
+                            <button @click="printViaBrowser()" class="w-1/2 bg-blue-600 hover:bg-blue-750 text-white font-bold py-3 rounded-xl text-[10px] tracking-wider shadow-lg shadow-blue-500/10 transition-all">
+                                📄 طباعة المتصفح
+                            </button>
+                        </div>
+                        <button @click="finishReceiptAndReset()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl text-xs tracking-wider border border-slate-700 shadow transition-all">
+                            فاتورة جديدة (New Order)
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Script Block for POS Logic -->
+        <script>
+            // IndexedDB Simple Offline Store Wrapper
+            const dbName = "posOfflineDB";
+            let db;
+
+            const request = indexedDB.open(dbName, 1);
+            request.onupgradeneeded = function(e) {
+                const localDb = e.target.result;
+                if (!localDb.objectStoreNames.contains("orders")) {
+                    localDb.createObjectStore("orders", { keyPath: "id" });
+                }
+                if (!localDb.objectStoreNames.contains("order_items")) {
+                    localDb.createObjectStore("order_items", { keyPath: "id" });
+                }
+                if (!localDb.objectStoreNames.contains("payments")) {
+                    localDb.createObjectStore("payments", { keyPath: "id" });
+                }
+                if (!localDb.objectStoreNames.contains("inventory_transactions")) {
+                    localDb.createObjectStore("inventory_transactions", { keyPath: "id" });
+                }
+            };
+            request.onsuccess = function(e) {
+                db = e.target.result;
+                window.dispatchEvent(new CustomEvent('db-ready'));
+            };
+
+            function posApp() {
+                return {
+                    products: @json($products),
+                    categories: @json($categories),
+                    locations: @json($locations),
+                    
+                    selectedLocation: '',
+                    selectedCategory: 'All',
+                    printerIp: localStorage.getItem('printerIp') || '',
+                    
+                    cart: [],
+                    discount: 0,
+                    tax: 0,
+                    notes: '',
+                    
+                    // Connection and syncing
+                    isOnline: navigator.onLine,
+                    syncing: false,
+                    pendingSyncCount: 0,
+                    
+                    // Modals & checkout state
+                    showPaymentModal: false,
+                    checkoutState: null, // 'sadad', 'mobicash', 'tadawul', 'receipt'
+                    checkoutStatusText: '',
+                    currentOrderUuid: null,
+                    
+                    // Gateway outputs
+                    mobicashPayload: '',
+                    sadadUrl: '',
+                    tadawulMsg: '',
+                    pollingInterval: null,
+
+                    // Print preview receipt data (Phase 6 upgrade)
+                    receiptData: {
+                        orderId: '',
+                        orderIdRaw: '',
+                        date: '',
+                        locationName: '',
+                        items: [],
+                        subtotal: 0,
+                        discount: 0,
+                        tax: 0,
+                        total: 0,
+                        notes: '',
+                        paymentMethod: ''
+                    },
+
+                    init() {
+                        this.selectedLocation = localStorage.getItem('selectedLocation') || '';
+                        window.addEventListener('online', () => { this.isOnline = true; this.triggerAutoSync(); });
+                        window.addEventListener('offline', () => { this.isOnline = false; });
+                        window.addEventListener('db-ready', () => { this.updatePendingSyncCount(); });
+                        
+                        this.$watch('printerIp', val => localStorage.setItem('printerIp', val));
+                        setInterval(() => this.triggerAutoSync(), 30000);
+                    },
+
+                    changeLocation() {
+                        localStorage.setItem('selectedLocation', this.selectedLocation);
+                    },
+
+                    formatCurrency(value) {
+                        return parseFloat(value).toFixed(2) + ' د.ل';
+                    },
+
+                    translatePaymentMethod(method) {
+                        const dict = {
+                            'cash': 'نقداً (كاش)',
+                            'sadad': 'سداد (Sadad)',
+                            'mobicash': 'موبي كاش',
+                            'tadawul': 'تداول (Tadawul)'
+                        };
+                        return dict[method.toLowerCase()] || method;
+                    },
+
+                    filteredProducts() {
+                        if (this.selectedCategory === 'All') {
+                            return this.products;
+                        }
+                        return this.products.filter(p => p.category === this.selectedCategory);
+                    },
+
+                    addToCart(product) {
+                        const existingIndex = this.cart.findIndex(item => item.product.id === product.id);
+                        if (existingIndex > -1) {
+                            this.cart[existingIndex].quantity++;
+                        } else {
+                            this.cart.push({ product: product, quantity: 1 });
+                        }
+                    },
+
+                    incrementQty(index) {
+                        this.cart[index].quantity++;
+                    },
+
+                    decrementQty(index) {
+                        if (this.cart[index].quantity > 1) {
+                            this.cart[index].quantity--;
+                        } else {
+                            this.cart.splice(index, 1);
+                        }
+                    },
+
+                    clearCart() {
+                        this.cart = [];
+                        this.discount = 0;
+                        this.tax = 0;
+                        this.notes = '';
+                    },
+
+                    getSubtotal() {
+                        return this.cart.reduce((sum, item) => sum + (item.product.base_price * item.quantity), 0);
+                    },
+
+                    getTotal() {
+                        const subtotal = this.getSubtotal();
+                        return Math.max(0, subtotal - this.discount + this.tax);
+                    },
+
+                    openPaymentModal() {
+                        this.showPaymentModal = true;
+                        this.checkoutState = null;
+                    },
+
+                    closePaymentModal() {
+                        this.showPaymentModal = false;
+                        this.checkoutState = null;
+                        if (this.pollingInterval) {
+                            clearInterval(this.pollingInterval);
+                        }
+                    },
+
+                    generateUUID() {
+                        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                            return v.toString(16);
+                        });
+                    },
+
+                    saveOrderOffline(order, items, payment, inventoryTx) {
+                        if (!db) return;
+                        const tx = db.transaction(["orders", "order_items", "payments", "inventory_transactions"], "readwrite");
+                        
+                        tx.objectStore("orders").put(order);
+                        items.forEach(it => tx.objectStore("order_items").put(it));
+                        tx.objectStore("payments").put(payment);
+                        tx.objectStore("inventory_transactions").put(inventoryTx);
+
+                        tx.oncomplete = () => {
+                            this.updatePendingSyncCount();
+                            
+                            // Populate Receipt Preview data
+                            const activeLoc = this.locations.find(l => l.id === this.selectedLocation);
+                            this.receiptData = {
+                                orderId: order.id.substring(0, 8).toUpperCase(),
+                                orderIdRaw: order.id,
+                                date: new Date(order.created_at).toLocaleString('ar-LY'),
+                                locationName: activeLoc ? activeLoc.name : 'فرع طرابلس',
+                                items: JSON.parse(JSON.stringify(this.cart)),
+                                subtotal: this.getSubtotal(),
+                                discount: this.discount,
+                                tax: this.tax,
+                                total: this.getTotal(),
+                                notes: order.notes || '',
+                                paymentMethod: payment.payment_method
+                            };
+                            
+                            // Transition to show print receipt card
+                            this.checkoutState = 'receipt';
+                            
+                            // Attempt sync
+                            this.triggerAutoSync();
+                        };
+                    },
+
+                    finishReceiptAndReset() {
+                        this.clearCart();
+                        this.closePaymentModal();
+                    },
+
+                    // 1. Process CASH Checkouts
+                    processCashPayment() {
+                        const orderId = this.generateUUID();
+                        const paymentId = this.generateUUID();
+                        const txId = this.generateUUID();
+                        
+                        const order = {
+                            id: orderId,
+                            location_id: this.selectedLocation,
+                            status: 'pending',
+                            payment_status: 'paid',
+                            total_amount: this.getTotal(),
+                            discount: this.discount,
+                            tax: this.tax,
+                            notes: this.notes,
+                            sync_status: 'pending',
+                            created_at: new Date().toISOString()
+                        };
+
+                        const items = this.cart.map(c => ({
+                            id: this.generateUUID(),
+                            order_id: orderId,
+                            product_id: c.product.id,
+                            quantity: c.quantity,
+                            price: c.product.base_price
+                        }));
+
+                        const payment = {
+                            id: paymentId,
+                            order_id: orderId,
+                            amount: this.getTotal(),
+                            payment_method: 'cash',
+                            transaction_id: 'CASH_' + Math.floor(Math.random() * 100000),
+                            status: 'completed',
+                            created_at: new Date().toISOString()
+                        };
+
+                        const inventoryTx = {
+                            id: txId,
+                            product_id: items[0].product_id,
+                            location_id: this.selectedLocation,
+                            quantity: -items.reduce((sum, i) => sum + i.quantity, 0),
+                            unit_cost: items[0].price * 0.4,
+                            source_id: null,
+                            created_at: new Date().toISOString()
+                        };
+
+                        this.saveOrderOffline(order, items, payment, inventoryTx);
+                    },
+
+                    // 2. Process SADAD Integration
+                    processSadadPayment() {
+                        const orderId = this.generateUUID();
+                        this.currentOrderUuid = orderId;
+                        this.checkoutState = 'sadad';
+                        this.checkoutStatusText = "جاري الاتصال بخدمة سداد (SADAD API)...";
+
+                        if (this.isOnline) {
+                            fetch('/api/payments/sadad/checkout', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ order_id: orderId, amount: this.getTotal() })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.sadadUrl = data.checkout_url;
+                                    this.checkoutStatusText = "في انتظار تأكيد عملية الدفع من سداد...";
+                                    this.startPaymentPolling('sadad', orderId);
+                                }
+                            })
+                            .catch(() => {
+                                this.checkoutStatusText = "النظام غير متصل أو انتهت المهلة. تم الحفظ للمعالجة لاحقاً.";
+                            });
+                        } else {
+                            this.checkoutStatusText = "النظام غير متصل. تم حفظ الفاتورة محلياً.";
+                        }
+                    },
+
+                    // 3. Process MOBICASH Integration
+                    processMobiCashPayment() {
+                        const orderId = this.generateUUID();
+                        this.currentOrderUuid = orderId;
+                        this.checkoutState = 'mobicash';
+                        this.checkoutStatusText = "جاري إنشاء رمز الاستجابة السريع لموبي كاش (QR)...";
+
+                        if (this.isOnline) {
+                            fetch('/api/payments/mobicash/qr', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ order_id: orderId, amount: this.getTotal() })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.mobicashPayload = data.qr_payload;
+                                    this.checkoutStatusText = "امسح الرمز من تطبيق الهاتف لتأكيد الدفع...";
+                                    this.startPaymentPolling('mobicash', data.payment_id);
+                                }
+                            });
+                        } else {
+                            this.mobicashPayload = `MOBICASH_MADINA_77|${orderId}|${this.getTotal()}|${Date.now()}`;
+                            this.checkoutStatusText = "رمز QR محلي (سيتم التأكيد عند مزامنة الشبكة)...";
+                        }
+                    },
+
+                    // 4. Process TADAWUL POS Card Reader Integration
+                    processTadawulPayment() {
+                        const orderId = this.generateUUID();
+                        this.currentOrderUuid = orderId;
+                        this.checkoutState = 'tadawul';
+                        this.tadawulMsg = "جاري تهيئة جهاز نقاط البيع تداول...";
+                        this.checkoutStatusText = "جاري إرسال القيمة لجهاز بطاقات الدفع...";
+
+                        if (this.isOnline) {
+                            fetch('/api/payments/tadawul/transact', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ order_id: orderId, amount: this.getTotal() })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.tadawulMsg = data.message;
+                                    this.checkoutStatusText = "مرر البطاقة على جهاز تداول لإتمام الدفع...";
+                                    this.startPaymentPolling('tadawul', data.payment_id);
+                                }
+                            });
+                        } else {
+                            this.tadawulMsg = "الدفع بالبطاقة دون اتصال. يرجى تمرير البطاقة بالجهاز.";
+                            this.checkoutStatusText = "دفع بطاقة دون اتصال (تم الحفظ للمزامنة)...";
+                        }
+                    },
+
+                    startPaymentPolling(method, identifier) {
+                        if (this.pollingInterval) clearInterval(this.pollingInterval);
+                        this.pollingInterval = setInterval(() => {
+                            fetch(`/api/payments/${method}/status/${identifier}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success && data.status === 'completed') {
+                                        clearInterval(this.pollingInterval);
+                                        this.finalizeOrderGatewaySuccess(method);
+                                    }
+                                });
+                        }, 3000);
+                    },
+
+                    forceMockApprove() {
+                        if (this.pollingInterval) clearInterval(this.pollingInterval);
+                        this.finalizeOrderGatewaySuccess(this.checkoutState);
+                    },
+
+                    finalizeOrderGatewaySuccess(method) {
+                        const orderId = this.currentOrderUuid;
+                        const order = {
+                            id: orderId,
+                            location_id: this.selectedLocation,
+                            status: 'cooking',
+                            payment_status: 'paid',
+                            total_amount: this.getTotal(),
+                            discount: this.discount,
+                            tax: this.tax,
+                            notes: this.notes,
+                            sync_status: 'pending',
+                            created_at: new Date().toISOString()
+                        };
+
+                        const items = this.cart.map(c => ({
+                            id: this.generateUUID(),
+                            order_id: orderId,
+                            product_id: c.product.id,
+                            quantity: c.quantity,
+                            price: c.product.base_price
+                        }));
+
+                        const payment = {
+                            id: this.generateUUID(),
+                            order_id: orderId,
+                            amount: this.getTotal(),
+                            payment_method: method,
+                            transaction_id: 'GATEWAY_' + Math.floor(Math.random() * 100000),
+                            status: 'completed',
+                            created_at: new Date().toISOString()
+                        };
+
+                        const inventoryTx = {
+                            id: this.generateUUID(),
+                            product_id: items[0].product_id,
+                            location_id: this.selectedLocation,
+                            quantity: -items.reduce((sum, i) => sum + i.quantity, 0),
+                            unit_cost: items[0].price * 0.4,
+                            source_id: null,
+                            created_at: new Date().toISOString()
+                        };
+
+                        this.saveOrderOffline(order, items, payment, inventoryTx);
+                    },
+
+                    cancelCheckout() {
+                        if (this.pollingInterval) clearInterval(this.pollingInterval);
+                        this.checkoutState = null;
+                    },
+
+                    printViaBrowser() {
+                        window.print();
+                    },
+
+                    triggerLocalPrinter(orderId) {
+                        if (!this.printerIp) {
+                            alert("يرجى تهيئة وإدخال عنوان IP الخاص بالطابعة الشبكية في الشريط العلوي أولاً!");
+                            return;
+                        }
+                        
+                        fetch(`/pos/orders/${orderId}/print`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ ip: this.printerIp })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("تم إرسال أمر الطباعة بنجاح للطابعة الشبكية!");
+                            } else {
+                                alert("فشل الاتصال بالطابعة الشبكية. يرجى التحقق من اتصالها بالشبكة.");
+                            }
+                        });
+                    },
+
+                    updatePendingSyncCount() {
+                        if (!db) return;
+                        const tx = db.transaction(["orders"], "readonly");
+                        const store = tx.objectStore("orders");
+                        const req = store.getAll();
+                        req.onsuccess = () => {
+                            const unsynced = req.result.filter(o => o.sync_status === 'pending');
+                            this.pendingSyncCount = unsynced.length;
+                        };
+                    },
+
+                    triggerManualSync() {
+                        this.syncing = true;
+                        this.triggerAutoSync().finally(() => {
+                            setTimeout(() => this.syncing = false, 1000);
+                        });
+                    },
+
+                    async triggerAutoSync() {
+                        if (!this.isOnline || !db || this.syncing) return;
+                        const lastSync = localStorage.getItem('last_sync_time') || new Date(0).toISOString();
+                        
+                        try {
+                            const pullRes = await fetch(`/api/sync/pull?last_sync=${encodeURIComponent(lastSync)}`);
+                            const pullData = await pullRes.json();
+                            
+                            if (pullData.force_reset) {
+                                const wipeTx = db.transaction(["orders", "order_items", "payments", "inventory_transactions"], "readwrite");
+                                wipeTx.objectStore("orders").clear();
+                                wipeTx.objectStore("order_items").clear();
+                                wipeTx.objectStore("payments").clear();
+                                wipeTx.objectStore("inventory_transactions").clear();
+                            }
+
+                            const pushTx = db.transaction(["orders", "order_items", "payments", "inventory_transactions"], "readonly");
+                            
+                            const localOrders = await new Promise(r => pushTx.objectStore("orders").getAll().onsuccess = e => r(e.target.result));
+                            const localItems = await new Promise(r => pushTx.objectStore("order_items").getAll().onsuccess = e => r(e.target.result));
+                            const localPayments = await new Promise(r => pushTx.objectStore("payments").getAll().onsuccess = e => r(e.target.result));
+                            const localTx = await new Promise(r => pushTx.objectStore("inventory_transactions").getAll().onsuccess = e => r(e.target.result));
+
+                            const unsyncedOrders = localOrders.filter(o => o.sync_status === 'pending');
+                            
+                            if (unsyncedOrders.length > 0) {
+                                const unsyncedOrderIds = unsyncedOrders.map(o => o.id);
+                                
+                                const payload = {
+                                    orders: unsyncedOrders,
+                                    order_items: localItems.filter(i => unsyncedOrderIds.includes(i.order_id)),
+                                    payments: localPayments.filter(p => unsyncedOrderIds.includes(p.order_id)),
+                                    inventory_transactions: localTx
+                                };
+
+                                const pushRes = await fetch('/api/sync/push', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify(payload)
+                                });
+                                
+                                const pushData = await pushRes.json();
+                                
+                                if (pushData.success) {
+                                    const markTx = db.transaction(["orders"], "readwrite");
+                                    const store = markTx.objectStore("orders");
+                                    
+                                    for (let id of pushData.synced_orders) {
+                                        const getReq = store.get(id);
+                                        getReq.onsuccess = (e) => {
+                                            const record = e.target.result;
+                                            if (record) {
+                                                record.sync_status = 'synced';
+                                                store.put(record);
+                                            }
+                                        };
+                                    }
+                                    
+                                    markTx.oncomplete = () => {
+                                        this.updatePendingSyncCount();
+                                    };
+                                }
+                            }
+
+                            localStorage.setItem('last_sync_time', pullData.server_time);
+
+                        } catch (err) {
+                            console.error("Auto Sync failed: ", err);
+                        }
+                    }
+                };
+            }
+        </script>
+    </div>
+</body>
+</html>
