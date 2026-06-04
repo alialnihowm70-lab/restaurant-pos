@@ -23,25 +23,31 @@ class DatabaseSeeder extends Seeder
         }
 
         // 1. Create Default Users for Roles
-        User::factory()->create([
+        User::create([
             'name' => 'POS Administrator (المدير)',
             'email' => 'admin@pos.ly',
             'password' => bcrypt('admin123'),
             'role' => 'admin',
+            'email_verified_at' => now(),
+            'remember_token' => Str::random(10),
         ]);
 
-        User::factory()->create([
+        User::create([
             'name' => 'POS Cashier (الكاشير)',
             'email' => 'cashier@pos.ly',
             'password' => bcrypt('cashier123'),
             'role' => 'cashier',
+            'email_verified_at' => now(),
+            'remember_token' => Str::random(10),
         ]);
 
-        User::factory()->create([
+        User::create([
             'name' => 'POS Kitchen Chef (الطاهي)',
             'email' => 'chef@pos.ly',
             'password' => bcrypt('chef123'),
             'role' => 'chef',
+            'email_verified_at' => now(),
+            'remember_token' => Str::random(10),
         ]);
 
         // 2. Create Locations
