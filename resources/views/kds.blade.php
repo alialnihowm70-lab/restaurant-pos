@@ -43,7 +43,7 @@
     <div class="flex-grow flex flex-col overflow-hidden h-screen">
 
         <!-- Top Header -->
-        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0 text-right">
+        <header class="bg-white border-b border-slate-200 px-4 lg:px-6 py-3 lg:py-4 flex items-center justify-between flex-shrink-0 text-right">
             <div class="flex items-center gap-3">
                 <span class="text-2xl">🍳</span>
                 <div>
@@ -68,7 +68,7 @@
         </header>
 
         <!-- KDS Card Grid Area -->
-        <main class="flex-grow p-6 overflow-y-auto" dir="rtl">
+        <main class="flex-grow p-4 lg:p-6 overflow-y-auto" dir="rtl">
             <template x-if="orders.length === 0">
                 <div class="h-full flex flex-col items-center justify-center text-slate-400 gap-4 py-20">
                     <span class="text-6xl animate-bounce">👍</span>

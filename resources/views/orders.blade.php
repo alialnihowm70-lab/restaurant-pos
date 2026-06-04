@@ -61,7 +61,7 @@
     @include('partials.sidebar')
 
     <!-- Main Workspace -->
-    <main class="flex-grow p-8 space-y-8" dir="rtl">
+    <main class="flex-grow p-4 lg:p-8 space-y-6 lg:space-y-8" dir="rtl">
         
         <!-- Header Bar -->
         <div class="flex items-center justify-between border-b border-slate-200 pb-5 text-right">
@@ -78,10 +78,44 @@
 
         <!-- Orders Table Grid -->
         <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
                 <h2 class="text-sm font-bold text-slate-800">سجل الفواتير والمعاملات المالية</h2>
                 <!-- Total active counter -->
                 <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-lg">إجمالي الطلبات: {{ count($orders) }}</span>
+            </div>
+
+            <!-- Status filter tabs -->
+            <div class="flex flex-wrap gap-2 pb-2">
+                <button @click="currentFilter = 'all'" 
+                        :class="currentFilter === 'all' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
+                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                    الكل ({{ count($orders) }})
+                </button>
+                <button @click="currentFilter = 'pending'" 
+                        :class="currentFilter === 'pending' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
+                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                    معلقة ({{ $orders->where('status', 'pending')->count() }})
+                </button>
+                <button @click="currentFilter = 'cooking'" 
+                        :class="currentFilter === 'cooking' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
+                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                    قيد التحضير ({{ $orders->where('status', 'cooking')->count() }})
+                </button>
+                <button @click="currentFilter = 'ready'" 
+                        :class="currentFilter === 'ready' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
+                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                    جاهزة للتسليم ({{ $orders->where('status', 'ready')->count() }})
+                </button>
+                <button @click="currentFilter = 'completed'" 
+                        :class="currentFilter === 'completed' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
+                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                    مكتملة ({{ $orders->where('status', 'completed')->count() }})
+                </button>
+                <button @click="currentFilter = 'cancelled'" 
+                        :class="currentFilter === 'cancelled' ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 border-amber-500' : 'bg-slate-50 hover:bg-slate-100 text-slate-650 font-medium border-slate-200'"
+                        class="px-4 py-2 text-xs rounded-xl transition-all duration-300 border">
+                    ملغية ({{ $orders->where('status', 'cancelled')->count() }})
+                </button>
             </div>
 
             <div class="overflow-x-auto rounded-2xl border border-slate-200">
@@ -101,7 +135,8 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($orders as $order)
-                            <tr class="hover:bg-slate-50/50 transition-colors">
+                            <tr class="hover:bg-slate-50/50 transition-colors"
+                                x-show="currentFilter === 'all' || '{{ $order->status }}' === currentFilter">
                                 <td class="px-6 py-4 font-mono font-bold text-slate-800">
                                     #{{ strtoupper(substr($order->id, 0, 8)) }}
                                 </td>
@@ -262,6 +297,7 @@
     <script>
         function ordersHistoryApp() {
             return {
+                currentFilter: 'all',
                 printerIp: localStorage.getItem('printerIp') || '',
                 selectedOrder: null,
                 orders: @json($orders->load('items.product', 'location')),

@@ -60,7 +60,7 @@
     <!-- Main Workspace Area -->
     <div class="flex-grow flex flex-col min-h-screen overflow-y-auto">
         <!-- Top bar inside content area -->
-        <header class="bg-white border-b border-slate-200 px-8 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
+        <header class="bg-white border-b border-slate-200 px-4 lg:px-8 py-4 lg:py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
             <div>
                 <h1 class="text-xl font-black text-slate-800 flex items-center gap-2">
                     <span>📊</span> Management Dashboard (لوحة الإدارة والتحليلات)
@@ -91,7 +91,7 @@
             </div>
         </header>
 
-        <main class="p-8 space-y-10" x-data="{ supplierTab: 'list', showReportModal: false, rent: '', salaries: '', utilities: '', misc: '' }">
+        <main class="p-4 lg:p-8 space-y-6 lg:space-y-10" x-data="{ supplierTab: 'list', showReportModal: false, rent: '', salaries: '', utilities: '', misc: '' }">
         
         <!-- Flash Alert Notification -->
         @if(session('success'))

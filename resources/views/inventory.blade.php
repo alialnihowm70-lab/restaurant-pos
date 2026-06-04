@@ -63,7 +63,7 @@
     <div class="flex-grow flex flex-col min-h-screen overflow-y-auto">
         
         <!-- Header Bar -->
-        <header class="bg-white border-b border-slate-200 px-8 py-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 flex-shrink-0 text-right">
+        <header class="bg-white border-b border-slate-200 px-4 lg:px-8 py-4 lg:py-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 flex-shrink-0 text-right">
             <div>
                 <h1 class="text-xl font-black text-slate-800 flex items-center gap-2">
                     <span>📦</span> إدارة المخازن والمنتجات (Catalog & Stores)
@@ -112,7 +112,7 @@
         </header>
 
         <!-- Main Body Content -->
-        <main class="p-8 space-y-8" dir="rtl">
+        <main class="p-4 lg:p-8 space-y-6 lg:space-y-8" dir="rtl">
             
             @if(session('success'))
                 <div class="bg-green-50 border border-green-250 text-green-700 p-4 rounded-2xl text-xs font-bold flex items-center gap-3 animate-pulse">

@@ -100,7 +100,7 @@
     <div class="flex-grow flex flex-col overflow-hidden h-screen">
 
         <!-- Top Navigation Bar -->
-        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0 text-right">
+        <header class="bg-white border-b border-slate-200 px-4 lg:px-6 py-3 lg:py-4 flex flex-col md:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
             <div class="flex items-center gap-4">
                 <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-lg shadow-amber-500/10 text-xl">
                     M

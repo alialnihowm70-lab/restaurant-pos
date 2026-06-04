@@ -1,6 +1,7 @@
 <!-- Premium Arabic-English Shared Navigation Sidebar -->
-<aside class="w-72 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 h-screen sticky top-0 z-50"
-       x-data="sidebarNotificationApp()">
+<div x-data="sidebarNotificationApp()" class="contents">
+    <aside class="fixed lg:sticky top-0 right-0 h-screen z-50 w-72 bg-white border-l border-slate-200 flex flex-col justify-between flex-shrink-0 transition-transform duration-300 transform lg:transform-none"
+           :class="isOpen ? 'translate-x-0 shadow-2xl' : 'translate-x-full lg:translate-x-0'">
     <div class="p-6 space-y-8">
         <!-- Logo Header -->
         <div class="flex items-center gap-3">
@@ -150,12 +151,35 @@
             </div>
             <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse"></div>
         </div>
+    </aside>
+
+    <!-- Mobile Sidebar Overlay (Backdrop) -->
+    <div x-show="isOpen" 
+         @click="isOpen = false" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-slate-900/40 z-40 lg:hidden"
+         style="display: none;">
     </div>
-</aside>
+
+    <!-- Floating Mobile Menu Button -->
+    <button @click="isOpen = !isOpen" 
+            class="fixed bottom-6 right-6 z-50 p-4 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-full shadow-2xl lg:hidden focus:outline-none flex items-center justify-center font-bold text-xl transition-all duration-300 w-14 h-14"
+            aria-label="Toggle Navigation Menu">
+        <!-- Burger / Close Icon -->
+        <span x-show="!isOpen">☰</span>
+        <span x-show="isOpen" style="display: none;">✕</span>
+    </button>
+</div>
 
 <script>
     function sidebarNotificationApp() {
         return {
+            isOpen: false,
             lowStockCount: 0,
             notificationPermission: 'default',
 
