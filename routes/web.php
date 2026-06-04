@@ -7,6 +7,7 @@ use App\Models\Ingredient;
 use App\Models\Order;
 use App\Models\SupplierBankAccount;
 use App\Models\InventoryTransaction;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\AuthController;
 
