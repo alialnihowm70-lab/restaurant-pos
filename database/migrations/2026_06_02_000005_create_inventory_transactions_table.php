@@ -16,8 +16,10 @@ return new class extends Migration
             $table->decimal('unit_cost', 12, 2);
             $table->uuid('source_id')->nullable(); // referencing original transaction for FIFO tracking
             $table->timestamps();
+        });
 
-            // Self-referential index for FIFO tracking
+        // Add self-referential index after the table is created (PostgreSQL compatibility)
+        Schema::table('inventory_transactions', function (Blueprint $table) {
             $table->foreign('source_id')->references('id')->on('inventory_transactions')->nullOnDelete();
         });
     }
