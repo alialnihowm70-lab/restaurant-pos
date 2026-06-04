@@ -88,11 +88,16 @@
                         <!-- Card Header -->
                         <div class="p-4 border-b flex justify-between items-start text-right" :class="getBorderClass(order)">
                             <div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <span class="text-base font-extrabold text-slate-800" x-text="'#' + order.id.substring(0, 8).toUpperCase()"></span>
                                     <span class="text-[9px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border"
                                           :class="order.status === 'cooking' ? 'bg-amber-50 text-amber-700 border-amber-200' : (order.status === 'ready' ? 'bg-emerald-50 text-emerald-750 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200')"
                                           x-text="order.status === 'cooking' ? 'قيد الطهي' : (order.status === 'ready' ? 'جاهز للتسليم' : 'قيد الانتظار')"></span>
+                                    <span class="text-[9px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border flex items-center gap-1"
+                                          :class="getOrderTypeBadgeClass(order.notes)">
+                                        <span x-text="getOrderTypeIcon(order.notes)"></span>
+                                        <span x-text="getOrderType(order.notes)"></span>
+                                    </span>
                                 </div>
                                 <span class="text-[10px] text-slate-400 font-bold block mt-1" x-text="'الفرع: ' + order.location.name"></span>
                             </div>
@@ -121,12 +126,12 @@
                             </template>
 
                             <!-- Order Notes Display -->
-                            <template x-if="order.notes">
+                            <template x-if="cleanNotes(order.notes)">
                                 <div class="mt-3 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl text-xs space-y-1 font-semibold text-right">
                                     <div class="text-[9px] uppercase tracking-wider text-amber-700 font-extrabold flex items-center gap-1">
                                         <span>📝</span> ملاحظات خاصة بالتحضير
                                     </div>
-                                    <div class="text-slate-800 mt-1 font-sans text-[11px]" x-text="order.notes"></div>
+                                    <div class="text-slate-800 mt-1 font-sans text-[11px]" x-text="cleanNotes(order.notes)"></div>
                                 </div>
                             </template>
                         </div>
@@ -250,6 +255,32 @@
                                 }
                             }
                         });
+                    },
+
+                    getOrderType(notes) {
+                        if (!notes) return 'سفري';
+                        if (notes.includes('[محلي]')) return 'محلي';
+                        if (notes.includes('[توصيل]')) return 'توصيل';
+                        return 'سفري';
+                    },
+
+                    cleanNotes(notes) {
+                        if (!notes) return '';
+                        return notes.replace(/\[(محلي|سفري|توصيل)\]\s*/g, '');
+                    },
+
+                    getOrderTypeBadgeClass(notes) {
+                        const type = this.getOrderType(notes);
+                        if (type === 'محلي') return 'bg-blue-50 text-blue-700 border-blue-200';
+                        if (type === 'توصيل') return 'bg-rose-50 text-rose-700 border-rose-200';
+                        return 'bg-emerald-50 text-emerald-700 border-emerald-250';
+                    },
+
+                    getOrderTypeIcon(notes) {
+                        const type = this.getOrderType(notes);
+                        if (type === 'محلي') return '🛋️';
+                        if (type === 'توصيل') return '🚗';
+                        return '🛍️';
                     }
                 };
             }

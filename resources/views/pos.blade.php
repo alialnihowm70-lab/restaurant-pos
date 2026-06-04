@@ -206,6 +206,28 @@
                         <input type="number" min="0" x-model.number="tax" class="w-24 bg-white border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl px-3 py-1.5 text-center text-red-650 font-extrabold focus:outline-none" />
                     </div>
 
+                    <!-- Order Type Selector -->
+                    <div class="flex flex-col gap-1.5 text-right">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
+                        <div class="bg-slate-100 border border-slate-200 p-1 rounded-2xl flex gap-1" dir="rtl">
+                            <button @click="orderType = 'dinein'" type="button"
+                                    :class="orderType === 'dinein' ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'text-slate-650 hover:text-slate-900'"
+                                    class="w-1/3 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1">
+                                <span>🛋️</span> محلي
+                            </button>
+                            <button @click="orderType = 'takeaway'" type="button"
+                                    :class="orderType === 'takeaway' ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'text-slate-650 hover:text-slate-900'"
+                                    class="w-1/3 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1">
+                                <span>🛍️</span> سفري
+                            </button>
+                            <button @click="orderType = 'delivery'" type="button"
+                                    :class="orderType === 'delivery' ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'text-slate-650 hover:text-slate-900'"
+                                    class="w-1/3 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1">
+                                <span>🚗</span> توصيل
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Order Notes Input -->
                     <div class="flex flex-col gap-1.5 text-right">
                         <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">ملاحظات التحضير الخاصة</label>
@@ -232,15 +254,17 @@
                 <!-- Category Horizontal Scroll Bar -->
                 <div class="p-4 bg-white border-b border-slate-200 flex items-center gap-2 overflow-x-auto flex-shrink-0" dir="rtl">
                     <button @click="selectedCategory = 'All'"
-                            class="px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 uppercase tracking-wider"
+                            class="px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2"
                             :class="selectedCategory === 'All' ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'">
-                        جميع الوجبات
+                        <span>🍽️</span>
+                        <span>جميع الوجبات</span>
                     </button>
                     <template x-for="cat in categories" :key="cat">
                         <button @click="selectedCategory = cat"
-                                class="px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 uppercase tracking-wider"
-                                :class="selectedCategory === cat ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'"
-                                x-text="cat">
+                                class="px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2"
+                                :class="selectedCategory === cat ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'">
+                            <span x-text="getCategoryIcon(cat)"></span>
+                            <span x-text="cat"></span>
                         </button>
                     </template>
                 </div>
@@ -508,6 +532,7 @@
                     
                     selectedLocation: '',
                     selectedCategory: 'All',
+                    orderType: 'takeaway',
                     printerIp: localStorage.getItem('printerIp') || '',
                     
                     cart: [],
@@ -573,6 +598,20 @@
                             'tadawul': 'تداول (Tadawul)'
                         };
                         return dict[method.toLowerCase()] || method;
+                    },
+
+                    getCategoryIcon(cat) {
+                        const icons = {
+                            'Pizza': '🍕',
+                            'Burgers': '🍔',
+                            'Coffee': '☕',
+                            'Cold Drinks': '🥤',
+                            'Cold drinks': '🥤',
+                            'Shawarma': '🌯',
+                            'Dessert': '🍰',
+                            'Appetizers': '🍟'
+                        };
+                        return icons[cat] || '🍽️';
                     },
 
                     filteredProducts() {
@@ -694,7 +733,7 @@
                             total_amount: this.getTotal(),
                             discount: this.discount,
                             tax: this.tax,
-                            notes: this.notes,
+                            notes: (this.orderType === 'dinein' ? '[محلي]' : (this.orderType === 'delivery' ? '[توصيل]' : '[سفري]')) + (this.notes ? ' ' + this.notes : ''),
                             sync_status: 'pending',
                             created_at: new Date().toISOString()
                         };
@@ -843,7 +882,7 @@
                             total_amount: this.getTotal(),
                             discount: this.discount,
                             tax: this.tax,
-                            notes: this.notes,
+                            notes: (this.orderType === 'dinein' ? '[محلي]' : (this.orderType === 'delivery' ? '[توصيل]' : '[سفري]')) + (this.notes ? ' ' + this.notes : ''),
                             sync_status: 'pending',
                             created_at: new Date().toISOString()
                         };

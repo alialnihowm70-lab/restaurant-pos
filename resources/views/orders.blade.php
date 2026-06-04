@@ -76,6 +76,48 @@
             </div>
         </div>
 
+        <!-- Metrics Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Total Completed Revenue -->
+            <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-3xl p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">إجمالي الإيرادات المكتملة</span>
+                    <h3 class="text-2xl font-black text-amber-600 mt-1" dir="ltr">
+                        {{ number_format($orders->where('status', 'completed')->sum('total_amount'), 2) }} <span class="text-xs font-bold">د.ل</span>
+                    </h3>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl">
+                    💰
+                </div>
+            </div>
+
+            <!-- Completed Orders Count -->
+            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-3xl p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">الطلبات المكتملة (المسلمة)</span>
+                    <h3 class="text-2xl font-black text-emerald-650 mt-1">
+                        {{ $orders->where('status', 'completed')->count() }} <span class="text-xs font-bold text-slate-400">فاتورة</span>
+                    </h3>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-2xl">
+                    ✅
+                </div>
+            </div>
+
+            <!-- Active Orders Queue -->
+            <div class="bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-3xl p-6 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">الطلبات النشطة (تحت التحضير)</span>
+                    <h3 class="text-2xl font-black text-blue-600 mt-1">
+                        {{ $orders->whereIn('status', ['pending', 'cooking', 'ready'])->count() }} <span class="text-xs font-bold text-slate-400">طلب نشط</span>
+                    </h3>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-2xl">
+                    ⏳
+                </div>
+            </div>
+        </div>
+
         <!-- Orders Table Grid -->
         <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
