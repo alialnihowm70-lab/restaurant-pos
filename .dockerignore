@@ -1,0 +1,12 @@
+.env
+.git
+.gitignore
+.dockerignore
+node_modules/
+vendor/
+public/build/
+public/hot
+storage/db/*.sqlite
+storage/*.key
+.phpunit.result.cache
+tests/
