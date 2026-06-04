@@ -1,10 +1,11 @@
 FROM php:8.3-apache
 
-# Install system dependencies and PHP extensions (GD, SQLite, and PostgreSQL)
+# Install system dependencies and PHP extensions (GD, SQLite, PostgreSQL, and Intl)
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libicu-dev \
     zip \
     unzip \
     git \
@@ -13,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_sqlite pdo_pgsql
+    && docker-php-ext-install gd pdo pdo_sqlite pdo_pgsql intl
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
