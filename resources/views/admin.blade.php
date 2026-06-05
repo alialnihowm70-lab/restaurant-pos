@@ -1,8 +1,17 @@
 @php
+    $driverName = \DB::connection()->getDriverName();
+    if ($driverName === 'sqlite') {
+        $dateExpr = "strftime('%Y-%m-%d', created_at)";
+    } elseif ($driverName === 'pgsql') {
+        $dateExpr = "to_char(created_at, 'YYYY-MM-DD')";
+    } else {
+        $dateExpr = "date_format(created_at, '%Y-%m-%d')";
+    }
+
     $salesTrend = \DB::table('orders')
         ->where('status', 'completed')
         ->whereBetween('created_at', [$startDate, $endDate])
-        ->select(\DB::raw("strftime('%Y-%m-%d', created_at) as date"), \DB::raw('SUM(total_amount) as total'))
+        ->select(\DB::raw("$dateExpr as date"), \DB::raw('SUM(total_amount) as total'))
         ->groupBy('date')
         ->orderBy('date', 'asc')
         ->pluck('total', 'date')
