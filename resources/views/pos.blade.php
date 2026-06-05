@@ -364,30 +364,31 @@
                 </div>
 
                 <!-- Product Card Grid (Scrollable) -->
-                <div class="flex-grow overflow-y-auto p-4 sm:p-6 relative z-10" dir="rtl">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div class="flex-grow overflow-y-auto p-4 sm:p-5 relative z-10" dir="rtl">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <template x-for="product in filteredProducts()" :key="product.id">
                             <div @click="addToCart(product)"
-                                 class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 rounded-[20px] p-3 sm:p-4 flex flex-row sm:flex-col gap-4 items-center sm:items-stretch cursor-pointer transition-all shadow-sm hover:shadow-md text-right relative group active:scale-[0.98]">
+                                 class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 rounded-[20px] p-2.5 flex items-center gap-3 cursor-pointer transition-all shadow-sm hover:shadow-md text-right relative group active:scale-[0.98]">
                                 
                                 <!-- Product Thumbnail Image -->
-                                <div class="w-28 h-28 sm:w-full sm:h-44 flex-shrink-0 relative overflow-hidden rounded-[16px] bg-slate-100 dark:bg-slate-800">
+                                <div class="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 relative overflow-hidden rounded-[14px] bg-slate-50 dark:bg-slate-800">
                                     <img :src="product.image_url || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'" 
                                          x-on:error="$event.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'"
                                          alt="Food image"
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                    <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"></div>
                                 </div>
                                 
                                 <!-- Product Meta Details -->
-                                <div class="flex flex-col flex-grow min-w-0 py-1">
-                                    <h3 class="font-bold text-slate-900 dark:text-white text-base leading-tight truncate mb-1" x-text="product.name"></h3>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-3 leading-relaxed" x-text="product.description || 'وجبة شهية محضرة بأفضل المكونات الطازجة.'"></p>
+                                <div class="flex flex-col justify-between flex-grow min-w-0 h-24 sm:h-28 py-1">
+                                    <div>
+                                        <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-tight truncate mb-1 pl-1" x-text="product.name"></h3>
+                                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed pl-2 sm:pl-4" x-text="product.description || 'وجبة شهية محضرة بأفضل المكونات الطازجة.'"></p>
+                                    </div>
                                     
-                                    <div class="flex items-center justify-between mt-auto">
-                                        <p class="text-slate-900 dark:text-white font-black text-lg" x-text="formatCurrency(product.base_price)"></p>
-                                        <div class="w-9 h-9 rounded-full bg-slate-50 group-hover:bg-slate-100 dark:bg-slate-800 dark:group-hover:bg-slate-700 flex items-center justify-center text-slate-900 dark:text-white transition-colors border border-slate-200 dark:border-slate-700 shadow-sm">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                    <div class="flex items-center justify-between mt-auto pl-1 sm:pl-2">
+                                        <p class="text-amber-600 dark:text-amber-400 font-black text-sm sm:text-base truncate" x-text="formatCurrency(product.base_price)"></p>
+                                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 group-hover:bg-amber-500 dark:bg-amber-500 text-white dark:text-slate-900 flex items-center justify-center flex-shrink-0 transition-colors shadow-sm ml-1">
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                                         </div>
                                     </div>
                                 </div>
