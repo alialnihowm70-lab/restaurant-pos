@@ -59,30 +59,44 @@
     <div class="flex-grow flex flex-col overflow-hidden h-screen relative z-10">
 
         <!-- Top Header -->
-        <header class="glass-header px-6 py-4 flex items-center justify-between flex-shrink-0 text-right">
-            <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-[20px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center text-2xl shadow-lg shadow-orange-500/10">
-                    🍳
+        <header class="glass-header px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
+            <!-- Mobile Header Row -->
+            <div class="flex items-center justify-between w-full md:w-auto">
+                <div class="flex items-center gap-3">
+                    <!-- Mobile Sidebar Toggle -->
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
+                        ☰
+                    </button>
+                    <div class="w-10 h-10 rounded-[16px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center text-xl shadow-md shadow-orange-550/10">
+                        🍳
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-black leading-none text-slate-900">شاشة عرض المطبخ (KDS)</h1>
+                        <span class="text-[9px] text-amber-600 font-extrabold uppercase tracking-wider block mt-0.5">طابور الطهي والتحضير للوجبات</span>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-base font-black leading-none text-slate-900">شاشة عرض المطبخ (KDS)</h1>
-                    <span class="text-[10px] text-amber-600 font-extrabold uppercase tracking-wider block mt-1">طابور الطهي والتحضير الفوري للوجبات</span>
-                </div>
+                <!-- Compact refresh button for mobile -->
+                <button @click="window.location.reload()" class="md:hidden p-2 text-slate-600 hover:text-slate-800 focus:outline-none text-sm font-bold">
+                    🔄
+                </button>
             </div>
 
-            <div class="flex items-center gap-3">
+            <!-- Actions row -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
                 <!-- Active order counter -->
-                <div class="text-xs bg-white border border-slate-200 px-4 py-2.5 rounded-2xl text-slate-700 shadow-sm font-bold flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                <div class="text-[10px] md:text-xs bg-white border border-slate-200 px-3.5 py-2 rounded-2xl text-slate-700 shadow-sm font-bold flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                     <span>قيد التحضير: <span class="font-black text-amber-600" x-text="orders.length"></span></span>
                 </div>
                 
-                <button @click="window.location.reload()" class="bg-white hover:bg-slate-50 border border-slate-200 text-xs font-black px-4 py-2.5 rounded-2xl text-slate-700 transition-colors shadow-sm">
-                    تحديث القائمة
-                </button>
-                <a href="/pos" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 text-xs font-black px-5 py-3 rounded-2xl transition-all shadow-lg shadow-orange-500/15 hover:shadow-orange-500/25 active:scale-95">
-                    كاشير الصالة (POS)
-                </a>
+                <div class="flex items-center gap-2">
+                    <button @click="window.location.reload()" class="hidden md:block bg-white hover:bg-slate-50 border border-slate-200 text-xs font-black px-4 py-2.5 rounded-2xl text-slate-700 transition-colors shadow-sm">
+                        تحديث القائمة
+                    </button>
+                    <a href="/pos" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 text-[10px] md:text-xs font-black px-4 py-2.5 md:px-5 md:py-3 rounded-2xl transition-all shadow-lg shadow-orange-500/15 hover:shadow-orange-500/25 active:scale-95">
+                        كاشير الصالة (POS)
+                    </a>
+                </div>
             </div>
         </header>
 

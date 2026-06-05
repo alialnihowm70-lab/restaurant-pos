@@ -76,32 +76,47 @@
     <!-- Main Workspace Area -->
     <div class="flex-grow flex flex-col min-h-screen overflow-y-auto relative z-10">
         <!-- Top bar inside content area -->
-        <header class="bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0 text-right">
-            <div>
-                <h1 class="text-base font-black text-slate-900 flex items-center gap-2">
-                    <span>📊</span> لوحة التحكم والتقارير الإدارية (Dashboard)
-                </h1>
-                <span class="text-[10px] text-slate-400 font-extrabold mt-1 block">متابعة إيرادات المبيعات الفورية، نسب الأرباح، تالف المخزون وجرد الفروع</span>
+        <header class="bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
+            <!-- Mobile Header Row -->
+            <div class="flex items-center justify-between w-full lg:w-auto">
+                <div class="flex items-center gap-3">
+                    <!-- Mobile Sidebar Toggle -->
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
+                        ☰
+                    </button>
+                    <div class="w-10 h-10 rounded-[16px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center text-xl shadow-md shadow-orange-550/10">
+                        📊
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-black text-slate-900 leading-none">لوحة التحكم والتقارير الإدارية</h1>
+                        <span class="text-[9px] text-slate-400 font-extrabold block mt-0.5">متابعة إيرادات المبيعات ونشاط الفروع</span>
+                    </div>
+                </div>
+                <!-- Report button on mobile -->
+                <button @click="showReportModal = true" class="lg:hidden p-2 text-amber-650 hover:text-amber-850 text-lg leading-none">
+                    💼
+                </button>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <form action="/admin" method="GET" class="flex items-center gap-3 bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm">
-                    <div class="flex items-center gap-1.5 px-2">
-                        <span class="text-[9px] text-slate-400 font-extrabold uppercase">من:</span>
-                        <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}" class="bg-transparent text-xs font-bold text-slate-700 focus:outline-none" />
+            
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+                <form action="/admin" method="GET" class="flex items-center justify-between sm:justify-start gap-2 bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm w-full sm:w-auto">
+                    <div class="flex items-center gap-1 px-1.5">
+                        <span class="text-[8px] text-slate-400 font-black uppercase">من:</span>
+                        <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}" class="bg-transparent text-[11px] font-bold text-slate-700 focus:outline-none w-24 sm:w-auto" />
                     </div>
-                    <div class="h-4 w-px bg-slate-200"></div>
-                    <div class="flex items-center gap-1.5 px-2">
-                        <span class="text-[9px] text-slate-400 font-extrabold uppercase">إلى:</span>
-                        <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}" class="bg-transparent text-xs font-bold text-slate-700 focus:outline-none" />
+                    <div class="h-3 w-px bg-slate-200"></div>
+                    <div class="flex items-center gap-1 px-1.5">
+                        <span class="text-[8px] text-slate-400 font-black uppercase">إلى:</span>
+                        <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}" class="bg-transparent text-[11px] font-bold text-slate-700 focus:outline-none w-24 sm:w-auto" />
                     </div>
-                    <button type="submit" class="bg-slate-900 hover:bg-slate-950 text-white text-[9px] font-black px-4 py-2 rounded-xl transition-all shadow">
+                    <button type="submit" class="bg-slate-900 hover:bg-slate-950 text-white text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow">
                         تصفية
                     </button>
                     @if(request('start_date') || request('end_date'))
-                        <a href="/admin" class="text-rose-600 hover:text-rose-700 text-[10px] font-bold px-2">إعادة تعيين</a>
+                        <a href="/admin" class="text-rose-600 hover:text-rose-700 text-[10px] font-bold px-2">إعادة</a>
                     @endif
                 </form>
-                <button @click="showReportModal = true" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black px-5 py-3 rounded-2xl transition-all shadow-lg shadow-orange-550/15">
+                <button @click="showReportModal = true" class="hidden lg:block bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black px-5 py-3 rounded-2xl transition-all shadow-lg shadow-orange-550/15">
                     💼 إصدار تقرير مالي P&L
                 </button>
             </div>
@@ -141,63 +156,63 @@
         @endif
 
         <!-- 1. Real-Time Accounting Analytics Cards -->
-        <section class="grid grid-cols-1 md:grid-cols-5 gap-5">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <!-- Total Revenue Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-blue-500"></div>
                 <div class="space-y-1">
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">إجمالي المبيعات (Gross Revenue)</span>
-                    <h3 class="text-xl font-black text-blue-600 tracking-tight" dir="ltr">{{ number_format($salesTotal, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
-                    <span class="text-[9px] text-slate-400 block font-medium">مجموع مقبوضات الفترة الحالية</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">إجمالي المبيعات (Gross)</span>
+                    <h3 class="text-lg font-black text-blue-600 tracking-tight" dir="ltr">{{ number_format($salesTotal, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <span class="text-[8px] text-slate-400 block font-medium truncate">مقبوضات الفترة الحالية</span>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shadow-inner">💵</div>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base shadow-inner">💵</div>
             </div>
 
             <!-- Cost of Goods Sold Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-rose-500"></div>
                 <div class="space-y-1">
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">تكلفة الأغذية (COGS)</span>
-                    <h3 class="text-xl font-black text-rose-600 tracking-tight" dir="ltr">{{ number_format($totalCogs, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
-                    <span class="text-[9px] text-slate-400 block font-medium">التكلفة التشغيلية التقديرية للوجبات</span>
+                    <h3 class="text-lg font-black text-rose-600 tracking-tight" dir="ltr">{{ number_format($totalCogs, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <span class="text-[8px] text-slate-400 block font-medium truncate">التكلفة التقديرية للوجبات</span>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-rose-550/5 text-rose-600 flex items-center justify-center text-lg shadow-inner">🥩</div>
+                <div class="w-9 h-9 rounded-xl bg-rose-550/5 text-rose-600 flex items-center justify-center text-base shadow-inner">🥩</div>
             </div>
 
             <!-- Inventory Loss/Waste Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-red-500"></div>
                 <div class="space-y-1">
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">الفقد والهدر والتالف</span>
-                    <h3 class="text-xl font-black text-red-650 tracking-tight" dir="ltr">{{ number_format($totalWasteCost, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
-                    <span class="text-[9px] text-slate-400 block font-medium">تكلفة فروقات مطابقة تسويات الجرد</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">الهدر والتالف</span>
+                    <h3 class="text-lg font-black text-red-650 tracking-tight" dir="ltr">{{ number_format($totalWasteCost, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <span class="text-[8px] text-slate-400 block font-medium truncate">تسويات فروقات الجرد</span>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-lg shadow-inner">🗑️</div>
+                <div class="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-base shadow-inner">🗑️</div>
             </div>
 
             <!-- Net Profit Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-amber-500"></div>
                 <div class="space-y-1">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">صافي ربح المبيعات</span>
-                        <span class="text-[8px] font-black bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.5 rounded-lg">{{ number_format($profitMargin, 1) }}%</span>
+                    <div class="flex items-center gap-1">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block truncate">صافي الربح</span>
+                        <span class="text-[8px] font-black bg-amber-500/10 text-amber-600 px-1 py-0.5 rounded">{{ number_format($profitMargin, 0) }}%</span>
                     </div>
-                    <h3 class="text-xl font-black text-amber-650 tracking-tight" dir="ltr">{{ number_format($grossProfit, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
-                    <span class="text-[9px] text-slate-400 block font-medium">إجمالي المبيعات مطروحاً منها التكاليف</span>
+                    <h3 class="text-lg font-black text-amber-650 tracking-tight" dir="ltr">{{ number_format($grossProfit, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <span class="text-[8px] text-slate-400 block font-medium truncate">إجمالي صافي الأرباح</span>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shadow-inner">📈</div>
+                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base shadow-inner">📈</div>
             </div>
 
             <!-- Inventory Asset Value Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-2 md:col-span-1">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-emerald-500"></div>
                 <div class="space-y-1">
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">قيمة أصول المستودعات</span>
-                    <h3 class="text-xl font-black text-emerald-650 tracking-tight" dir="ltr">{{ number_format($inventoryAssetValue, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
-                    <span class="text-[9px] text-slate-400 block font-medium">حجم الأصول المالية بالمخازن</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">أصول المستودعات</span>
+                    <h3 class="text-lg font-black text-emerald-650 tracking-tight" dir="ltr">{{ number_format($inventoryAssetValue, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <span class="text-[8px] text-slate-400 block font-medium truncate">قيمة الأصول الحالية</span>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shadow-inner">📦</div>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base shadow-inner">📦</div>
             </div>
         </section>
 

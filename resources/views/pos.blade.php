@@ -124,25 +124,42 @@
 
     <!-- Main Content Area -->
     <div class="flex-grow flex flex-col overflow-hidden h-screen relative z-10">
-
         <!-- Top Navigation Bar -->
-        <header class="glass-header px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4 flex-shrink-0">
-            <div class="flex items-center gap-4 text-right">
-                <div class="w-12 h-12 rounded-[20px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-lg shadow-orange-550/20 text-2xl animate-pulse">
-                    M
+        <header class="glass-header px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 relative z-30">
+            <!-- Mobile Header Row -->
+            <div class="flex items-center justify-between w-full lg:w-auto">
+                <div class="flex items-center gap-3 text-right">
+                    <!-- Mobile Sidebar Toggle -->
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
+                        ☰
+                    </button>
+                    <div class="w-10 h-10 rounded-[16px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-md shadow-orange-550/20 text-xl animate-pulse">
+                        M
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-black tracking-tight text-slate-900 leading-none">منظومة المدينة POS</h1>
+                        <span class="text-[9px] text-amber-600 font-extrabold uppercase tracking-wider block mt-0.5">واجهة الكاشير ونقاط البيع المزامنة</span>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-base font-black tracking-tight text-slate-900 leading-none">منظومة المدينة POS</h1>
-                    <span class="text-[10px] text-amber-600 font-extrabold uppercase tracking-wider block mt-1">واجهة الكاشير ونقاط البيع المزامنة</span>
+                
+                <!-- Mobile Action Icons -->
+                <div class="flex items-center gap-3 lg:hidden">
+                    <!-- Compact Online Status indicator -->
+                    <span class="w-2.5 h-2.5 rounded-full" :class="isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'"></span>
+                    <!-- Gear Settings Toggle -->
+                    <button @click="showMobileSettings = !showMobileSettings" class="p-2 text-slate-650 hover:text-slate-850 focus:outline-none text-lg leading-none transition-transform active:rotate-45 duration-350">
+                        ⚙️
+                    </button>
                 </div>
             </div>
 
-            <!-- Sync & Connection Info -->
-            <div class="flex flex-wrap items-center gap-4" dir="rtl">
+            <!-- Sync & Connection Info Panel (Collapsible on Mobile, Row on Desktop) -->
+            <div :class="showMobileSettings ? 'flex flex-col w-full bg-slate-50/90 border border-slate-200/80 p-4 rounded-2xl gap-3.5 mt-2 transition-all duration-300' : 'hidden lg:flex'" 
+                 class="lg:flex-row lg:items-center lg:gap-4 lg:w-auto flex-wrap" dir="rtl">
                 <!-- Active Location Selector -->
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-between lg:justify-start gap-2 w-full lg:w-auto">
                     <span class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">الفرع:</span>
-                    <select x-model="selectedLocation" @change="changeLocation()" class="bg-white/80 border border-slate-200 text-xs rounded-2xl px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-slate-800 font-bold shadow-sm transition-all">
+                    <select x-model="selectedLocation" @change="changeLocation()" class="bg-white/80 border border-slate-200 text-xs rounded-2xl px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-slate-800 font-bold shadow-sm transition-all w-2/3 lg:w-auto">
                         <option value="">اختر الفرع</option>
                         @foreach($locations as $location)
                             <option value="{{ $location->id }}">{{ $location->name }}</option>
@@ -151,35 +168,35 @@
                 </div>
 
                 <!-- Printer IP Configuration -->
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-between lg:justify-start gap-2 w-full lg:w-auto">
                     <span class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">طابعة IP:</span>
-                    <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-36 bg-white/80 border border-slate-200 text-xs rounded-2xl px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-slate-800 text-center font-mono shadow-sm transition-all" dir="ltr" />
+                    <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-2/3 lg:w-36 bg-white/80 border border-slate-200 text-xs rounded-2xl px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-slate-800 text-center font-mono shadow-sm transition-all" dir="ltr" />
                 </div>
 
-                <!-- Network Connection Status -->
-                <div class="flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black tracking-wider border shadow-sm"
+                <!-- Network Connection Status (Desktop only) -->
+                <div class="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black tracking-wider border shadow-sm"
                      :class="isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-250' : 'bg-rose-50 text-rose-700 border-rose-250'">
                     <span class="w-2.5 h-2.5 rounded-full" :class="isOnline ? 'bg-emerald-550 animate-pulse' : 'bg-rose-550'"></span>
                     <span x-text="isOnline ? 'متصل بالشبكة' : 'الوضع المحلي'"></span>
                 </div>
 
                 <!-- Sync Button -->
-                <button @click="triggerManualSync()" :disabled="syncing" class="relative bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-black text-xs px-5 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-orange-550/15 hover:shadow-orange-550/25 active:scale-[0.98] disabled:scale-100">
+                <button @click="triggerManualSync()" :disabled="syncing" class="relative bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-black text-xs px-5 py-3 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-550/15 hover:shadow-orange-550/25 active:scale-[0.98] disabled:scale-100 w-full lg:w-auto">
                     <svg x-show="syncing" class="animate-spin h-3.5 w-3.5 text-slate-950" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span x-text="syncing ? 'مزامنة...' : 'مزامنة'"></span>
+                    <span x-text="syncing ? 'مزامنة...' : 'مزامنة البيانات'"></span>
                     <span x-show="pendingSyncCount > 0" class="absolute -top-2 -right-2 bg-rose-550 text-white text-[9px] w-6 h-6 rounded-full flex items-center justify-center font-black border-2 border-white animate-bounce" x-text="pendingSyncCount"></span>
                 </button>
             </div>
         </header>
 
         <!-- Main Workspace -->
-        <main class="flex-grow flex overflow-hidden">
+        <main class="flex-grow flex overflow-hidden pb-16 lg:pb-0">
 
             <!-- Right Column: Checkout Cart -->
-            <section class="w-[400px] bg-slate-950/95 backdrop-blur-xl border-l border-slate-900 flex flex-col flex-shrink-0 text-right shadow-2xl relative z-10 h-full overflow-hidden text-slate-100">
+            <section :class="activeTab === 'cart' ? 'flex w-full' : 'hidden lg:flex lg:w-[400px]'" class="bg-slate-950/95 backdrop-blur-xl border-l border-slate-900 flex-col flex-shrink-0 text-right shadow-2xl relative z-10 h-full overflow-hidden text-slate-100">
                 <!-- Active Customer / Cart Metadata -->
                 <div class="p-5 border-b border-slate-900 flex justify-between items-center bg-slate-900/30">
                     <h2 class="font-black text-xs text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
@@ -280,7 +297,7 @@
             </section>
 
             <!-- Left Column: Menu Products Grid -->
-            <section class="flex-grow flex flex-col bg-slate-50/50 text-right relative">
+            <section :class="activeTab === 'menu' ? 'flex' : 'hidden lg:flex'" class="flex-grow flex flex-col bg-slate-50/50 text-right relative">
                 <!-- Category Horizontal Scroll Bar -->
                 <div class="p-4 bg-white/70 backdrop-blur-md border-b border-slate-200/60 flex items-center gap-3 overflow-x-auto flex-shrink-0" dir="rtl">
                     <button @click="selectedCategory = 'All'"
@@ -331,6 +348,28 @@
                 </div>
             </section>
         </main>
+
+        <!-- Mobile Bottom Navigation Bar (Phase 9 responsive upgrade) -->
+        <div class="fixed bottom-0 left-0 right-0 z-45 bg-slate-950/95 backdrop-blur-xl border-t border-slate-900/80 px-6 py-3 flex justify-around items-center lg:hidden shadow-[0_-8px_32px_rgba(15,23,42,0.5)]">
+            <!-- Menu Tab Button -->
+            <button @click="activeTab = 'menu'" 
+                    class="flex flex-col items-center gap-1.5 transition-all text-xs font-black"
+                    :class="activeTab === 'menu' ? 'text-amber-500 scale-105' : 'text-slate-500 hover:text-slate-350'">
+                <span class="text-xl">🍕</span>
+                <span>الوجبات</span>
+            </button>
+            
+            <!-- Cart Tab Button -->
+            <button @click="activeTab = 'cart'" 
+                    class="flex flex-col items-center gap-1.5 transition-all text-xs font-black relative"
+                    :class="activeTab === 'cart' ? 'text-amber-500 scale-105' : 'text-slate-500 hover:text-slate-350'">
+                <span class="text-xl">🛒</span>
+                <span>سلة الطلبات</span>
+                <span x-show="cart.reduce((sum, item) => sum + item.quantity, 0) > 0" 
+                      class="absolute -top-1.5 -right-3.5 bg-rose-550 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-slate-950 animate-bounce" 
+                      x-text="cart.reduce((sum, item) => sum + item.quantity, 0)"></span>
+            </button>
+        </div>
 
         <!-- Payment Gateway & Receipt Preview Modal -->
         <div x-show="showPaymentModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-transition>
@@ -565,6 +604,8 @@
                     selectedCategory: 'All',
                     orderType: 'takeaway',
                     printerIp: localStorage.getItem('printerIp') || '',
+                    activeTab: 'menu', // 'menu' or 'cart' for mobile layout toggling
+                    showMobileSettings: false, // compact settings toggler on mobile header
                     
                     cart: [],
                     discount: 0,

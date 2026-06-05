@@ -100,17 +100,29 @@
     <main class="flex-grow p-6 lg:p-8 space-y-6 relative z-10" dir="rtl">
         
         <!-- Header Bar -->
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between border-b border-slate-200/80 pb-5 gap-4 text-right">
-            <div>
-                <h1 class="text-base font-black text-slate-900">سجل الفواتير والمبيعات اليومية</h1>
-                <span class="text-[10px] text-slate-400 font-extrabold mt-1 block">استعراض أرشيف الفواتير المصدرة، إعادة طباعة الإيصالات الورقية، ومراقبة حالة المطبخ</span>
+        <header class="bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
+            <!-- Mobile Header Row -->
+            <div class="flex items-center justify-between w-full lg:w-auto">
+                <div class="flex items-center gap-3">
+                    <!-- Mobile Sidebar Toggle -->
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
+                        ☰
+                    </button>
+                    <div class="w-10 h-10 rounded-[16px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center text-xl shadow-md shadow-orange-550/10">
+                        📜
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-black text-slate-900 leading-none">سجل الفواتير والمبيعات اليومية</h1>
+                        <span class="text-[9px] text-slate-400 font-extrabold block mt-0.5">استعراض أرشيف الفواتير وطباعة الإيصالات</span>
+                    </div>
+                </div>
             </div>
             
-            <div class="flex items-center gap-3">
-                <span class="text-xs text-slate-500 font-bold">طابعة IP:</span>
-                <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-36 bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-xs rounded-2xl px-4 py-2.5 text-slate-800 text-center font-mono focus:outline-none shadow-sm transition-all" dir="ltr" />
+            <div class="flex items-center justify-between lg:justify-start gap-2 w-full lg:w-auto bg-white border border-slate-200 px-4 py-2 rounded-2xl shadow-sm">
+                <span class="text-[10px] text-slate-500 font-extrabold uppercase">طابعة IP:</span>
+                <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-2/3 lg:w-36 bg-transparent text-xs font-mono text-slate-800 text-center focus:outline-none" dir="ltr" />
             </div>
-        </div>
+        </header>
 
         <!-- Metrics Overview Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -161,36 +173,36 @@
                 <span class="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200/50 px-3.5 py-1.5 rounded-xl shadow-sm">إجمالي الفواتير: {{ count($orders) }}</span>
             </div>
 
-            <!-- Status filter tabs -->
-            <div class="bg-slate-100 border border-slate-205 p-1.5 rounded-2xl flex flex-wrap gap-1" dir="rtl">
+            <!-- Status filter tabs (Scrollable horizontal ribbon on mobile) -->
+            <div class="bg-slate-100 border border-slate-200 p-1.5 rounded-2xl flex gap-1 overflow-x-auto w-full max-w-full scrollbar-none whitespace-nowrap flex-nowrap" dir="rtl">
                 <button @click="currentFilter = 'all'" 
                         :class="currentFilter === 'all' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
-                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0">
                     الكل ({{ count($orders) }})
                 </button>
                 <button @click="currentFilter = 'pending'" 
                         :class="currentFilter === 'pending' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
-                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0">
                     معلقة ({{ $orders->where('status', 'pending')->count() }})
                 </button>
                 <button @click="currentFilter = 'cooking'" 
                         :class="currentFilter === 'cooking' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
-                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0">
                     قيد التحضير ({{ $orders->where('status', 'cooking')->count() }})
                 </button>
                 <button @click="currentFilter = 'ready'" 
                         :class="currentFilter === 'ready' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
-                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0">
                     جاهزة للتسليم ({{ $orders->where('status', 'ready')->count() }})
                 </button>
                 <button @click="currentFilter = 'completed'" 
                         :class="currentFilter === 'completed' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
-                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0">
                     مكتملة ({{ $orders->where('status', 'completed')->count() }})
                 </button>
                 <button @click="currentFilter = 'cancelled'" 
                         :class="currentFilter === 'cancelled' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-900'"
-                        class="px-4 py-2 rounded-xl text-xs font-black transition-all">
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0">
                     ملغية ({{ $orders->where('status', 'cancelled')->count() }})
                 </button>
             </div>

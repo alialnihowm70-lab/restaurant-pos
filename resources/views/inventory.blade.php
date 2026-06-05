@@ -79,48 +79,58 @@
     <div class="flex-grow flex flex-col min-h-screen overflow-y-auto relative z-10">
         
         <!-- Header Bar -->
-        <header class="bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-6 py-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 flex-shrink-0 text-right">
-            <div>
-                <h1 class="text-base font-black text-slate-900 flex items-center gap-2">
-                    <span>📦</span> إدارة المستودعات والمنتجات (Catalog & Inventory)
-                </h1>
-                <span class="text-[10px] text-slate-400 font-extrabold mt-1 block">إضافة وتعديل المنتجات، مراقبة مستويات المواد الخام، وإجراء مطابقة الجرد والتسويات</span>
+        <header class="bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
+            <!-- Mobile Header Row -->
+            <div class="flex items-center justify-between w-full lg:w-auto">
+                <div class="flex items-center gap-3">
+                    <!-- Mobile Sidebar Toggle -->
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
+                        ☰
+                    </button>
+                    <div class="w-10 h-10 rounded-[16px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center text-xl shadow-md shadow-orange-550/10">
+                        📦
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-black text-slate-900 leading-none">إدارة المستودعات والمنتجات</h1>
+                        <span class="text-[9px] text-slate-400 font-extrabold block mt-0.5">تسوية الجرد ومراقبة المواد الخام والأصناف</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Tab Toggle buttons -->
-            <div class="bg-slate-100 border border-slate-205 p-1.5 rounded-2xl flex flex-wrap gap-1" dir="rtl">
+            <!-- Tab Toggle buttons (Scrollable on mobile) -->
+            <div class="bg-slate-100 border border-slate-200 p-1.5 rounded-2xl flex gap-1 overflow-x-auto w-full lg:w-auto max-w-full scrollbar-none" dir="rtl">
                 <button @click="tab = 'stock'"
-                        class="px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all duration-300 flex-shrink-0"
                         :class="tab === 'stock' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-950'">
                     المخزون والتوريد
                 </button>
                 <button @click="tab = 'products'"
-                        class="px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all duration-300 flex-shrink-0"
                         :class="tab === 'products' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-950'">
                     إدارة الأصناف
                 </button>
                 <button @click="tab = 'ingredients'"
-                        class="px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all duration-300 flex-shrink-0"
                         :class="tab === 'ingredients' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-950'">
                     المواد الخام
                 </button>
                 <button @click="tab = 'recipes'"
-                        class="px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all duration-300 flex-shrink-0"
                         :class="tab === 'recipes' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-950'">
                     مكونات الوجبات
                 </button>
                 <button @click="tab = 'locations'"
-                        class="px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all duration-300 flex-shrink-0"
                         :class="tab === 'locations' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-950'">
                     الفروع والمواقع
                 </button>
                 <button @click="tab = 'reconcile'"
-                        class="px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all duration-300 flex-shrink-0"
                         :class="tab === 'reconcile' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-950'">
                     تسوية الجرد
                 </button>
                 <button @click="tab = 'history'"
-                        class="px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300"
+                        class="px-4 py-2 rounded-xl text-xs font-black transition-all duration-300 flex-shrink-0"
                         :class="tab === 'history' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-orange-500/10' : 'text-slate-600 hover:text-slate-950'">
                     حركات المخازن
                 </button>

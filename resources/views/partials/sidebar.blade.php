@@ -1,5 +1,5 @@
 <!-- Premium Arabic-English Shared Navigation Sidebar -->
-<div x-data="sidebarNotificationApp()" class="contents">
+<div x-data="sidebarNotificationApp()" @toggle-sidebar.window="isOpen = !isOpen" class="contents">
     <!-- Global Top Progress Loading Bar -->
     <div id="global-top-loader" class="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 z-[9999] opacity-0 transition-all duration-300 ease-out pointer-events-none" style="width: 0%;"></div>
 
@@ -177,7 +177,7 @@
 
     <!-- Floating Mobile Menu Button -->
     <button @click="isOpen = !isOpen" 
-            class="fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-650 text-slate-950 rounded-full shadow-[0_8px_32px_rgba(245,158,11,0.3)] lg:hidden focus:outline-none flex items-center justify-center font-bold text-xl transition-all duration-300 w-14 h-14"
+            class="fixed bottom-24 right-6 z-50 p-4 bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-650 text-slate-950 rounded-full shadow-[0_8px_32px_rgba(245,158,11,0.3)] lg:hidden focus:outline-none flex items-center justify-center font-bold text-xl transition-all duration-300 w-14 h-14"
             aria-label="Toggle Navigation Menu">
         <!-- Burger / Close Icon -->
         <span x-show="!isOpen" class="leading-none">☰</span>
