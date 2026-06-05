@@ -157,7 +157,7 @@
     <!-- Main Content Area -->
     <div class="flex-grow flex flex-col overflow-hidden h-screen relative z-10">
         <!-- Top Navigation Bar -->
-        <header class="glass-header px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 relative z-30">
+        <header class="bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 relative z-30 border-b border-slate-200/80 dark:border-slate-800 shadow-sm dark:shadow-none">
             <!-- Mobile Header Row -->
             <div class="flex items-center justify-between w-full lg:w-auto">
                 <div class="flex items-center gap-3 text-right">
@@ -234,79 +234,79 @@
         <main class="flex-grow flex overflow-hidden pb-16 lg:pb-0">
 
             <!-- Right Column: Checkout Cart -->
-            <section :class="activeTab === 'cart' ? 'flex w-full' : 'hidden lg:flex lg:w-[400px]'" class="bg-slate-950/95 backdrop-blur-xl border-l border-slate-900 flex-col flex-shrink-0 text-right shadow-2xl relative z-10 h-full overflow-hidden text-slate-100">
+            <section :class="activeTab === 'cart' ? 'flex w-full' : 'hidden lg:flex lg:w-[400px]'" class="bg-slate-50 dark:bg-slate-950/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-900 flex-col flex-shrink-0 text-right shadow-2xl relative z-10 h-full overflow-hidden text-slate-800 dark:text-slate-100">
                 <!-- Active Customer / Cart Metadata -->
-                <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900">
-                    <h2 class="font-bold text-sm text-slate-100">السلة الحالية</h2>
-                    <button @click="clearCart()" class="text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors">مسح الكل</button>
+                <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
+                    <h2 class="font-bold text-sm text-slate-900 dark:text-slate-100">السلة الحالية</h2>
+                    <button @click="clearCart()" class="text-xs font-semibold text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 transition-colors">مسح الكل</button>
                 </div>
 
                 <!-- Cart Items List (Scrollable) -->
-                <div class="flex-grow overflow-y-auto p-4 space-y-3 min-h-0">
+                <div class="flex-grow overflow-y-auto p-4 space-y-3 min-h-0 bg-slate-50 dark:bg-transparent">
                     <template x-if="cart.length === 0">
-                        <div class="h-full flex flex-col items-center justify-center text-slate-500 gap-3 py-20">
-                            <span class="text-sm font-semibold text-slate-400">سلة المشتريات فارغة</span>
+                        <div class="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 gap-3 py-20">
+                            <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">سلة المشتريات فارغة</span>
                         </div>
                     </template>
 
                     <template x-for="(item, index) in cart" :key="item.product.id">
-                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3 flex items-center justify-between gap-3">
+                        <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm dark:shadow-none">
                             <div class="min-w-0 flex-grow text-right">
-                                <h3 class="font-semibold text-sm text-slate-200 truncate" x-text="item.product.name"></h3>
-                                <span class="text-xs text-amber-400 font-medium block mt-0.5" x-text="formatCurrency(item.product.base_price)"></span>
+                                <h3 class="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate" x-text="item.product.name"></h3>
+                                <span class="text-xs text-amber-600 dark:text-amber-400 font-medium block mt-0.5" x-text="formatCurrency(item.product.base_price)"></span>
                             </div>
-                            <div class="flex items-center gap-2 bg-slate-900 p-1 rounded-lg border border-slate-700" dir="ltr">
-                                <button @click="decrementQty(index)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded flex items-center justify-center text-sm transition-colors">-</button>
-                                <span class="w-6 text-center font-semibold text-sm text-slate-200" x-text="item.quantity"></span>
-                                <button @click="incrementQty(index)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded flex items-center justify-center text-sm transition-colors">+</button>
+                            <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700" dir="ltr">
+                                <button @click="decrementQty(index)" class="w-7 h-7 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded flex items-center justify-center text-sm transition-colors border border-slate-200 dark:border-transparent shadow-sm dark:shadow-none">-</button>
+                                <span class="w-6 text-center font-semibold text-sm text-slate-800 dark:text-slate-200" x-text="item.quantity"></span>
+                                <button @click="incrementQty(index)" class="w-7 h-7 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded flex items-center justify-center text-sm transition-colors border border-slate-200 dark:border-transparent shadow-sm dark:shadow-none">+</button>
                             </div>
                             <div class="text-left w-20 flex-shrink-0" dir="ltr">
-                                <span class="font-semibold text-sm text-slate-200" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
+                                <span class="font-semibold text-sm text-slate-800 dark:text-slate-200" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
                             </div>
                         </div>
                     </template>
                 </div>
 
                 <!-- Tax, Discount, Subtotal & Total Controls -->
-                <div class="p-4 bg-slate-900/85 border-t border-slate-850/80 space-y-3 rounded-t-[28px] text-white shadow-[0_-12px_40px_rgba(15,23,42,0.3)] relative z-20 flex-shrink-0">
-                    <div class="flex items-center justify-between text-xs text-slate-400">
+                <div class="p-4 bg-white dark:bg-slate-900/85 border-t border-slate-200 dark:border-slate-850/80 space-y-3 rounded-t-[28px] text-slate-800 dark:text-white shadow-[0_-12px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_-12px_40px_rgba(15,23,42,0.3)] relative z-20 flex-shrink-0">
+                    <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                         <span class="font-bold">المجموع الفرعي</span>
-                        <span class="font-black text-slate-300" x-text="formatCurrency(getSubtotal())"></span>
+                        <span class="font-black text-slate-700 dark:text-slate-300" x-text="formatCurrency(getSubtotal())"></span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <!-- Discount Input -->
                         <div class="flex flex-col gap-1.5 text-right">
-                            <span class="text-[9px] text-slate-400 font-extrabold">الخصم الممنوح (د.ل)</span>
-                            <input type="number" min="0" x-model.number="discount" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500/80 focus:ring-4 focus:ring-amber-550/10 rounded-2xl px-3 py-2 text-center text-amber-400 font-black focus:outline-none text-xs transition-all shadow-inner" />
+                            <span class="text-[9px] text-slate-500 dark:text-slate-400 font-extrabold">الخصم الممنوح (د.ل)</span>
+                            <input type="number" min="0" x-model.number="discount" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-amber-500/80 focus:ring-4 focus:ring-amber-550/10 rounded-2xl px-3 py-2 text-center text-amber-600 dark:text-amber-400 font-black focus:outline-none text-xs transition-all shadow-inner" />
                         </div>
 
                         <!-- Tax Input -->
                         <div class="flex flex-col gap-1.5 text-right">
-                            <span class="text-[9px] text-slate-400 font-extrabold">الضريبة المضافة (د.ل)</span>
-                            <input type="number" min="0" x-model.number="tax" class="w-full bg-slate-950 border border-slate-800 focus:border-rose-500/80 focus:ring-4 focus:ring-rose-550/10 rounded-2xl px-3 py-2 text-center text-rose-450 font-black focus:outline-none text-xs transition-all shadow-inner" />
+                            <span class="text-[9px] text-slate-500 dark:text-slate-400 font-extrabold">الضريبة المضافة (د.ل)</span>
+                            <input type="number" min="0" x-model.number="tax" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-rose-500/80 focus:ring-4 focus:ring-rose-550/10 rounded-2xl px-3 py-2 text-center text-rose-500 dark:text-rose-450 font-black focus:outline-none text-xs transition-all shadow-inner" />
                         </div>
                     </div>
 
                     <!-- Order Type Selector -->
                     <div class="flex flex-col gap-1.5 text-right">
                         <div class="flex justify-between items-center">
-                            <label class="text-[9px] font-black text-slate-450 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
-                            <button x-show="orderType === 'dinein'" @click="openSeatingModal(); playAudio('click')" type="button" class="text-[8px] text-amber-500 hover:text-amber-600 font-black tracking-tight">(تغيير طاولة الجلوس)</button>
+                            <label class="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
+                            <button x-show="orderType === 'dinein'" @click="openSeatingModal(); playAudio('click')" type="button" class="text-[8px] text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-600 font-black tracking-tight">(تغيير طاولة الجلوس)</button>
                         </div>
-                        <div class="bg-slate-900 border border-slate-800 p-1 rounded-xl flex gap-1" dir="rtl">
+                        <div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl flex gap-1" dir="rtl">
                             <button @click="orderType = 'dinein'; openSeatingModal(); playAudio('click')" type="button"
-                                    :class="orderType === 'dinein' ? 'bg-amber-500 text-slate-900' : 'text-slate-300 hover:text-white hover:bg-slate-800'"
+                                    :class="orderType === 'dinein' ? 'bg-amber-500 text-white dark:text-slate-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800'"
                                     class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
-                                محلي <span x-show="selectedTable" class="text-[10px] bg-slate-900 text-amber-400 px-1.5 py-0.5 rounded" x-text="'ط ' + selectedTable"></span>
+                                محلي <span x-show="selectedTable" class="text-[10px] bg-slate-800 dark:bg-slate-900 text-amber-400 px-1.5 py-0.5 rounded" x-text="'ط ' + selectedTable"></span>
                             </button>
                             <button @click="orderType = 'takeaway'; selectedTable = null; playAudio('click')" type="button"
-                                    :class="orderType === 'takeaway' ? 'bg-amber-500 text-slate-900' : 'text-slate-300 hover:text-white hover:bg-slate-800'"
+                                    :class="orderType === 'takeaway' ? 'bg-amber-500 text-white dark:text-slate-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800'"
                                     class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center">
                                 سفري
                             </button>
                             <button @click="orderType = 'delivery'; selectedTable = null; playAudio('click')" type="button"
-                                    :class="orderType === 'delivery' ? 'bg-amber-500 text-slate-900' : 'text-slate-300 hover:text-white hover:bg-slate-800'"
+                                    :class="orderType === 'delivery' ? 'bg-amber-500 text-white dark:text-slate-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800'"
                                     class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center">
                                 توصيل
                             </button>
@@ -315,15 +315,15 @@
 
                     <!-- Order Notes Input -->
                     <div class="flex flex-col gap-1.5 text-right">
-                        <label class="text-[9px] font-black text-slate-450 uppercase tracking-wider block">ملاحظات التحضير الخاصة</label>
+                        <label class="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider block">ملاحظات التحضير الخاصة</label>
                         <input type="text" x-model="notes" placeholder="مثال: بدون بصل، زيادة جبنة، إلخ..." 
-                               class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none text-right placeholder-slate-700 transition-all" />
+                               class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none text-right placeholder-slate-400 dark:placeholder-slate-700 transition-all shadow-inner" />
                     </div>
 
                     <!-- Grand Total -->
-                    <div class="flex items-center justify-between border-t border-slate-800/80 pt-4 text-sm">
-                        <span class="font-extrabold text-slate-450 uppercase tracking-wider text-[10px]">إجمالي الفاتورة النهائي</span>
-                        <span class="text-2xl font-black text-amber-400" x-text="formatCurrency(getTotal())"></span>
+                    <div class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800/80 pt-4 text-sm">
+                        <span class="font-extrabold text-slate-700 dark:text-slate-450 uppercase tracking-wider text-[10px]">إجمالي الفاتورة النهائي</span>
+                        <span class="text-2xl font-black text-amber-600 dark:text-amber-400" x-text="formatCurrency(getTotal())"></span>
                     </div>
 
                     <!-- Checkout Button -->
@@ -384,11 +384,11 @@
         </main>
 
         <!-- Mobile Bottom Navigation Bar (Phase 9 responsive upgrade) -->
-        <div class="fixed bottom-0 left-0 right-0 z-45 bg-slate-950/95 backdrop-blur-xl border-t border-slate-900/80 px-6 py-3 flex justify-around items-center lg:hidden shadow-[0_-8px_32px_rgba(15,23,42,0.5)]">
+        <div class="fixed bottom-0 left-0 right-0 z-45 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-900/80 px-6 py-3 flex justify-around items-center lg:hidden shadow-[0_-8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_-8px_32px_rgba(15,23,42,0.5)]">
             <!-- Menu Tab Button -->
             <button @click="activeTab = 'menu'" 
                     class="flex flex-col items-center gap-1.5 transition-all text-xs font-black touch-bounce"
-                    :class="activeTab === 'menu' ? 'text-amber-500 scale-105' : 'text-slate-500 hover:text-slate-350'">
+                    :class="activeTab === 'menu' ? 'text-amber-500 dark:text-amber-500 scale-105' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350'">
                 <span class="text-xl">🍕</span>
                 <span>الوجبات</span>
             </button>
@@ -396,11 +396,11 @@
             <!-- Cart Tab Button -->
             <button @click="activeTab = 'cart'" 
                     class="flex flex-col items-center gap-1.5 transition-all text-xs font-black relative touch-bounce"
-                    :class="[activeTab === 'cart' ? 'text-amber-500 scale-105' : 'text-slate-500 hover:text-slate-350', cartBounce ? 'cart-bounce-active' : '']">
+                    :class="[activeTab === 'cart' ? 'text-amber-500 dark:text-amber-500 scale-105' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350', cartBounce ? 'cart-bounce-active' : '']">
                 <span class="text-xl">🛒</span>
                 <span>سلة الطلبات</span>
                 <span x-show="cart.reduce((sum, item) => sum + item.quantity, 0) > 0" 
-                      class="absolute -top-1.5 -right-3.5 bg-rose-550 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-slate-950" 
+                      class="absolute -top-1.5 -right-3.5 bg-rose-550 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-white dark:border-slate-950 shadow-sm" 
                       :class="badgePop ? 'badge-pop-active' : 'animate-bounce'"
                       x-text="cart.reduce((sum, item) => sum + item.quantity, 0)"></span>
             </button>
