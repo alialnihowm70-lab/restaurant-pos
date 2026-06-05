@@ -354,13 +354,13 @@
 
                 <!-- Product Card Grid (Scrollable) -->
                 <div class="flex-grow overflow-y-auto p-4 sm:p-6 relative z-10" dir="rtl">
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
                         <template x-for="product in filteredProducts()" :key="product.id">
                             <div @click="addToCart(product)"
-                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 rounded-xl p-2.5 sm:p-3 flex flex-col justify-between cursor-pointer transition-colors shadow-sm h-44 sm:h-56 text-right relative overflow-hidden group">
+                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 rounded-xl p-2.5 sm:p-3 flex flex-row sm:flex-col items-center sm:items-stretch justify-between cursor-pointer transition-colors shadow-sm h-28 sm:h-56 text-right relative overflow-hidden group">
                                 
                                 <!-- Product Thumbnail Image -->
-                                <div class="w-full h-24 sm:h-32 relative overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+                                <div class="w-24 sm:w-full h-full sm:h-32 flex-shrink-0 relative overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800 ml-3 sm:ml-0">
                                     <img :src="product.image_url || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'" 
                                          x-on:error="$event.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'"
                                          alt="Food image"
@@ -369,11 +369,11 @@
                                 </div>
                                 
                                 <!-- Product Meta Details -->
-                                <div class="mt-2 flex flex-col justify-between flex-grow">
-                                    <h3 class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate text-right" x-text="product.name"></h3>
-                                    <div class="flex items-center justify-between mt-1">
-                                        <p class="text-slate-900 dark:text-white font-semibold text-xs sm:text-sm" x-text="formatCurrency(product.base_price)"></p>
-                                        <span class="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 transition-colors">إضافة +</span>
+                                <div class="flex flex-col justify-center sm:justify-between flex-grow min-w-0 w-full mt-0 sm:mt-2 h-full py-1 sm:py-0">
+                                    <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm truncate text-right mb-1 sm:mb-0" x-text="product.name"></h3>
+                                    <div class="flex items-center justify-between mt-auto sm:mt-1">
+                                        <p class="text-slate-900 dark:text-white font-semibold text-sm" x-text="formatCurrency(product.base_price)"></p>
+                                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 transition-colors bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg sm:bg-transparent sm:px-0 sm:py-0">إضافة +</span>
                                     </div>
                                 </div>
                             </div>
