@@ -34,14 +34,10 @@
             font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
             color: #1e293b;
-            background-image: radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.04) 0%, transparent 45%),
-                              radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.04) 0%, transparent 45%);
         }
         .dark body {
-            background-color: #020617; /* slate-950 */
+            background-color: #0f172a; /* slate-900 */
             color: #f8fafc;
-            background-image: radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 45%),
-                              radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.08) 0%, transparent 45%);
         }
         @keyframes pageFadeIn {
             from { opacity: 0; transform: translateY(4px); }
@@ -153,9 +149,7 @@
 </head>
 <body class="h-screen overflow-hidden flex relative page-animate" x-data="posApp()">
 
-    <!-- Decorative Glow Circles -->
-    <div class="absolute -top-40 -right-40 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none"></div>
-    <div class="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-indigo-500/5 rounded-full blur-[150px] pointer-events-none"></div>
+    <!-- Removed Glow Circles for cleaner UI -->
 
     <!-- Unified left navigation sidebar -->
     @include('partials.sidebar')
@@ -171,7 +165,7 @@
                     <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
                         ☰
                     </button>
-                    <div class="w-10 h-10 rounded-[16px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-md shadow-orange-550/20 text-xl animate-pulse">
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-amber-500 flex items-center justify-center font-bold text-white dark:text-slate-900 text-xl">
                         M
                     </div>
                     <div>
@@ -220,19 +214,18 @@
 
                 <!-- Sound Toggle Widget -->
                 <button @click="soundEnabled = !soundEnabled; localStorage.setItem('soundEnabled', soundEnabled)" 
-                        class="bg-white/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-205 font-black text-xs px-4 py-2.5 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm hover:scale-[1.01] active:scale-[0.99] w-full lg:w-auto">
-                    <span x-text="soundEnabled ? '🔊' : '🔇'"></span>
-                    <span x-text="soundEnabled ? 'مؤثرات الصوت: تفعيل' : 'مؤثرات الصوت: كتم'"></span>
+                        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700 w-full lg:w-auto">
+                    <span x-text="soundEnabled ? 'الصوت: مفعل' : 'الصوت: معطل'"></span>
                 </button>
 
                 <!-- Sync Button -->
-                <button @click="triggerManualSync()" :disabled="syncing" class="relative bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-black text-xs px-5 py-3 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-550/15 hover:shadow-orange-550/25 active:scale-[0.98] disabled:scale-100 w-full lg:w-auto">
-                    <svg x-show="syncing" class="animate-spin h-3.5 w-3.5 text-slate-950" fill="none" viewBox="0 0 24 24">
+                <button @click="triggerManualSync()" :disabled="syncing" class="relative bg-amber-500 hover:bg-amber-600 disabled:bg-slate-200 text-slate-900 disabled:text-slate-400 font-bold text-xs px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors w-full lg:w-auto">
+                    <svg x-show="syncing" class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span x-text="syncing ? 'مزامنة...' : 'مزامنة البيانات'"></span>
-                    <span x-show="pendingSyncCount > 0" class="absolute -top-2 -right-2 bg-rose-550 text-white text-[9px] w-6 h-6 rounded-full flex items-center justify-center font-black border-2 border-white animate-bounce" x-text="pendingSyncCount"></span>
+                    <span x-text="syncing ? 'جاري المزامنة...' : 'مزامنة'"></span>
+                    <span x-show="pendingSyncCount > 0" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold" x-text="pendingSyncCount"></span>
                 </button>
             </div>
         </header>
@@ -243,35 +236,32 @@
             <!-- Right Column: Checkout Cart -->
             <section :class="activeTab === 'cart' ? 'flex w-full' : 'hidden lg:flex lg:w-[400px]'" class="bg-slate-950/95 backdrop-blur-xl border-l border-slate-900 flex-col flex-shrink-0 text-right shadow-2xl relative z-10 h-full overflow-hidden text-slate-100">
                 <!-- Active Customer / Cart Metadata -->
-                <div class="p-5 border-b border-slate-900 flex justify-between items-center bg-slate-900/30">
-                    <h2 class="font-black text-xs text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
-                        <span>🛒</span> السلة الحالية
-                    </h2>
-                    <button @click="clearCart()" class="text-[10px] font-black text-rose-450 hover:text-rose-450 transition-colors bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 px-3 py-1.5 rounded-xl">مسح السلة</button>
+                <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+                    <h2 class="font-bold text-sm text-slate-100">السلة الحالية</h2>
+                    <button @click="clearCart()" class="text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors">مسح الكل</button>
                 </div>
 
                 <!-- Cart Items List (Scrollable) -->
                 <div class="flex-grow overflow-y-auto p-4 space-y-3 min-h-0">
                     <template x-if="cart.length === 0">
                         <div class="h-full flex flex-col items-center justify-center text-slate-500 gap-3 py-20">
-                            <span class="text-5xl animate-bounce">🍕</span>
-                            <span class="text-xs font-black text-slate-400 uppercase tracking-widest">سلة المشتريات فارغة</span>
+                            <span class="text-sm font-semibold text-slate-400">سلة المشتريات فارغة</span>
                         </div>
                     </template>
 
                     <template x-for="(item, index) in cart" :key="item.product.id">
-                        <div class="bg-slate-900/40 border border-slate-900 hover:border-amber-500/20 hover:bg-slate-900/70 rounded-[22px] p-4 flex items-center justify-between gap-3 shadow-sm transition-all duration-300">
+                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3 flex items-center justify-between gap-3">
                             <div class="min-w-0 flex-grow text-right">
-                                <h3 class="font-extrabold text-xs text-slate-200 truncate" x-text="item.product.name"></h3>
-                                <span class="text-[11px] text-amber-400 font-extrabold block mt-0.5" x-text="formatCurrency(item.product.base_price)"></span>
+                                <h3 class="font-semibold text-sm text-slate-200 truncate" x-text="item.product.name"></h3>
+                                <span class="text-xs text-amber-400 font-medium block mt-0.5" x-text="formatCurrency(item.product.base_price)"></span>
                             </div>
-                            <div class="flex items-center gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-850 shadow-inner" dir="ltr">
-                                <button @click="decrementQty(index)" class="w-7 h-7 bg-slate-900 hover:bg-slate-800 active:scale-90 text-slate-400 font-black rounded-xl flex items-center justify-center text-sm border border-slate-800 transition-all">-</button>
-                                <span class="w-6 text-center font-extrabold text-xs text-slate-200" x-text="item.quantity"></span>
-                                <button @click="incrementQty(index)" class="w-7 h-7 bg-slate-900 hover:bg-slate-800 active:scale-90 text-slate-400 font-black rounded-xl flex items-center justify-center text-sm border border-slate-800 transition-all">+</button>
+                            <div class="flex items-center gap-2 bg-slate-900 p-1 rounded-lg border border-slate-700" dir="ltr">
+                                <button @click="decrementQty(index)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded flex items-center justify-center text-sm transition-colors">-</button>
+                                <span class="w-6 text-center font-semibold text-sm text-slate-200" x-text="item.quantity"></span>
+                                <button @click="incrementQty(index)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded flex items-center justify-center text-sm transition-colors">+</button>
                             </div>
                             <div class="text-left w-20 flex-shrink-0" dir="ltr">
-                                <span class="font-black text-xs text-slate-200" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
+                                <span class="font-semibold text-sm text-slate-200" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
                             </div>
                         </div>
                     </template>
@@ -304,21 +294,21 @@
                             <label class="text-[9px] font-black text-slate-450 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
                             <button x-show="orderType === 'dinein'" @click="openSeatingModal(); playAudio('click')" type="button" class="text-[8px] text-amber-500 hover:text-amber-600 font-black tracking-tight">(تغيير طاولة الجلوس)</button>
                         </div>
-                        <div class="bg-slate-950 border border-slate-850 p-1.5 rounded-2xl flex gap-1.5" dir="rtl">
+                        <div class="bg-slate-900 border border-slate-800 p-1 rounded-xl flex gap-1" dir="rtl">
                             <button @click="orderType = 'dinein'; openSeatingModal(); playAudio('click')" type="button"
-                                    :class="orderType === 'dinein' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
-                                    class="w-1/3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1.5">
-                                <span>🛋️</span> محلي <span x-show="selectedTable" class="text-[8px] bg-slate-950 text-amber-400 px-1.5 py-0.5 rounded-md font-black" x-text="'ط ' + selectedTable"></span>
+                                    :class="orderType === 'dinein' ? 'bg-amber-500 text-slate-900' : 'text-slate-300 hover:text-white hover:bg-slate-800'"
+                                    class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
+                                محلي <span x-show="selectedTable" class="text-[10px] bg-slate-900 text-amber-400 px-1.5 py-0.5 rounded" x-text="'ط ' + selectedTable"></span>
                             </button>
                             <button @click="orderType = 'takeaway'; selectedTable = null; playAudio('click')" type="button"
-                                    :class="orderType === 'takeaway' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
-                                    class="w-1/3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1">
-                                <span>🛍️</span> سفري
+                                    :class="orderType === 'takeaway' ? 'bg-amber-500 text-slate-900' : 'text-slate-300 hover:text-white hover:bg-slate-800'"
+                                    class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center">
+                                سفري
                             </button>
                             <button @click="orderType = 'delivery'; selectedTable = null; playAudio('click')" type="button"
-                                    :class="orderType === 'delivery' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
-                                    class="w-1/3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1">
-                                <span>🚗</span> توصيل
+                                    :class="orderType === 'delivery' ? 'bg-amber-500 text-slate-900' : 'text-slate-300 hover:text-white hover:bg-slate-800'"
+                                    class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center">
+                                توصيل
                             </button>
                         </div>
                     </div>
@@ -338,8 +328,8 @@
 
                     <!-- Checkout Button -->
                     <button @click="openPaymentModal()" :disabled="cart.length === 0 || !selectedLocation"
-                            class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:bg-none disabled:bg-slate-800/50 text-slate-950 disabled:text-slate-500 font-black py-4 rounded-2xl shadow-xl shadow-orange-550/10 hover:shadow-orange-550/20 disabled:shadow-none hover:scale-[1.01] active:scale-[0.99] disabled:scale-100 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 text-xs tracking-wider uppercase">
-                        <span x-text="!selectedLocation ? 'الرجاء تحديد الفرع أولاً' : 'إتمام الدفع وطباعة الفاتورة'"></span>
+                            class="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-800 text-slate-900 disabled:text-slate-500 font-bold py-3.5 rounded-xl disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm">
+                        <span x-text="!selectedLocation ? 'الرجاء تحديد الفرع أولاً' : 'الدفع'"></span>
                     </button>
                 </div>
             </section>
@@ -347,18 +337,16 @@
             <!-- Left Column: Menu Products Grid -->
             <section :class="activeTab === 'menu' ? 'flex' : 'hidden lg:flex'" class="flex-grow flex flex-col bg-slate-50/50 text-right relative">
                 <!-- Category Horizontal Scroll Bar -->
-                <div class="p-4 bg-white/70 backdrop-blur-md border-b border-slate-200/60 flex items-center gap-3 overflow-x-auto flex-shrink-0" dir="rtl">
+                <div class="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 overflow-x-auto flex-shrink-0" dir="rtl">
                     <button @click="selectedCategory = 'All'"
-                            class="px-5 py-3 rounded-2xl text-xs font-black transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2 touch-bounce"
-                            :class="selectedCategory === 'All' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-orange-500/20' : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200/50 hover:scale-[1.02]'">
-                        <span>🍽️</span>
-                        <span>جميع الوجبات</span>
+                            class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
+                            :class="selectedCategory === 'All' ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-900' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'">
+                        جميع الوجبات
                     </button>
                     <template x-for="cat in categories" :key="cat">
                         <button @click="selectedCategory = cat"
-                                class="px-5 py-3 rounded-2xl text-xs font-black transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2 touch-bounce"
-                                :class="selectedCategory === cat ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-orange-500/20' : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200/50 hover:scale-[1.02]'">
-                            <span x-text="getCategoryIcon(cat)"></span>
+                                class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
+                                :class="selectedCategory === cat ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-900' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'">
                             <span x-text="cat"></span>
                         </button>
                     </template>
@@ -369,25 +357,23 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                         <template x-for="product in filteredProducts()" :key="product.id">
                             <div @click="addToCart(product)"
-                                 class="bg-white/90 backdrop-blur-sm border border-slate-200 hover:border-amber-500/40 rounded-[28px] p-3 flex flex-col justify-between cursor-pointer transition-all duration-350 hover:-translate-y-1 shadow-[0_4px_20px_rgba(241,245,249,0.5)] hover:shadow-[0_12px_32px_rgba(245,158,11,0.12)] group relative overflow-hidden h-56 text-right card-animate touch-bounce">
+                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition-colors shadow-sm h-56 text-right relative overflow-hidden group">
                                 
                                 <!-- Product Thumbnail Image -->
-                                <div class="w-full h-32 relative overflow-hidden rounded-2xl bg-slate-100">
+                                <div class="w-full h-32 relative overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
                                     <img :src="product.image_url || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'" 
                                          x-on:error="$event.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'"
                                          alt="Food image"
-                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
-                                    <!-- Floating category -->
-                                    <span class="absolute top-2.5 right-2.5 text-[8px] uppercase font-black text-amber-500 tracking-widest bg-slate-950/80 backdrop-blur-sm px-2 py-0.5 rounded-lg border border-slate-800 shadow" x-text="product.category"></span>
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 </div>
                                 
                                 <!-- Product Meta Details -->
                                 <div class="mt-3 flex flex-col justify-between flex-grow">
-                                    <h3 class="font-extrabold text-slate-800 text-xs leading-snug group-hover:text-amber-600 transition-colors truncate text-right" x-text="product.name"></h3>
+                                    <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm truncate text-right" x-text="product.name"></h3>
                                     <div class="flex items-center justify-between mt-1">
-                                        <p class="text-amber-600 font-black text-xs" x-text="formatCurrency(product.base_price)"></p>
-                                        <span class="text-[9px] font-black bg-amber-500/10 text-amber-600 group-hover:bg-amber-500 group-hover:text-slate-950 px-2.5 py-1 rounded-xl transition-all duration-300">إضافة +</span>
+                                        <p class="text-slate-900 dark:text-white font-semibold text-sm" x-text="formatCurrency(product.base_price)"></p>
+                                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 transition-colors">إضافة +</span>
                                     </div>
                                 </div>
                             </div>
