@@ -114,17 +114,15 @@
                         تحديث القائمة
                     </button>
                     <a href="/pos" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 text-[10px] md:text-xs font-black px-4 py-2.5 md:px-5 md:py-3 rounded-2xl transition-all shadow-lg shadow-orange-550/15 hover:shadow-orange-550/25 active:scale-95">
-                        كاشير الصالة (POS)
-                    </a>
-                </div>
-            </div>
-        </header>
-
-        <!-- KDS Kanban Board Area -->
-        <main class="flex-grow p-6 overflow-hidden flex flex-col lg:flex-row gap-6 h-full min-h-0" dir="rtl">
+              <!-- KDS Kanban Board Area -->
+        <main class="flex-grow p-6 overflow-hidden flex flex-col lg:flex-row gap-6 h-full min-h-0" dir="rtl" x-data="{ draggedOrderId: null, dragOverColumn: null }">
             
             <!-- Lane 1: Cooking / Preparation -->
-            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden">
+            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden transition-all duration-300"
+                 @dragover.prevent="dragOverColumn = 1"
+                 @dragleave="dragOverColumn = null"
+                 @drop="handleDrop('cooking'); dragOverColumn = null"
+                 :class="dragOverColumn === 1 ? 'ring-4 ring-amber-500/20 border-amber-500/40 bg-amber-500/[0.02]' : ''">
                 <div class="flex justify-between items-center mb-4 px-2">
                     <h2 class="font-black text-xs text-slate-850 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-amber-500 shadow-md shadow-orange-500/20"></span>
@@ -136,7 +134,9 @@
                 <div class="flex-grow overflow-y-auto space-y-4 pr-1 pl-1 min-h-0">
                     <template x-for="order in orders.filter(o => o.status === 'pending' || o.status === 'cooking')" :key="order.id">
                         <div x-data="{ checkedItems: [] }"
-                             class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-animate"
+                             draggable="true"
+                             @dragstart="draggedOrderId = order.id"
+                             class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-animate cursor-grab active:cursor-grabbing"
                              :class="getBorderClass(order)">
                             
                             <!-- Top time indicator strip -->
@@ -178,7 +178,7 @@
                                                   :class="checkedItems.includes(item.id) ? 'bg-emerald-500 border-emerald-500 text-white font-black shadow-sm' : 'border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-950 group-hover:border-slate-400 text-transparent'">
                                                 ✓
                                             </span>
-                                            <span class="font-black text-amber-650" x-text="item.quantity + 'x'"></span>
+                                            <span class="font-black text-amber-655" x-text="item.quantity + 'x'"></span>
                                             <span class="text-slate-700 dark:text-slate-300 font-bold transition-all mr-1" :class="checkedItems.includes(item.id) ? 'line-through text-slate-400 dark:text-slate-500 font-normal' : 'group-hover:text-amber-650'" x-text="item.product.name"></span>
                                         </div>
                                     </div>
@@ -187,10 +187,10 @@
                                 <!-- Order Notes Display -->
                                 <template x-if="cleanNotes(order.notes)">
                                     <div class="mt-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/25 dark:border-amber-500/30 text-amber-850 dark:text-amber-400 rounded-2xl text-xs space-y-1 font-semibold text-right">
-                                        <div class="text-[8px] uppercase tracking-wider text-amber-700 dark:text-amber-500 font-black flex items-center gap-1">
+                                        <div class="text-[8px] uppercase tracking-wider text-amber-700 dark:text-amber-555 font-black flex items-center gap-1">
                                             <span>📝</span> ملاحظات خاصة بالتحضير
                                         </div>
-                                        <div class="text-slate-850 dark:text-slate-200 mt-1 font-bold text-[10px]" x-text="cleanNotes(order.notes)"></div>
+                                        <div class="text-slate-855 dark:text-slate-200 mt-1 font-bold text-[10px]" x-text="cleanNotes(order.notes)"></div>
                                     </div>
                                 </template>
                             </div>
@@ -211,7 +211,7 @@
                         </div>
                     </template>
                     <template x-if="orders.filter(o => o.status === 'pending' || o.status === 'cooking').length === 0">
-                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 gap-2 py-12">
+                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-655 gap-2 py-12">
                             <span class="text-3xl">🎉</span>
                             <span class="text-[10px] font-black">لا يوجد طلبات تحت التحضير</span>
                         </div>
@@ -220,7 +220,11 @@
             </div>
 
             <!-- Lane 2: Ready for Pickup -->
-            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden">
+            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden transition-all duration-300"
+                 @dragover.prevent="dragOverColumn = 2"
+                 @dragleave="dragOverColumn = null"
+                 @drop="handleDrop('ready'); dragOverColumn = null"
+                 :class="dragOverColumn === 2 ? 'ring-4 ring-emerald-500/20 border-emerald-500/40 bg-emerald-500/[0.02]' : ''">
                 <div class="flex justify-between items-center mb-4 px-2">
                     <h2 class="font-black text-xs text-slate-850 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-md shadow-emerald-500/20 animate-pulse"></span>
@@ -232,7 +236,9 @@
                 <div class="flex-grow overflow-y-auto space-y-4 pr-1 pl-1 min-h-0">
                     <template x-for="order in orders.filter(o => o.status === 'ready')" :key="order.id">
                         <div x-data="{ checkedItems: [] }"
-                             class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-animate"
+                             draggable="true"
+                             @dragstart="draggedOrderId = order.id"
+                             class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-animate cursor-grab active:cursor-grabbing"
                              :class="getBorderClass(order)">
                             
                             <!-- Top time indicator strip -->
@@ -243,7 +249,7 @@
                                 <div>
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <span class="text-sm font-black text-slate-800 dark:text-slate-105" x-text="'#' + order.id.substring(0, 8).toUpperCase()"></span>
-                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border border-emerald-250 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-550/10 text-emerald-700 dark:text-emerald-400">جاهز للتسليم</span>
+                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border border-emerald-250 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-555/10 text-emerald-700 dark:text-emerald-400">جاهز للتسليم</span>
                                         <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border flex items-center gap-1"
                                               :class="getOrderTypeBadgeClass(order.notes)">
                                             <span x-text="getOrderTypeIcon(order.notes)"></span>
@@ -297,7 +303,7 @@
                         </div>
                     </template>
                     <template x-if="orders.filter(o => o.status === 'ready').length === 0">
-                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 gap-2 py-12">
+                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-655 gap-2 py-12">
                             <span class="text-3xl">🕒</span>
                             <span class="text-[10px] font-black">لا يوجد وجبات جاهزة للتسليم</span>
                         </div>
@@ -306,7 +312,11 @@
             </div>
 
             <!-- Lane 3: Served / Completed (Session History) -->
-            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden">
+            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden transition-all duration-300"
+                 @dragover.prevent="dragOverColumn = 3"
+                 @dragleave="dragOverColumn = null"
+                 @drop="handleDrop('completed'); dragOverColumn = null"
+                 :class="dragOverColumn === 3 ? 'ring-4 ring-blue-500/20 border-blue-500/40 bg-blue-500/[0.02]' : ''">
                 <div class="flex justify-between items-center mb-4 px-2">
                     <h2 class="font-black text-xs text-slate-850 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-blue-500 shadow-md shadow-blue-500/20"></span>
@@ -317,14 +327,16 @@
                 </div>
                 <div class="flex-grow overflow-y-auto space-y-4 pr-1 pl-1 min-h-0">
                     <template x-for="order in completedOrders" :key="order.id">
-                        <div class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-850 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 card-animate border-slate-200 dark:border-slate-800 opacity-75">
+                        <div draggable="true"
+                             @dragstart="draggedOrderId = order.id"
+                             class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-850 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 card-animate border-slate-200 dark:border-slate-800 opacity-75 cursor-grab active:cursor-grabbing">
                             
                             <!-- Card Header -->
                             <div class="p-4 border-b flex justify-between items-start text-right border-slate-100 dark:border-slate-800">
                                 <div>
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="text-sm font-black text-slate-500 dark:text-slate-400 line-through" x-text="'#' + order.id.substring(0, 8).toUpperCase()"></span>
-                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border border-blue-100 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">تم التسليم</span>
+                                        <span class="text-sm font-black text-slate-505 dark:text-slate-400 line-through" x-text="'#' + order.id.substring(0, 8).toUpperCase()"></span>
+                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border border-blue-100 dark:border-blue-550/20 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">تم التسليم</span>
                                     </div>
                                     <span class="text-[8px] text-slate-400 mt-1 block" x-text="'تم التسليم: ' + new Date(order.completed_at).toLocaleTimeString('ar-LY')"></span>
                                 </div>
@@ -350,7 +362,7 @@
                         </div>
                     </template>
                     <template x-if="completedOrders.length === 0">
-                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 gap-2 py-12">
+                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-655 gap-2 py-12">
                             <span class="text-3xl">🍽️</span>
                             <span class="text-[10px] font-black text-center px-4">لم يتم تسليم أي وجبة في هذه الجلسة</span>
                         </div>
@@ -405,7 +417,7 @@
                             };
                             
                             const now = ctx.currentTime;
-                            // High double ding: E6 (1318.51Hz) and G6 (1567.98Hz)
+                            // High double chime ding: E6 (1318.51Hz) and G6 (1567.98Hz)
                             playChime(1318.51, now, 0.4);
                             playChime(1567.98, now + 0.15, 0.5);
                         } catch (e) {
@@ -444,6 +456,22 @@
                                     }
                                 }
                             });
+                    },
+
+                    handleDrop(targetStatus) {
+                        if (!this.draggedOrderId) return;
+                        
+                        let order = this.orders.find(o => o.id === this.draggedOrderId);
+                        if (!order) {
+                            order = this.completedOrders.find(o => o.id === this.draggedOrderId);
+                        }
+                        
+                        if (order) {
+                            if (order.status !== targetStatus) {
+                                this.updateStatus(order, targetStatus);
+                            }
+                        }
+                        this.draggedOrderId = null;
                     },
 
                     getElapsedSeconds(order) {

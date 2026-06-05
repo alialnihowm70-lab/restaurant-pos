@@ -45,6 +45,23 @@ Route::middleware(['role:cashier'])->group(function () {
             'base64' => base64_encode($bytes)
         ]);
     });
+
+    Route::get('/api/active-tables', function () {
+        $occupied = Order::whereIn('status', ['pending', 'cooking', 'ready'])
+            ->where('notes', 'like', '%[محلي - طاولة%')
+            ->pluck('notes')
+            ->map(function ($note) {
+                if (preg_match('/\[محلي - طاولة (\d+)\]/', $note, $matches)) {
+                    return (int)$matches[1];
+                }
+                return null;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+        return response()->json(['occupied' => $occupied]);
+    });
 });
 
 // 2. Kitchen Display System (KDS) Routes (Restricted to Chef and Admin)

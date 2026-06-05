@@ -300,19 +300,22 @@
 
                     <!-- Order Type Selector -->
                     <div class="flex flex-col gap-1.5 text-right">
-                        <label class="text-[9px] font-black text-slate-450 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
+                        <div class="flex justify-between items-center">
+                            <label class="text-[9px] font-black text-slate-450 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
+                            <button x-show="orderType === 'dinein'" @click="openSeatingModal(); playAudio('click')" type="button" class="text-[8px] text-amber-500 hover:text-amber-600 font-black tracking-tight">(تغيير طاولة الجلوس)</button>
+                        </div>
                         <div class="bg-slate-950 border border-slate-850 p-1.5 rounded-2xl flex gap-1.5" dir="rtl">
-                            <button @click="orderType = 'dinein'" type="button"
+                            <button @click="orderType = 'dinein'; openSeatingModal(); playAudio('click')" type="button"
                                     :class="orderType === 'dinein' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
-                                    class="w-1/3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1">
-                                <span>🛋️</span> محلي
+                                    class="w-1/3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1.5">
+                                <span>🛋️</span> محلي <span x-show="selectedTable" class="text-[8px] bg-slate-950 text-amber-400 px-1.5 py-0.5 rounded-md font-black" x-text="'ط ' + selectedTable"></span>
                             </button>
-                            <button @click="orderType = 'takeaway'" type="button"
+                            <button @click="orderType = 'takeaway'; selectedTable = null; playAudio('click')" type="button"
                                     :class="orderType === 'takeaway' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
                                     class="w-1/3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1">
                                 <span>🛍️</span> سفري
                             </button>
-                            <button @click="orderType = 'delivery'" type="button"
+                            <button @click="orderType = 'delivery'; selectedTable = null; playAudio('click')" type="button"
                                     :class="orderType === 'delivery' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/15' : 'text-slate-400 hover:text-white'"
                                     class="w-1/3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 flex items-center justify-center gap-1">
                                 <span>🚗</span> توصيل
@@ -415,6 +418,63 @@
                       :class="badgePop ? 'badge-pop-active' : 'animate-bounce'"
                       x-text="cart.reduce((sum, item) => sum + item.quantity, 0)"></span>
             </button>
+        </div>
+
+        <!-- Seating Map Modal -->
+        <div x-show="showSeatingModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-transition>
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm" @click="showSeatingModal = false"></div>
+
+            <!-- Modal Content -->
+            <div class="flex items-center justify-center min-h-screen p-6 relative">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] max-w-lg w-full p-6 shadow-2xl relative z-10 space-y-6 text-right">
+                    <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🛋️</span>
+                            <h3 class="text-sm font-black text-slate-850 dark:text-slate-100">تخطيط طاولات صالة الطعام</h3>
+                        </div>
+                        <button @click="showSeatingModal = false" class="text-slate-400 hover:text-slate-655 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 p-2 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">يرجى اختيار الطاولة المحددة للزبون لتثبيت الطلب المحلي. الطاولات الحمراء مشغولة حالياً.</p>
+
+                    <!-- Seating Plan Grid (Graphical Layout) -->
+                    <div class="grid grid-cols-4 gap-4 p-4 bg-slate-50 dark:bg-slate-950/40 rounded-3xl border border-slate-200/50 dark:border-slate-850/50 relative overflow-hidden">
+                        <!-- Decorative bar/counter area -->
+                        <div class="col-span-4 bg-slate-200 dark:bg-slate-800 text-center py-2.5 rounded-2xl text-[9px] font-black text-slate-650 dark:text-slate-400 tracking-wider uppercase mb-2">
+                            🍳 منطقة الكاونتر وتحضير الطلبات (Bar / Counter Area)
+                        </div>
+
+                        <template x-for="t in tables" :key="t.id">
+                            <button @click="!occupiedTables.includes(t.id) && (selectedTable = t.id); playAudio('click')"
+                                    :disabled="occupiedTables.includes(t.id)"
+                                    class="h-24 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all relative overflow-hidden group touch-bounce"
+                                    :class="occupiedTables.includes(t.id) 
+                                        ? 'bg-rose-500/10 border-rose-500/30 text-rose-500 cursor-not-allowed opacity-80' 
+                                        : (selectedTable === t.id 
+                                            ? 'bg-amber-500/20 border-amber-500 text-amber-600 dark:text-amber-400 ring-4 ring-amber-500/15' 
+                                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-500/5 text-slate-700 dark:text-slate-300')">
+                                
+                                <span class="text-xl" x-text="t.type === 'round' ? '⭕' : '⬜'"></span>
+                                <span class="text-xs font-black" x-text="'طاولة ' + t.id"></span>
+                                <span class="text-[8px] font-bold opacity-75" x-text="t.chairs + ' كراسي'"></span>
+                                
+                                <!-- Occupied badge overlay -->
+                                <span x-show="occupiedTables.includes(t.id)" class="absolute top-1 right-1 text-[7px] bg-rose-550 text-white px-1.5 py-0.5 rounded-md font-black">مشغولة</span>
+                            </button>
+                        </template>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button @click="showSeatingModal = false" class="w-1/3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-250 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs font-black py-3.5 rounded-2xl transition-all">إلغاء</button>
+                        <button @click="confirmSeatingSelection()" :disabled="!selectedTable" class="w-2/3 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 font-black py-3.5 rounded-2xl text-xs tracking-wider transition-all shadow-lg shadow-orange-550/15 disabled:shadow-none">
+                            تأكيد اختيار الطاولة
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Payment Gateway & Receipt Preview Modal -->
@@ -668,6 +728,19 @@
                     
                     selectedLocation: '',
                     soundEnabled: localStorage.getItem('soundEnabled') !== 'false',
+                    showSeatingModal: false,
+                    selectedTable: null,
+                    occupiedTables: [],
+                    tables: [
+                        { id: 1, type: 'round', chairs: 2 },
+                        { id: 2, type: 'square', chairs: 4 },
+                        { id: 3, type: 'square', chairs: 4 },
+                        { id: 4, type: 'round', chairs: 2 },
+                        { id: 5, type: 'square', chairs: 6 },
+                        { id: 6, type: 'square', chairs: 6 },
+                        { id: 7, type: 'square', chairs: 4 },
+                        { id: 8, type: 'square', chairs: 4 }
+                    ],
                     selectedCategory: 'All',
                     orderType: 'takeaway',
                     printerIp: localStorage.getItem('printerIp') || '',
@@ -796,6 +869,41 @@
                         }
                     },
 
+                    openSeatingModal() {
+                        this.showSeatingModal = true;
+                        this.fetchOccupiedTables();
+                    },
+
+                    fetchOccupiedTables() {
+                        if (this.isOnline) {
+                            fetch('/api/active-tables')
+                                .then(res => res.json())
+                                .then(data => {
+                                    this.occupiedTables = data.occupied || [];
+                                })
+                                .catch(err => console.error("Failed to fetch active tables", err));
+                        } else {
+                            if (db) {
+                                const tx = db.transaction(["orders"], "readonly");
+                                const store = tx.objectStore("orders");
+                                const req = store.getAll();
+                                req.onsuccess = () => {
+                                    const active = req.result.filter(o => o.status !== 'completed' && o.status !== 'cancelled');
+                                    this.occupiedTables = active
+                                        .map(o => {
+                                            const m = (o.notes || '').match(/\[محلي - طاولة (\d+)\]/);
+                                            return m ? parseInt(m[1]) : null;
+                                        })
+                                        .filter(t => t !== null);
+                                };
+                            }
+                        }
+                    },
+
+                    confirmSeatingSelection() {
+                        this.showSeatingModal = false;
+                    },
+
                     changeLocation() {
                         localStorage.setItem('selectedLocation', this.selectedLocation);
                     },
@@ -873,6 +981,7 @@
                         this.discount = 0;
                         this.tax = 0;
                         this.notes = '';
+                        this.selectedTable = null;
                     },
 
                     getSubtotal() {
@@ -942,6 +1051,7 @@
                     },
 
                     finishReceiptAndReset() {
+                        this.selectedTable = null;
                         this.clearCart();
                         this.closePaymentModal();
                     },
@@ -960,7 +1070,7 @@
                             total_amount: this.getTotal(),
                             discount: this.discount,
                             tax: this.tax,
-                            notes: (this.orderType === 'dinein' ? '[محلي]' : (this.orderType === 'delivery' ? '[توصيل]' : '[سفري]')) + (this.notes ? ' ' + this.notes : ''),
+                            notes: (this.orderType === 'dinein' ? ('[محلي' + (this.selectedTable ? ' - طاولة ' + this.selectedTable : '') + ']') : (this.orderType === 'delivery' ? '[توصيل]' : '[سفري]')) + (this.notes ? ' ' + this.notes : ''),
                             sync_status: 'pending',
                             created_at: new Date().toISOString()
                         };
@@ -1110,7 +1220,7 @@
                             total_amount: this.getTotal(),
                             discount: this.discount,
                             tax: this.tax,
-                            notes: (this.orderType === 'dinein' ? '[محلي]' : (this.orderType === 'delivery' ? '[توصيل]' : '[سفري]')) + (this.notes ? ' ' + this.notes : ''),
+                            notes: (this.orderType === 'dinein' ? ('[محلي' + (this.selectedTable ? ' - طاولة ' + this.selectedTable : '') + ']') : (this.orderType === 'delivery' ? '[توصيل]' : '[سفري]')) + (this.notes ? ' ' + this.notes : ''),
                             sync_status: 'pending',
                             created_at: new Date().toISOString()
                         };

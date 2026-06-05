@@ -611,8 +611,7 @@
             </div>
         </section>
 
-        </main>
-    </div>
+
 
     <!-- 4. Professional Financial Statement Report Modal -->
     <div class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-50 flex items-center justify-center p-6 print:p-0 print:bg-white print:relative" 
@@ -755,13 +754,20 @@
 
             <!-- Action buttons (Screen Only) -->
             <div class="flex gap-3 mt-8 print:hidden">
-                <button @click="showReportModal = false" class="w-1/3 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-black py-3.5 rounded-2xl text-xs tracking-wider transition-all">
+                <button @click="showReportModal = false" class="w-1/4 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-black py-3.5 rounded-2xl text-xs tracking-wider transition-all">
                     إغلاق النافذة
                 </button>
-                <button @click="window.print()" class="w-2/3 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs tracking-wider transition-all shadow-lg shadow-orange-550/15">
+                <button @click="exportAdminReportToCSV(rent, salaries, utilities, misc)" class="w-2/5 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 rounded-2xl text-xs tracking-wider transition-all shadow-lg shadow-emerald-500/15">
+                    📥 تصدير ملف Excel/CSV
+                </button>
+                <button @click="window.print()" class="w-2/5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs tracking-wider transition-all shadow-lg shadow-orange-550/15">
                     🖨️ طباعة وتصدير كشف الأرباح والخسائر
                 </button>
             </div>
+        </div> <!-- closes Modal Container -->
+    </div> <!-- closes fixed outer -->
+</main>
+</div>
     <!-- Chart.js rendering scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -938,6 +944,69 @@
                 locChart.update();
             });
         });
+
+        function exportAdminReportToCSV(rentVal, salariesVal, utilitiesVal, miscVal) {
+            const rent = parseFloat(rentVal) || 0;
+            const salaries = parseFloat(salariesVal) || 0;
+            const utilities = parseFloat(utilitiesVal) || 0;
+            const misc = parseFloat(miscVal) || 0;
+            
+            const grossSales = {{ $salesTotal - $taxTotal + $discountTotal }};
+            const discounts = {{ $discountTotal }};
+            const netRevenue = {{ $salesTotal - $taxTotal }};
+            const cogs = {{ $totalCogs }};
+            const waste = {{ $totalWasteCost }};
+            const adjustments = {{ $totalAdjustmentSurplus }};
+            const grossProfit = {{ $grossProfit }};
+            const tax = {{ $taxTotal }};
+            const assets = {{ $inventoryAssetValue }};
+            
+            const totalExpenses = rent + salaries + utilities + misc;
+            const netIncome = grossProfit - totalExpenses;
+            
+            const rows = [
+                ["البند", "القيمة (د.ل)"],
+                ["إجمالي مبيعات الصالة والدليفري (Gross Sales)", grossSales.toFixed(2)],
+                ["الخصومات والعروض الترويجية الممنوحة (Discounts)", (-discounts).toFixed(2)],
+                ["صافي إيراد المبيعات (Net Revenue)", netRevenue.toFixed(2)],
+                ["تكلفة الأغذية المستهلكة (COGS)", (-cogs).toFixed(2)],
+                ["تكلفة عجز وهدر وتالف المخازن (Waste)", (-waste).toFixed(2)],
+                ["تسويات الجرد الفائضة (Stock Adjustments)", adjustments.toFixed(2)],
+                ["إجمالي الأرباح التشغيلية (Gross Profit)", grossProfit.toFixed(2)],
+                ["إيجار مقار الفروع والمطاعم الشهري (Rent)", (-rent).toFixed(2)],
+                ["مرتبات ومكافآت العاملين والموظفين (Salaries)", (-salaries).toFixed(2)],
+                ["فواتير المرافق (Utilities)", (-utilities).toFixed(2)],
+                ["مصاريف أخرى وصيانة نثرية (Misc)", (-misc).toFixed(2)],
+                ["إجمالي المصاريف التشغيلية (Total Expenses)", (-totalExpenses).toFixed(2)],
+                ["صافي الربح المالي النهائي (Net Income)", netIncome.toFixed(2)],
+                ["الضرائب المحصلة بالعهدة (Sales Taxes)", tax.toFixed(2)],
+                ["قيمة المواد والأغذية المتبقية بمخازن الفروع (End Assets)", assets.toFixed(2)],
+                [],
+                ["تاريخ استخراج التقرير", "{{ date('Y-m-d H:i:s') }}"],
+                ["فترة التقرير", "من {{ $startDate->format('Y-m-d') }} إلى {{ $endDate->format('Y-m-d') }}"]
+            ];
+            
+            let csvContent = "\uFEFF";
+            rows.forEach(row => {
+                const rowStr = row.map(val => {
+                    if (typeof val === "string") {
+                        return `"${val.replace(/"/g, '""')}"`;
+                    }
+                    return val;
+                }).join(",");
+                csvContent += rowStr + "\r\n";
+            });
+            
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `تقرير_الأرباح_والخسائر_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 </body>
 </html>
