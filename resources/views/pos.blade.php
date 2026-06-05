@@ -157,20 +157,21 @@
     <!-- Main Content Area -->
     <div class="flex-grow flex flex-col overflow-hidden h-screen relative z-10">
         <!-- Top Navigation Bar -->
-        <header class="bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 relative z-30 border-b border-slate-200/80 dark:border-slate-800 shadow-sm dark:shadow-none">
+        <!-- Top Navigation Bar -->
+        <header class="bg-white dark:bg-slate-950 px-5 py-4 flex flex-col lg:flex-row items-center justify-between gap-4 flex-shrink-0 relative z-30 border-b border-slate-100 dark:border-slate-800 shadow-sm">
             <!-- Mobile Header Row -->
             <div class="flex items-center justify-between w-full lg:w-auto">
                 <div class="flex items-center gap-3 text-right">
                     <!-- Mobile Sidebar Toggle -->
-                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
-                        ☰
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 -ml-2 text-slate-900 dark:text-white focus:outline-none text-2xl leading-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-slate-900 dark:bg-amber-500 flex items-center justify-center font-bold text-white dark:text-slate-900 text-lg sm:text-xl">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-900 dark:bg-amber-500 flex items-center justify-center font-black text-white dark:text-slate-900 text-xl shadow-md">
                         M
                     </div>
                     <div>
-                        <h1 class="text-sm font-black tracking-tight text-slate-900 leading-none">منظومة المدينة POS</h1>
-                        <span class="text-[9px] text-amber-600 font-extrabold uppercase tracking-wider block mt-0.5">واجهة الكاشير ونقاط البيع المزامنة</span>
+                        <h1 class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white leading-tight">المدينة POS</h1>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block mt-0.5">واجهة الكاشير المزامنة</span>
                     </div>
                 </div>
                 
@@ -242,26 +243,36 @@
                 </div>
 
                 <!-- Cart Items List (Scrollable) -->
-                <div class="flex-grow overflow-y-auto p-4 space-y-3 min-h-0 bg-slate-50 dark:bg-transparent">
+                <div class="flex-grow overflow-y-auto p-5 space-y-4 min-h-0 bg-slate-50/50 dark:bg-transparent">
                     <template x-if="cart.length === 0">
-                        <div class="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 gap-3 py-20">
-                            <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">سلة المشتريات فارغة</span>
+                        <div class="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 gap-4 py-20">
+                            <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-2">
+                                <span class="text-4xl">🛒</span>
+                            </div>
+                            <span class="text-base font-bold text-slate-500 dark:text-slate-400">سلة المشتريات فارغة</span>
+                            <p class="text-xs text-slate-400 text-center px-8">قم بإضافة بعض الوجبات الشهية لتبدأ طلبك</p>
                         </div>
                     </template>
 
                     <template x-for="(item, index) in cart" :key="item.product.id">
-                        <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm dark:shadow-none">
-                            <div class="min-w-0 flex-grow text-right">
-                                <h3 class="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate" x-text="item.product.name"></h3>
-                                <span class="text-xs text-amber-600 dark:text-amber-400 font-medium block mt-0.5" x-text="formatCurrency(item.product.base_price)"></span>
+                        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex flex-col gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <div class="flex justify-between items-start">
+                                <div class="text-right">
+                                    <h3 class="font-bold text-base text-slate-900 dark:text-slate-100" x-text="item.product.name"></h3>
+                                    <span class="text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1 block" x-text="formatCurrency(item.product.base_price)"></span>
+                                </div>
+                                <div class="text-left flex-shrink-0">
+                                    <span class="font-black text-base text-slate-900 dark:text-white" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700" dir="ltr">
-                                <button @click="decrementQty(index)" class="w-7 h-7 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded flex items-center justify-center text-sm transition-colors border border-slate-200 dark:border-transparent shadow-sm dark:shadow-none">-</button>
-                                <span class="w-6 text-center font-semibold text-sm text-slate-800 dark:text-slate-200" x-text="item.quantity"></span>
-                                <button @click="incrementQty(index)" class="w-7 h-7 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded flex items-center justify-center text-sm transition-colors border border-slate-200 dark:border-transparent shadow-sm dark:shadow-none">+</button>
-                            </div>
-                            <div class="text-left w-20 flex-shrink-0" dir="ltr">
-                                <span class="font-semibold text-sm text-slate-800 dark:text-slate-200" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
+                            
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-800 mt-1">
+                                <button @click="cart.splice(index, 1); playAudio('click')" class="text-xs font-bold text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 px-3 py-1.5 rounded-lg transition-colors">إزالة</button>
+                                <div class="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 p-1 rounded-full border border-slate-100 dark:border-slate-700" dir="ltr">
+                                    <button @click="decrementQty(index)" class="w-8 h-8 bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-bold rounded-full flex items-center justify-center shadow-sm transition-transform active:scale-95">-</button>
+                                    <span class="w-6 text-center font-black text-base text-slate-900 dark:text-white" x-text="item.quantity"></span>
+                                    <button @click="incrementQty(index)" class="w-8 h-8 bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-bold rounded-full flex items-center justify-center shadow-sm transition-transform active:scale-95">+</button>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -335,18 +346,18 @@
             </section>
 
             <!-- Left Column: Menu Products Grid -->
-            <section :class="activeTab === 'menu' ? 'flex' : 'hidden lg:flex'" class="flex-grow flex flex-col bg-slate-50/50 text-right relative">
+            <section :class="activeTab === 'menu' ? 'flex' : 'hidden lg:flex'" class="flex-grow flex flex-col bg-slate-50/30 dark:bg-slate-950 text-right relative">
                 <!-- Category Horizontal Scroll Bar -->
-                <div class="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 overflow-x-auto flex-shrink-0" dir="rtl">
+                <div class="px-4 py-4 bg-white dark:bg-slate-950 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 overflow-x-auto flex-shrink-0 hide-scrollbar" dir="rtl">
                     <button @click="selectedCategory = 'All'"
-                            class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
-                            :class="selectedCategory === 'All' ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-900' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'">
+                            class="px-6 py-2.5 rounded-full text-sm font-bold transition-all flex-shrink-0 border"
+                            :class="selectedCategory === 'All' ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300'">
                         جميع الوجبات
                     </button>
                     <template x-for="cat in categories" :key="cat">
                         <button @click="selectedCategory = cat"
-                                class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
-                                :class="selectedCategory === cat ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-900' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'">
+                                class="px-6 py-2.5 rounded-full text-sm font-bold transition-all flex-shrink-0 border"
+                                :class="selectedCategory === cat ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300'">
                             <span x-text="cat"></span>
                         </button>
                     </template>
@@ -354,26 +365,30 @@
 
                 <!-- Product Card Grid (Scrollable) -->
                 <div class="flex-grow overflow-y-auto p-4 sm:p-6 relative z-10" dir="rtl">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                         <template x-for="product in filteredProducts()" :key="product.id">
                             <div @click="addToCart(product)"
-                                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 rounded-xl p-2.5 sm:p-3 flex flex-row sm:flex-col items-center sm:items-stretch justify-between cursor-pointer transition-colors shadow-sm h-28 sm:h-56 text-right relative overflow-hidden group">
+                                 class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 rounded-[20px] p-3 sm:p-4 flex flex-row sm:flex-col gap-4 items-center sm:items-stretch cursor-pointer transition-all shadow-sm hover:shadow-md text-right relative group active:scale-[0.98]">
                                 
                                 <!-- Product Thumbnail Image -->
-                                <div class="w-24 sm:w-full h-full sm:h-32 flex-shrink-0 relative overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800 ml-3 sm:ml-0">
+                                <div class="w-28 h-28 sm:w-full sm:h-44 flex-shrink-0 relative overflow-hidden rounded-[16px] bg-slate-100 dark:bg-slate-800">
                                     <img :src="product.image_url || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'" 
                                          x-on:error="$event.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop'"
                                          alt="Food image"
-                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"></div>
                                 </div>
                                 
                                 <!-- Product Meta Details -->
-                                <div class="flex flex-col justify-center sm:justify-between flex-grow min-w-0 w-full mt-0 sm:mt-2 h-full py-1 sm:py-0">
-                                    <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm truncate text-right mb-1 sm:mb-0" x-text="product.name"></h3>
-                                    <div class="flex items-center justify-between mt-auto sm:mt-1">
-                                        <p class="text-slate-900 dark:text-white font-semibold text-sm" x-text="formatCurrency(product.base_price)"></p>
-                                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 transition-colors bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg sm:bg-transparent sm:px-0 sm:py-0">إضافة +</span>
+                                <div class="flex flex-col flex-grow min-w-0 py-1">
+                                    <h3 class="font-bold text-slate-900 dark:text-white text-base leading-tight truncate mb-1" x-text="product.name"></h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-3 leading-relaxed" x-text="product.description || 'وجبة شهية محضرة بأفضل المكونات الطازجة.'"></p>
+                                    
+                                    <div class="flex items-center justify-between mt-auto">
+                                        <p class="text-slate-900 dark:text-white font-black text-lg" x-text="formatCurrency(product.base_price)"></p>
+                                        <div class="w-9 h-9 rounded-full bg-slate-50 group-hover:bg-slate-100 dark:bg-slate-800 dark:group-hover:bg-slate-700 flex items-center justify-center text-slate-900 dark:text-white transition-colors border border-slate-200 dark:border-slate-700 shadow-sm">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -383,26 +398,30 @@
             </section>
         </main>
 
-        <!-- Mobile Bottom Navigation Bar (Phase 9 responsive upgrade) -->
-        <div class="fixed bottom-0 left-0 right-0 z-45 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-900/80 px-6 py-3 flex justify-around items-center lg:hidden shadow-[0_-8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_-8px_32px_rgba(15,23,42,0.5)]">
+        <!-- Mobile Bottom Navigation Bar -->
+        <div class="fixed bottom-0 left-0 right-0 z-45 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-100 dark:border-slate-800/80 px-6 py-2 pb-6 sm:pb-3 flex justify-around items-center lg:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
             <!-- Menu Tab Button -->
             <button @click="activeTab = 'menu'" 
-                    class="flex flex-col items-center gap-1.5 transition-all text-xs font-black touch-bounce"
-                    :class="activeTab === 'menu' ? 'text-amber-500 dark:text-amber-500 scale-105' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350'">
-                <span class="text-xl">🍕</span>
-                <span>الوجبات</span>
+                    class="flex flex-col items-center gap-1 transition-all text-[10px] font-bold touch-bounce w-16"
+                    :class="activeTab === 'menu' ? 'text-amber-500 dark:text-amber-500' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500'">
+                <div class="p-1.5 rounded-xl transition-colors" :class="activeTab === 'menu' ? 'bg-amber-50 dark:bg-amber-500/10' : ''">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                </div>
+                <span>القائمة</span>
             </button>
             
             <!-- Cart Tab Button -->
             <button @click="activeTab = 'cart'" 
-                    class="flex flex-col items-center gap-1.5 transition-all text-xs font-black relative touch-bounce"
-                    :class="[activeTab === 'cart' ? 'text-amber-500 dark:text-amber-500 scale-105' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350', cartBounce ? 'cart-bounce-active' : '']">
-                <span class="text-xl">🛒</span>
-                <span>سلة الطلبات</span>
-                <span x-show="cart.reduce((sum, item) => sum + item.quantity, 0) > 0" 
-                      class="absolute -top-1.5 -right-3.5 bg-rose-550 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-white dark:border-slate-950 shadow-sm" 
-                      :class="badgePop ? 'badge-pop-active' : 'animate-bounce'"
-                      x-text="cart.reduce((sum, item) => sum + item.quantity, 0)"></span>
+                    class="flex flex-col items-center gap-1 transition-all text-[10px] font-bold relative touch-bounce w-16"
+                    :class="[activeTab === 'cart' ? 'text-amber-500 dark:text-amber-500' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500', cartBounce ? 'cart-bounce-active' : '']">
+                <div class="p-1.5 rounded-xl transition-colors relative" :class="activeTab === 'cart' ? 'bg-amber-50 dark:bg-amber-500/10' : ''">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <span x-show="cart.reduce((sum, item) => sum + item.quantity, 0) > 0" 
+                          class="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-black border-2 border-white dark:border-slate-950 shadow-sm" 
+                          :class="badgePop ? 'badge-pop-active' : 'animate-bounce'"
+                          x-text="cart.reduce((sum, item) => sum + item.quantity, 0)"></span>
+                </div>
+                <span>السلة</span>
             </button>
         </div>
 
