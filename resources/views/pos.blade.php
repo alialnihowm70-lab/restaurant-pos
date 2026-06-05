@@ -43,6 +43,30 @@
         .card-animate {
             animation: cardFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+        /* Touch Bounce Spring animations for premium touch feel */
+        .touch-bounce {
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .touch-bounce:active {
+            transform: scale(0.95);
+        }
+        @keyframes badgePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .badge-pop-active {
+            animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes cartTabBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px) scale(1.05); }
+        }
+        .cart-bounce-active {
+            animation: cartTabBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -301,14 +325,14 @@
                 <!-- Category Horizontal Scroll Bar -->
                 <div class="p-4 bg-white/70 backdrop-blur-md border-b border-slate-200/60 flex items-center gap-3 overflow-x-auto flex-shrink-0" dir="rtl">
                     <button @click="selectedCategory = 'All'"
-                            class="px-5 py-3 rounded-2xl text-xs font-black transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2"
+                            class="px-5 py-3 rounded-2xl text-xs font-black transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2 touch-bounce"
                             :class="selectedCategory === 'All' ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-orange-500/20' : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200/50 hover:scale-[1.02]'">
                         <span>🍽️</span>
                         <span>جميع الوجبات</span>
                     </button>
                     <template x-for="cat in categories" :key="cat">
                         <button @click="selectedCategory = cat"
-                                class="px-5 py-3 rounded-2xl text-xs font-black transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2"
+                                class="px-5 py-3 rounded-2xl text-xs font-black transition-all flex-shrink-0 uppercase tracking-wider flex items-center gap-2 touch-bounce"
                                 :class="selectedCategory === cat ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-orange-500/20' : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200/50 hover:scale-[1.02]'">
                             <span x-text="getCategoryIcon(cat)"></span>
                             <span x-text="cat"></span>
@@ -321,7 +345,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                         <template x-for="product in filteredProducts()" :key="product.id">
                             <div @click="addToCart(product)"
-                                 class="bg-white/90 backdrop-blur-sm border border-slate-200 hover:border-amber-500/40 rounded-[28px] p-3 flex flex-col justify-between cursor-pointer transition-all duration-350 hover:-translate-y-1 shadow-[0_4px_20px_rgba(241,245,249,0.5)] hover:shadow-[0_12px_32px_rgba(245,158,11,0.12)] group relative overflow-hidden h-56 text-right card-animate">
+                                 class="bg-white/90 backdrop-blur-sm border border-slate-200 hover:border-amber-500/40 rounded-[28px] p-3 flex flex-col justify-between cursor-pointer transition-all duration-350 hover:-translate-y-1 shadow-[0_4px_20px_rgba(241,245,249,0.5)] hover:shadow-[0_12px_32px_rgba(245,158,11,0.12)] group relative overflow-hidden h-56 text-right card-animate touch-bounce">
                                 
                                 <!-- Product Thumbnail Image -->
                                 <div class="w-full h-32 relative overflow-hidden rounded-2xl bg-slate-100">
@@ -353,7 +377,7 @@
         <div class="fixed bottom-0 left-0 right-0 z-45 bg-slate-950/95 backdrop-blur-xl border-t border-slate-900/80 px-6 py-3 flex justify-around items-center lg:hidden shadow-[0_-8px_32px_rgba(15,23,42,0.5)]">
             <!-- Menu Tab Button -->
             <button @click="activeTab = 'menu'" 
-                    class="flex flex-col items-center gap-1.5 transition-all text-xs font-black"
+                    class="flex flex-col items-center gap-1.5 transition-all text-xs font-black touch-bounce"
                     :class="activeTab === 'menu' ? 'text-amber-500 scale-105' : 'text-slate-500 hover:text-slate-350'">
                 <span class="text-xl">🍕</span>
                 <span>الوجبات</span>
@@ -361,12 +385,13 @@
             
             <!-- Cart Tab Button -->
             <button @click="activeTab = 'cart'" 
-                    class="flex flex-col items-center gap-1.5 transition-all text-xs font-black relative"
-                    :class="activeTab === 'cart' ? 'text-amber-500 scale-105' : 'text-slate-500 hover:text-slate-350'">
+                    class="flex flex-col items-center gap-1.5 transition-all text-xs font-black relative touch-bounce"
+                    :class="[activeTab === 'cart' ? 'text-amber-500 scale-105' : 'text-slate-500 hover:text-slate-350', cartBounce ? 'cart-bounce-active' : '']">
                 <span class="text-xl">🛒</span>
                 <span>سلة الطلبات</span>
                 <span x-show="cart.reduce((sum, item) => sum + item.quantity, 0) > 0" 
-                      class="absolute -top-1.5 -right-3.5 bg-rose-550 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-slate-950 animate-bounce" 
+                      class="absolute -top-1.5 -right-3.5 bg-rose-550 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-slate-950" 
+                      :class="badgePop ? 'badge-pop-active' : 'animate-bounce'"
                       x-text="cart.reduce((sum, item) => sum + item.quantity, 0)"></span>
             </button>
         </div>
@@ -567,6 +592,26 @@
             </div>
         </div>
 
+        <!-- Connection Status Toast (Premium network awareness indicator) -->
+        <div x-show="showConnectionToast" 
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="translate-y-12 opacity-0"
+             x-transition:enter-end="translate-y-0 opacity-100"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="translate-y-0 opacity-100"
+             x-transition:leave-end="translate-y-12 opacity-0"
+             class="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-6 z-[9999] max-w-sm"
+             style="display: none;">
+            <div class="backdrop-blur-xl border p-4.5 rounded-[22px] shadow-2xl flex items-center gap-3.5 text-right font-sans"
+                 :class="isOnline ? 'bg-emerald-950/90 border-emerald-500/30 text-emerald-100 shadow-emerald-500/10' : 'bg-rose-950/90 border-rose-500/30 text-rose-100 shadow-rose-500/10'">
+                <span class="text-2xl" x-text="isOnline ? '🟢' : '⚠️'"></span>
+                <div class="flex-grow min-w-0">
+                    <h4 class="font-black text-xs" x-text="isOnline ? 'تم استعادة الاتصال بالإنترنت' : 'تم الانتقال للوضع المحلي (بدون اتصال)'"></h4>
+                    <p class="text-[9px] font-bold mt-0.5 opacity-80" x-text="isOnline ? 'جاري مزامنة الفواتير غير المرفوعة تلقائياً...' : 'فواتيرك آمنة، سيتم تسجيل المبيعات محلياً وحفظها للمزامنة لاحقاً.'"></p>
+                </div>
+            </div>
+        </div>
+
         <!-- Script Block for POS Logic -->
         <script>
             // IndexedDB Simple Offline Store Wrapper
@@ -606,6 +651,9 @@
                     printerIp: localStorage.getItem('printerIp') || '',
                     activeTab: 'menu', // 'menu' or 'cart' for mobile layout toggling
                     showMobileSettings: false, // compact settings toggler on mobile header
+                    showConnectionToast: false, // dynamic internet alert toast on mobile
+                    cartBounce: false, // bounce cart icon on add
+                    badgePop: false, // pop cart item count badge on add
                     
                     cart: [],
                     discount: 0,
@@ -646,8 +694,19 @@
 
                     init() {
                         this.selectedLocation = localStorage.getItem('selectedLocation') || '';
-                        window.addEventListener('online', () => { this.isOnline = true; this.triggerAutoSync(); });
-                        window.addEventListener('offline', () => { this.isOnline = false; });
+                        
+                        // Connection awareness listeners for floating toast notification
+                        window.addEventListener('online', () => { 
+                            this.isOnline = true; 
+                            this.showConnectionToast = true;
+                            this.triggerAutoSync(); 
+                            setTimeout(() => { this.showConnectionToast = false; }, 4000);
+                        });
+                        window.addEventListener('offline', () => { 
+                            this.isOnline = false; 
+                            this.showConnectionToast = true;
+                            setTimeout(() => { this.showConnectionToast = false; }, 5000);
+                        });
                         window.addEventListener('db-ready', () => { this.updatePendingSyncCount(); });
                         
                         this.$watch('printerIp', val => localStorage.setItem('printerIp', val));
@@ -700,6 +759,14 @@
                         } else {
                             this.cart.push({ product: product, quantity: 1 });
                         }
+                        
+                        // Dynamic bounce animations on item additions
+                        this.cartBounce = true;
+                        this.badgePop = true;
+                        setTimeout(() => {
+                            this.cartBounce = false;
+                            this.badgePop = false;
+                        }, 400);
                     },
 
                     incrementQty(index) {
