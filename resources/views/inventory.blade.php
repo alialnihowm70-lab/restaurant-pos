@@ -56,7 +56,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex relative overflow-x-hidden page-animate" x-data="{ 
+<body class="min-h-screen flex bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 relative overflow-x-hidden page-animate" x-data="{ 
     tab: 'stock', 
     editingIngredient: null,
     selectedReconcileLocation: '{{ $locations->first()?->id }}',
@@ -83,17 +83,17 @@
 }">
 
     <!-- Decorative Glow Circles -->
-    <div class="absolute top-10 right-10 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none"></div>
-    <div class="absolute bottom-10 left-10 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="hidden dark:block absolute top-10 right-10 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="hidden dark:block absolute bottom-10 left-10 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none"></div>
 
     <!-- Unified Left Sidebar -->
     @include('partials.sidebar')
 
     <!-- Main Workspace -->
-    <div class="flex-grow flex flex-col min-h-screen overflow-y-auto relative z-10">
+    <div class="flex-grow flex flex-col h-screen overflow-hidden relative z-10">
         
         <!-- Header Bar -->
-        <header class="bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
+        <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
             <!-- Mobile Header Row -->
             <div class="flex items-center justify-between w-full lg:w-auto">
                 <div class="flex items-center gap-3">
@@ -101,12 +101,12 @@
                     <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
                         ☰
                     </button>
-                    <div class="w-10 h-10 rounded-[16px] bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center text-xl shadow-md shadow-orange-550/10">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-lg shadow-lg shadow-orange-500/20 flex-shrink-0">
                         📦
                     </div>
                     <div>
-                        <h1 class="text-sm font-black text-slate-900 leading-none">إدارة المستودعات والمنتجات</h1>
-                        <span class="text-[9px] text-slate-400 font-extrabold block mt-0.5">تسوية الجرد ومراقبة المواد الخام والأصناف</span>
+                        <h1 class="text-sm font-black text-slate-900 dark:text-white leading-none">إدارة المستودعات والمنتجات</h1>
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-0.5">Inventory & Stock Management</span>
                     </div>
                 </div>
             </div>
@@ -152,7 +152,7 @@
         </header>
 
         <!-- Main Body Content -->
-        <main class="p-6 lg:p-8 space-y-6" dir="rtl">
+        <main class="flex-grow overflow-y-auto p-5 lg:p-6 space-y-5" dir="rtl">
             
             @if(session('success'))
                 <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-2xl text-xs font-bold flex items-center gap-3 animate-pulse shadow-sm">
