@@ -191,14 +191,7 @@
          style="display: none;">
     </div>
 
-    <!-- Floating Mobile Menu Button -->
-    <button @click="isOpen = !isOpen" 
-            class="fixed bottom-24 right-6 z-50 p-4 bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-650 text-slate-950 rounded-full shadow-[0_8px_32px_rgba(245,158,11,0.3)] lg:hidden focus:outline-none flex items-center justify-center font-bold text-xl transition-all duration-300 w-14 h-14"
-            aria-label="Toggle Navigation Menu">
-        <!-- Burger / Close Icon -->
-        <span x-show="!isOpen" class="leading-none">☰</span>
-        <span x-show="isOpen" style="display: none;" class="leading-none">✕</span>
-    </button>
+
 </div>
 
 <script>
