@@ -1,9 +1,29 @@
+@php
+    $salesTrend = \DB::table('orders')
+        ->where('status', 'completed')
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->select(\DB::raw("strftime('%Y-%m-%d', created_at) as date"), \DB::raw('SUM(total_amount) as total'))
+        ->groupBy('date')
+        ->orderBy('date', 'asc')
+        ->pluck('total', 'date')
+        ->toArray();
+@endphp
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- Immediate theme prevention flash script -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منظومة المدينة - لوحة الإدارة والتحليلات</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;650;750;850;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Compiled Vite Assets -->
@@ -27,6 +47,12 @@
             color: #1e293b;
             background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
                               radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
+        }
+        .dark body {
+            background-color: #020617; /* slate-950 */
+            color: #f8fafc;
+            background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 40%);
         }
         @keyframes pageFadeIn {
             from { opacity: 0; transform: translateY(4px); }
@@ -508,74 +534,79 @@
         </section>
 
         <!-- Accounting & Sales Breakdown -->
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-6" dir="rtl">
-            <!-- Payment Methods Stats -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 space-y-4 shadow-sm text-right">
-                <div>
-                    <h3 class="text-sm font-black text-slate-800">الإيرادات حسب طريقة الدفع</h3>
-                    <span class="text-xs text-slate-400 font-bold">توزيع دخل المبيعات على قنوات الدفع الإلكترونية والنقدية المحلية</span>
+        <section class="space-y-6" dir="rtl">
+            <!-- 1. Full-Width Daily Sales Trend Area Chart -->
+            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm text-right">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 dark:text-white">منحنى الإيرادات والمبيعات اليومي</h3>
+                        <span class="text-xs text-slate-400 font-bold dark:text-slate-500">تتبع حجم دخل المبيعات اليومية الإجمالية خلال الفترة المحددة</span>
+                    </div>
+                    <span class="text-xs bg-amber-500/10 text-amber-600 dark:text-amber-500 px-3 py-1.5 rounded-xl font-black">تحليل زمني مباشر</span>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <!-- Cash -->
-                    <div class="bg-slate-50/80 border border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                        <span class="text-3xl">💵</span>
-                        <div class="space-y-1 text-left">
-                            <span class="text-[9px] font-black text-slate-400 block text-right">كاش (نقدًا)</span>
-                            <span class="text-sm font-black text-emerald-600" dir="ltr">{{ number_format($salesByPayment['cash'] ?? 0, 2) }} <span class="text-[8px] text-slate-400">د.ل</span></span>
-                        </div>
-                    </div>
-
-                    <!-- Sadad -->
-                    <div class="bg-slate-50/80 border border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                        <span class="text-3xl">📱</span>
-                        <div class="space-y-1 text-left">
-                            <span class="text-[9px] font-black text-slate-400 block text-right">سداد (Sadad)</span>
-                            <span class="text-sm font-black text-amber-650" dir="ltr">{{ number_format($salesByPayment['sadad'] ?? 0, 2) }} <span class="text-[8px] text-slate-400">د.ل</span></span>
-                        </div>
-                    </div>
-
-                    <!-- MobiCash -->
-                    <div class="bg-slate-50/80 border border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                        <span class="text-3xl">💳</span>
-                        <div class="space-y-1 text-left">
-                            <span class="text-[9px] font-black text-slate-400 block text-right">موبي كاش</span>
-                            <span class="text-sm font-black text-blue-600" dir="ltr">{{ number_format($salesByPayment['mobicash'] ?? 0, 2) }} <span class="text-[8px] text-slate-400">د.ل</span></span>
-                        </div>
-                    </div>
-
-                    <!-- Tadawul POS -->
-                    <div class="bg-slate-50/80 border border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                        <span class="text-3xl">🖥️</span>
-                        <div class="space-y-1 text-left">
-                            <span class="text-[9px] font-black text-slate-400 block text-right">تداول (Tadawul)</span>
-                            <span class="text-sm font-black text-purple-650" dir="ltr">{{ number_format($salesByPayment['tadawul'] ?? 0, 2) }} <span class="text-[8px] text-slate-400">د.ل</span></span>
-                        </div>
-                    </div>
+                <div class="w-full h-72">
+                    <canvas id="salesTrendChart"></canvas>
                 </div>
             </div>
 
-            <!-- Branch Location Sales Performance -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 space-y-4 shadow-sm text-right">
-                <div>
-                    <h3 class="text-sm font-black text-slate-800">مبيعات الفروع ونقاط البيع</h3>
-                    <span class="text-xs text-slate-400 font-bold">مساهمة الإيرادات لكل فرع نشط بالمنظومة</span>
-                </div>
-                
-                <div class="space-y-4 pt-2">
-                    @forelse($salesByLocation as $locName => $total)
-                        <div class="space-y-1.5">
-                            <div class="flex justify-between text-xs font-bold">
-                                <span class="text-slate-700">{{ $locName }}</span>
-                                <span class="text-amber-600 font-black" dir="ltr">{{ number_format($total, 2) }} د.ل</span>
+            <!-- 2. Side-by-Side Breakdown Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Payment Distribution (Doughnut Chart + stats) -->
+                <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 space-y-6 shadow-sm text-right">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 dark:text-white">توزيع الدخل حسب طريقة الدفع</h3>
+                        <span class="text-xs text-slate-400 font-bold dark:text-slate-500">حصة المبيعات النقدية والمبيعات الإلكترونية المحلية</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-6">
+                        <div class="w-36 h-36 flex-shrink-0">
+                            <canvas id="paymentMethodsChart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 flex-grow w-full">
+                            <!-- Cash -->
+                            <div class="bg-slate-50/80 dark:bg-slate-950/50 border border-slate-200/50 dark:border-slate-800/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                                <span class="text-2xl">💵</span>
+                                <div class="space-y-0.5 text-left">
+                                    <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 block text-right">كاش (نقدًا)</span>
+                                    <span class="text-xs font-black text-emerald-600 dark:text-emerald-500" dir="ltr">{{ number_format($salesByPayment['cash'] ?? 0, 2) }} <span class="text-[8px]">د.ل</span></span>
+                                </div>
                             </div>
-                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/50 shadow-inner">
-                                <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-full rounded-full" style="width: {{ $salesTotal > 0 ? ($total / $salesTotal) * 100 : 0 }}%"></div>
+                            <!-- Sadad -->
+                            <div class="bg-slate-50/80 dark:bg-slate-950/50 border border-slate-200/50 dark:border-slate-800/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                                <span class="text-2xl">📱</span>
+                                <div class="space-y-0.5 text-left">
+                                    <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 block text-right">سداد</span>
+                                    <span class="text-xs font-black text-amber-600 dark:text-amber-500" dir="ltr">{{ number_format($salesByPayment['sadad'] ?? 0, 2) }} <span class="text-[8px]">د.ل</span></span>
+                                </div>
+                            </div>
+                            <!-- MobiCash -->
+                            <div class="bg-slate-50/80 dark:bg-slate-950/50 border border-slate-200/50 dark:border-slate-800/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                                <span class="text-2xl">💳</span>
+                                <div class="space-y-0.5 text-left">
+                                    <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 block text-right">موبي كاش</span>
+                                    <span class="text-xs font-black text-blue-600 dark:text-blue-500" dir="ltr">{{ number_format($salesByPayment['mobicash'] ?? 0, 2) }} <span class="text-[8px]">د.ل</span></span>
+                                </div>
+                            </div>
+                            <!-- Tadawul -->
+                            <div class="bg-slate-50/80 dark:bg-slate-950/50 border border-slate-200/50 dark:border-slate-800/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                                <span class="text-2xl">🖥️</span>
+                                <div class="space-y-0.5 text-left">
+                                    <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 block text-right">تداول</span>
+                                    <span class="text-xs font-black text-purple-650 dark:text-purple-500" dir="ltr">{{ number_format($salesByPayment['tadawul'] ?? 0, 2) }} <span class="text-[8px]">د.ل</span></span>
+                                </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="text-xs text-slate-450 text-center py-6">لا يوجد مبيعات فروع مسجلة في هذه الفترة.</div>
-                    @endforelse
+                    </div>
+                </div>
+
+                <!-- Locations comparison Chart -->
+                <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 space-y-4 shadow-sm text-right">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 dark:text-white">مبيعات الفروع ونقاط البيع</h3>
+                        <span class="text-xs text-slate-400 font-bold dark:text-slate-500">حجم مبيعات كل فرع ونسبة مساهمته في الإيراد العام</span>
+                    </div>
+                    <div class="w-full h-44">
+                        <canvas id="locationsChart"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
@@ -731,8 +762,182 @@
                     🖨️ طباعة وتصدير كشف الأرباح والخسائر
                 </button>
             </div>
-        </div>
-    </div>
+    <!-- Chart.js rendering scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const trendCtx = document.getElementById('salesTrendChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
 
+            // Generate trend gradient
+            const trendGradient = trendCtx.createLinearGradient(0, 0, 0, 250);
+            trendGradient.addColorStop(0, 'rgba(245, 158, 11, 0.25)'); // Amber glow
+            trendGradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
+
+            const salesTrendData = @json($salesTrend);
+            const trendLabels = Object.keys(salesTrendData).length > 0 ? Object.keys(salesTrendData) : ['لا يوجد بيانات'];
+            const trendValues = Object.keys(salesTrendData).length > 0 ? Object.values(salesTrendData) : [0];
+
+            const trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'المبيعات اليومية',
+                        data: trendValues,
+                        borderColor: '#f59e0b',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#f59e0b',
+                        pointBorderColor: '#ffffff',
+                        pointHoverRadius: 6,
+                        pointRadius: 4,
+                        fill: true,
+                        backgroundColor: trendGradient,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                            titleColor: isDark ? '#ffffff' : '#0f172a',
+                            bodyColor: isDark ? '#ffffff' : '#0f172a',
+                            borderColor: '#f59e0b',
+                            borderWidth: 1,
+                            padding: 10,
+                            bodyFont: { family: 'Cairo' },
+                            titleFont: { family: 'Cairo' },
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.raw.toFixed(2) + ' د.ل';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
+                        },
+                        y: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // 2. Payment Methods Doughnut Chart
+            const paymentCtx = document.getElementById('paymentMethodsChart').getContext('2d');
+            const paymentValues = [
+                {{ $salesByPayment['cash'] ?? 0 }},
+                {{ $salesByPayment['sadad'] ?? 0 }},
+                {{ $salesByPayment['mobicash'] ?? 0 }},
+                {{ $salesByPayment['tadawul'] ?? 0 }}
+            ];
+            
+            const paymentChart = new Chart(paymentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['نقدًا (كاش)', 'سداد', 'موبي كاش', 'تداول'],
+                    datasets: [{
+                        data: paymentValues,
+                        backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'],
+                        borderWidth: isDark ? 2 : 0,
+                        borderColor: '#1e293b',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            bodyFont: { family: 'Cairo' },
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw.toFixed(2) + ' د.ل';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 3. Locations Bar Chart
+            const locCtx = document.getElementById('locationsChart').getContext('2d');
+            const locData = @json($salesByLocation);
+            const locLabels = Object.keys(locData).length > 0 ? Object.keys(locData) : ['لا يوجد فروع'];
+            const locValues = Object.keys(locData).length > 0 ? Object.values(locData) : [0];
+
+            const locChart = new Chart(locCtx, {
+                type: 'bar',
+                data: {
+                    labels: locLabels,
+                    datasets: [{
+                        data: locValues,
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 8,
+                        hoverBackgroundColor: '#d97706'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            bodyFont: { family: 'Cairo' },
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.raw.toFixed(2) + ' د.ل';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // Listen to theme change to update colors dynamically
+            window.addEventListener('theme-changed', (e) => {
+                const isDark = e.detail.isDark;
+                const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
+                const textColor = isDark ? '#94a3b8' : '#64748b';
+
+                [trendChart, locChart].forEach(chart => {
+                    chart.options.scales.x.ticks.color = textColor;
+                    chart.options.scales.y.ticks.color = textColor;
+                    if (chart.options.scales.y.grid) chart.options.scales.y.grid.color = gridColor;
+                    if (chart.options.scales.x.grid) chart.options.scales.x.grid.color = gridColor;
+                });
+                
+                paymentChart.data.datasets[0].borderWidth = isDark ? 2 : 0;
+                
+                trendChart.update();
+                paymentChart.update();
+                locChart.update();
+            });
+        });
+    </script>
 </body>
 </html>

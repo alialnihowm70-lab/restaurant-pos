@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- Immediate theme prevention flash script -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المدينة KDS - شاشة عرض المطبخ</title>
@@ -27,6 +35,12 @@
             color: #1e293b;
             background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
                               radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
+        }
+        .dark body {
+            background-color: #020617; /* slate-950 */
+            color: #f8fafc;
+            background-image: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 40%);
         }
         @keyframes pageFadeIn {
             from { opacity: 0; transform: translateY(4px); }
@@ -84,115 +98,266 @@
             <!-- Actions row -->
             <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
                 <!-- Active order counter -->
-                <div class="text-[10px] md:text-xs bg-white border border-slate-200 px-3.5 py-2 rounded-2xl text-slate-700 shadow-sm font-bold flex items-center gap-2">
+                <div class="text-[10px] md:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3.5 py-2 rounded-2xl text-slate-700 dark:text-slate-350 shadow-sm font-bold flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                    <span>قيد التحضير: <span class="font-black text-amber-600" x-text="orders.length"></span></span>
+                    <span>قيد العمليات: <span class="font-black text-amber-600 dark:text-amber-400" x-text="orders.length"></span></span>
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <button @click="window.location.reload()" class="hidden md:block bg-white hover:bg-slate-50 border border-slate-200 text-xs font-black px-4 py-2.5 rounded-2xl text-slate-700 transition-colors shadow-sm">
+                    <!-- Sound Toggle Widget -->
+                    <button @click="soundEnabled = !soundEnabled; localStorage.setItem('soundEnabled', soundEnabled)" 
+                            class="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-250 font-black text-xs px-4 py-2.5 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm">
+                        <span x-text="soundEnabled ? '🔊' : '🔇'"></span>
+                        <span class="hidden sm:inline" x-text="soundEnabled ? 'تنبيه الجرس: تفعيل' : 'تنبيه الجرس: كتم'"></span>
+                    </button>
+                    <button @click="window.location.reload()" class="hidden md:block bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-xs font-black px-4 py-2.5 rounded-2xl text-slate-700 dark:text-slate-250 transition-colors shadow-sm">
                         تحديث القائمة
                     </button>
-                    <a href="/pos" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 text-[10px] md:text-xs font-black px-4 py-2.5 md:px-5 md:py-3 rounded-2xl transition-all shadow-lg shadow-orange-500/15 hover:shadow-orange-500/25 active:scale-95">
+                    <a href="/pos" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 text-[10px] md:text-xs font-black px-4 py-2.5 md:px-5 md:py-3 rounded-2xl transition-all shadow-lg shadow-orange-550/15 hover:shadow-orange-550/25 active:scale-95">
                         كاشير الصالة (POS)
                     </a>
                 </div>
             </div>
         </header>
 
-        <!-- KDS Card Grid Area -->
-        <main class="flex-grow p-6 overflow-y-auto" dir="rtl">
-            <template x-if="orders.length === 0">
-                <div class="h-full flex flex-col items-center justify-center text-slate-400 gap-4 py-20">
-                    <span class="text-7xl animate-bounce">👍</span>
-                    <h2 class="text-sm font-black text-slate-800">تم الانتهاء من جميع الطلبات! لا يوجد وجبات معلقة.</h2>
+        <!-- KDS Kanban Board Area -->
+        <main class="flex-grow p-6 overflow-hidden flex flex-col lg:flex-row gap-6 h-full min-h-0" dir="rtl">
+            
+            <!-- Lane 1: Cooking / Preparation -->
+            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h2 class="font-black text-xs text-slate-850 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-amber-500 shadow-md shadow-orange-500/20"></span>
+                        تحت التحضير (Cooking)
+                    </h2>
+                    <span class="bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-[10px] px-2.5 py-1 rounded-full border border-amber-500/10" 
+                          x-text="orders.filter(o => o.status === 'pending' || o.status === 'cooking').length"></span>
                 </div>
-            </template>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <template x-for="order in orders" :key="order.id">
-                    <div x-data="{ checkedItems: [] }"
-                         class="bg-white/90 backdrop-blur-md border rounded-[28px] flex flex-col justify-between overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-                         :class="getBorderClass(order)">
-                        
-                        <!-- Top time indicator strip -->
-                        <div class="h-2 w-full" :class="getStripClass(order)"></div>
-
-                        <!-- Card Header -->
-                        <div class="p-4 border-b flex justify-between items-start text-right" :class="getBorderClass(order)">
-                            <div>
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-sm font-black text-slate-800" x-text="'#' + order.id.substring(0, 8).toUpperCase()"></span>
-                                    <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border"
-                                          :class="order.status === 'cooking' ? 'bg-amber-50 text-amber-700 border-amber-200' : (order.status === 'ready' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200')"
-                                          x-text="order.status === 'cooking' ? 'قيد الطهي' : (order.status === 'ready' ? 'جاهز للتسليم' : 'قيد الانتظار')"></span>
-                                    <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border flex items-center gap-1"
-                                          :class="getOrderTypeBadgeClass(order.notes)">
-                                        <span x-text="getOrderTypeIcon(order.notes)"></span>
-                                        <span x-text="getOrderType(order.notes)"></span>
-                                    </span>
-                                </div>
-                                <span class="text-[9px] text-slate-400 font-extrabold block mt-1" x-text="'الفرع: ' + order.location.name"></span>
-                            </div>
+                <div class="flex-grow overflow-y-auto space-y-4 pr-1 pl-1 min-h-0">
+                    <template x-for="order in orders.filter(o => o.status === 'pending' || o.status === 'cooking')" :key="order.id">
+                        <div x-data="{ checkedItems: [] }"
+                             class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-animate"
+                             :class="getBorderClass(order)">
                             
-                            <!-- Cooking Timer Display -->
-                            <div class="text-left" dir="ltr">
-                                <div class="flex items-center gap-1">
-                                    <span class="text-xs">⏱️</span>
-                                    <span class="font-mono font-black text-xs block tracking-wider" :class="getElapsedSeconds(order) > 600 ? 'text-rose-600 animate-pulse' : (getElapsedSeconds(order) > 300 ? 'text-amber-600' : 'text-emerald-600')" x-text="getElapsedTime(order)"></span>
+                            <!-- Top time indicator strip -->
+                            <div class="h-2 w-full" :class="getStripClass(order)"></div>
+
+                            <!-- Card Header -->
+                            <div class="p-4 border-b flex justify-between items-start text-right border-slate-200 dark:border-slate-800">
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="text-sm font-black text-slate-800 dark:text-slate-105" x-text="'#' + order.id.substring(0, 8).toUpperCase()"></span>
+                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border border-amber-250 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-550/10 text-amber-700 dark:text-amber-400"
+                                              x-text="order.status === 'cooking' ? 'تحت التحضير' : 'قيد الانتظار'"></span>
+                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border flex items-center gap-1"
+                                              :class="getOrderTypeBadgeClass(order.notes)">
+                                            <span x-text="getOrderTypeIcon(order.notes)"></span>
+                                            <span x-text="getOrderType(order.notes)"></span>
+                                        </span>
+                                    </div>
+                                    <span class="text-[9px] text-slate-400 font-extrabold block mt-1" x-text="'الفرع: ' + order.location.name"></span>
                                 </div>
-                                <span class="text-[7px] text-slate-400 uppercase tracking-widest font-black block text-left mt-0.5">الوقت المنقضي</span>
+                                
+                                <!-- Cooking Timer Display -->
+                                <div class="text-left" dir="ltr">
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-xs">⏱️</span>
+                                        <span class="font-mono font-black text-xs block tracking-wider" :class="getElapsedSeconds(order) > 600 ? 'text-rose-600 animate-pulse' : (getElapsedSeconds(order) > 300 ? 'text-amber-600' : 'text-emerald-600')" x-text="getElapsedTime(order)"></span>
+                                    </div>
+                                    <span class="text-[7px] text-slate-450 dark:text-slate-500 uppercase tracking-widest font-black block text-left mt-0.5">الوقت المنقضي</span>
+                                </div>
+                            </div>
+
+                            <!-- Card Body: Interactive Item Checklist -->
+                            <div class="flex-grow p-4 bg-slate-50/50 dark:bg-slate-900/20 space-y-2.5">
+                                <template x-for="item in order.items" :key="item.id">
+                                    <div @click="checkedItems.includes(item.id) ? checkedItems = checkedItems.filter(id => id !== item.id) : checkedItems.push(item.id)"
+                                         class="flex justify-between items-center text-xs cursor-pointer bg-white dark:bg-slate-950 hover:bg-slate-100/60 dark:hover:bg-slate-900/60 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-slate-350 dark:hover:border-slate-700 transition-all group shadow-sm" dir="rtl">
+                                        <div class="min-w-0 flex items-center gap-2.5">
+                                            <span class="w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] transition-all"
+                                                  :class="checkedItems.includes(item.id) ? 'bg-emerald-500 border-emerald-500 text-white font-black shadow-sm' : 'border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-950 group-hover:border-slate-400 text-transparent'">
+                                                ✓
+                                            </span>
+                                            <span class="font-black text-amber-650" x-text="item.quantity + 'x'"></span>
+                                            <span class="text-slate-700 dark:text-slate-300 font-bold transition-all mr-1" :class="checkedItems.includes(item.id) ? 'line-through text-slate-400 dark:text-slate-500 font-normal' : 'group-hover:text-amber-650'" x-text="item.product.name"></span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Order Notes Display -->
+                                <template x-if="cleanNotes(order.notes)">
+                                    <div class="mt-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/25 dark:border-amber-500/30 text-amber-850 dark:text-amber-400 rounded-2xl text-xs space-y-1 font-semibold text-right">
+                                        <div class="text-[8px] uppercase tracking-wider text-amber-700 dark:text-amber-500 font-black flex items-center gap-1">
+                                            <span>📝</span> ملاحظات خاصة بالتحضير
+                                        </div>
+                                        <div class="text-slate-850 dark:text-slate-200 mt-1 font-bold text-[10px]" x-text="cleanNotes(order.notes)"></div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Card Action Footer -->
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/60 border-t flex gap-2 border-slate-200 dark:border-slate-800" :class="getBorderClass(order)">
+                                <!-- Transition pending to cooking -->
+                                <button x-show="order.status === 'pending'" @click="updateStatus(order, 'cooking')"
+                                        class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-orange-550/15">
+                                    بدء الطهي / التحضير
+                                </button>
+                                <!-- Transition cooking to ready -->
+                                <button x-show="order.status === 'cooking'" @click="updateStatus(order, 'ready')"
+                                        class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-emerald-500/10">
+                                    تجهيز الوجبة (جاهز)
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Card Body: Interactive Item Checklist -->
-                        <div class="flex-grow p-4 bg-slate-50/50 space-y-2.5">
-                            <template x-for="item in order.items" :key="item.id">
-                                <div @click="checkedItems.includes(item.id) ? checkedItems = checkedItems.filter(id => id !== item.id) : checkedItems.push(item.id)"
-                                     class="flex justify-between items-center text-xs cursor-pointer bg-white hover:bg-slate-100/60 p-3 rounded-2xl border border-slate-200/80 hover:border-slate-350 transition-all group shadow-sm" dir="rtl">
-                                    <div class="min-w-0 flex items-center gap-2.5">
-                                        <span class="w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] transition-all"
-                                              :class="checkedItems.includes(item.id) ? 'bg-emerald-500 border-emerald-500 text-white font-black shadow-sm' : 'border-slate-300 bg-white group-hover:border-slate-400 text-transparent'">
-                                            ✓
-                                        </span>
-                                        <span class="font-black text-amber-600" x-text="item.quantity + 'x'"></span>
-                                        <span class="text-slate-700 font-bold transition-all mr-1" :class="checkedItems.includes(item.id) ? 'line-through text-slate-400 font-normal' : 'group-hover:text-amber-650'" x-text="item.product.name"></span>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <!-- Order Notes Display -->
-                            <template x-if="cleanNotes(order.notes)">
-                                <div class="mt-3 p-3 bg-amber-500/5 border border-amber-500/25 text-amber-800 rounded-2xl text-xs space-y-1 font-semibold text-right">
-                                    <div class="text-[8px] uppercase tracking-wider text-amber-700 font-black flex items-center gap-1">
-                                        <span>📝</span> ملاحظات خاصة بالتحضير
-                                    </div>
-                                    <div class="text-slate-800 mt-1 font-bold text-[10px]" x-text="cleanNotes(order.notes)"></div>
-                                </div>
-                            </template>
+                    </template>
+                    <template x-if="orders.filter(o => o.status === 'pending' || o.status === 'cooking').length === 0">
+                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 gap-2 py-12">
+                            <span class="text-3xl">🎉</span>
+                            <span class="text-[10px] font-black">لا يوجد طلبات تحت التحضير</span>
                         </div>
-
-                        <!-- Card Action Footer -->
-                        <div class="p-3 bg-slate-50 border-t flex gap-2" :class="getBorderClass(order)">
-                            <!-- Transition pending to cooking -->
-                            <button x-show="order.status === 'pending'" @click="updateStatus(order, 'cooking')"
-                                    class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-orange-550/15">
-                                بدء الطهي / التحضير
-                            </button>
-                            <!-- Transition cooking to ready -->
-                            <button x-show="order.status === 'cooking'" @click="updateStatus(order, 'ready')"
-                                    class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-emerald-500/10">
-                                تجهيز الوجبة (جاهز)
-                            </button>
-                            <!-- Transition ready to completed -->
-                            <button x-show="order.status === 'ready'" @click="updateStatus(order, 'completed')"
-                                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-blue-500/10">
-                                تسليم وإتمام الطلب
-                            </button>
-                        </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
             </div>
+
+            <!-- Lane 2: Ready for Pickup -->
+            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h2 class="font-black text-xs text-slate-850 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-md shadow-emerald-500/20 animate-pulse"></span>
+                        جاهز للتسليم (Ready)
+                    </h2>
+                    <span class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] px-2.5 py-1 rounded-full border border-emerald-500/10" 
+                          x-text="orders.filter(o => o.status === 'ready').length"></span>
+                </div>
+                <div class="flex-grow overflow-y-auto space-y-4 pr-1 pl-1 min-h-0">
+                    <template x-for="order in orders.filter(o => o.status === 'ready')" :key="order.id">
+                        <div x-data="{ checkedItems: [] }"
+                             class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-animate"
+                             :class="getBorderClass(order)">
+                            
+                            <!-- Top time indicator strip -->
+                            <div class="h-2 w-full" :class="getStripClass(order)"></div>
+
+                            <!-- Card Header -->
+                            <div class="p-4 border-b flex justify-between items-start text-right border-slate-200 dark:border-slate-800">
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="text-sm font-black text-slate-800 dark:text-slate-105" x-text="'#' + order.id.substring(0, 8).toUpperCase()"></span>
+                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border border-emerald-250 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-550/10 text-emerald-700 dark:text-emerald-400">جاهز للتسليم</span>
+                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border flex items-center gap-1"
+                                              :class="getOrderTypeBadgeClass(order.notes)">
+                                            <span x-text="getOrderTypeIcon(order.notes)"></span>
+                                            <span x-text="getOrderType(order.notes)"></span>
+                                        </span>
+                                    </div>
+                                    <span class="text-[9px] text-slate-400 font-extrabold block mt-1" x-text="'الفرع: ' + order.location.name"></span>
+                                </div>
+                                
+                                <!-- Cooking Timer Display -->
+                                <div class="text-left" dir="ltr">
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-xs">⏱️</span>
+                                        <span class="font-mono font-black text-xs block tracking-wider" :class="getElapsedSeconds(order) > 600 ? 'text-rose-600 animate-pulse' : (getElapsedSeconds(order) > 300 ? 'text-amber-600' : 'text-emerald-600')" x-text="getElapsedTime(order)"></span>
+                                    </div>
+                                    <span class="text-[7px] text-slate-450 dark:text-slate-500 uppercase tracking-widest font-black block text-left mt-0.5">الوقت المنقضي</span>
+                                </div>
+                            </div>
+
+                            <!-- Card Body: Items List -->
+                            <div class="flex-grow p-4 bg-slate-50/50 dark:bg-slate-900/20 space-y-2.5">
+                                <template x-for="item in order.items" :key="item.id">
+                                    <div class="flex justify-between items-center text-xs bg-white dark:bg-slate-950 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm" dir="rtl">
+                                        <div class="min-w-0 flex items-center gap-2.5">
+                                            <span class="font-black text-emerald-650">✓</span>
+                                            <span class="font-black text-amber-650" x-text="item.quantity + 'x'"></span>
+                                            <span class="text-slate-700 dark:text-slate-350 font-bold transition-all mr-1" x-text="item.product.name"></span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Order Notes Display -->
+                                <template x-if="cleanNotes(order.notes)">
+                                    <div class="mt-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/25 dark:border-amber-500/30 text-amber-850 dark:text-amber-400 rounded-2xl text-xs space-y-1 font-semibold text-right">
+                                        <div class="text-[8px] uppercase tracking-wider text-amber-700 dark:text-amber-500 font-black flex items-center gap-1">
+                                            <span>📝</span> ملاحظات خاصة بالتحضير
+                                        </div>
+                                        <div class="text-slate-850 dark:text-slate-200 mt-1 font-bold text-[10px]" x-text="cleanNotes(order.notes)"></div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Card Action Footer -->
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/60 border-t flex gap-2 border-slate-200 dark:border-slate-800" :class="getBorderClass(order)">
+                                <!-- Transition ready to completed -->
+                                <button @click="updateStatus(order, 'completed')"
+                                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs py-3 rounded-xl transition-all shadow-md shadow-blue-500/10">
+                                    تسليم وإتمام الطلب (Serve)
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="orders.filter(o => o.status === 'ready').length === 0">
+                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 gap-2 py-12">
+                            <span class="text-3xl">🕒</span>
+                            <span class="text-[10px] font-black">لا يوجد وجبات جاهزة للتسليم</span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Lane 3: Served / Completed (Session History) -->
+            <div class="flex-1 flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-[32px] border border-slate-200/50 dark:border-slate-800/50 p-4 h-full overflow-hidden">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h2 class="font-black text-xs text-slate-850 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-blue-500 shadow-md shadow-blue-500/20"></span>
+                        تم التسليم (Served)
+                    </h2>
+                    <span class="bg-blue-500/10 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] px-2.5 py-1 rounded-full border border-blue-500/10" 
+                          x-text="completedOrders.length"></span>
+                </div>
+                <div class="flex-grow overflow-y-auto space-y-4 pr-1 pl-1 min-h-0">
+                    <template x-for="order in completedOrders" :key="order.id">
+                        <div class="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-850 rounded-[28px] flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 card-animate border-slate-200 dark:border-slate-800 opacity-75">
+                            
+                            <!-- Card Header -->
+                            <div class="p-4 border-b flex justify-between items-start text-right border-slate-100 dark:border-slate-800">
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="text-sm font-black text-slate-500 dark:text-slate-400 line-through" x-text="'#' + order.id.substring(0, 8).toUpperCase()"></span>
+                                        <span class="text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-wider border border-blue-100 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">تم التسليم</span>
+                                    </div>
+                                    <span class="text-[8px] text-slate-400 mt-1 block" x-text="'تم التسليم: ' + new Date(order.completed_at).toLocaleTimeString('ar-LY')"></span>
+                                </div>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div class="p-4 bg-slate-50/30 dark:bg-slate-900/10 space-y-2">
+                                <template x-for="item in order.items" :key="item.id">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400">
+                                        <span class="font-bold line-through" x-text="item.product.name"></span>
+                                        <span class="font-bold" x-text="item.quantity + 'x'"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Card Footer: Revert Button -->
+                            <div class="p-3 bg-slate-50/50 dark:bg-slate-900/60 border-t flex gap-2 border-slate-100 dark:border-slate-800">
+                                <button @click="updateStatus(order, 'ready')"
+                                        class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-250 font-black text-[10px] py-2.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700">
+                                    ↺ إرجاع لقائمة الجاهز
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="completedOrders.length === 0">
+                        <div class="h-40 flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 gap-2 py-12">
+                            <span class="text-3xl">🍽️</span>
+                            <span class="text-[10px] font-black text-center px-4">لم يتم تسليم أي وجبة في هذه الجلسة</span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
         </main>
 
         <!-- Script Block for KDS Polling and Timers -->
@@ -200,7 +365,9 @@
             function kdsApp() {
                 return {
                     orders: @json($orders),
+                    completedOrders: [],
                     currentTime: Date.now(),
+                    soundEnabled: localStorage.getItem('soundEnabled') !== 'false',
                     
                     init() {
                         // Update current timestamp every second to drive reactive timers
@@ -212,6 +379,38 @@
                         setInterval(() => {
                             this.pollNewOrders();
                         }, 10000);
+                    },
+
+                    playDoubleChime() {
+                        if (!this.soundEnabled) return;
+                        try {
+                            const AudioContext = window.AudioContext || window.webkitAudioContext;
+                            if (!AudioContext) return;
+                            const ctx = new AudioContext();
+                            
+                            const playChime = (freq, time, duration) => {
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.connect(gain);
+                                gain.connect(ctx.destination);
+                                
+                                osc.type = 'sine';
+                                osc.frequency.setValueAtTime(freq, time);
+                                
+                                gain.gain.setValueAtTime(0.15, time);
+                                gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+                                
+                                osc.start(time);
+                                osc.stop(time + duration);
+                            };
+                            
+                            const now = ctx.currentTime;
+                            // High double ding: E6 (1318.51Hz) and G6 (1567.98Hz)
+                            playChime(1318.51, now, 0.4);
+                            playChime(1567.98, now + 0.15, 0.5);
+                        } catch (e) {
+                            console.error("Chime synthesis failed", e);
+                        }
                     },
 
                     pollNewOrders() {
@@ -227,7 +426,18 @@
                                     const match = html.match(/orders":\s*(\[.*?\]),/s);
                                     if (match && match[1]) {
                                         try {
-                                            this.orders = JSON.parse(match[1]);
+                                            const newOrders = JSON.parse(match[1]);
+                                            
+                                            // Check for new orders to trigger chime sound
+                                            const newIds = newOrders.map(o => o.id);
+                                            const oldIds = this.orders.map(o => o.id);
+                                            const hasNew = newIds.some(id => !oldIds.includes(id));
+                                            
+                                            if (hasNew && oldIds.length > 0) {
+                                                this.playDoubleChime();
+                                            }
+                                            
+                                            this.orders = newOrders;
                                         } catch (e) {
                                             console.error("KDS refresh parsing failed", e);
                                         }
@@ -262,7 +472,7 @@
                     getBorderClass(order) {
                         const secs = this.getElapsedSeconds(order);
                         if (secs < 300) {
-                            return 'border-slate-200';
+                            return 'border-slate-200 dark:border-slate-800';
                         } else if (secs < 600) {
                             return 'border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.05)]';
                         } else {
@@ -282,9 +492,18 @@
                         .then(res => res.json())
                         .then(data => {
                             if (data.success) {
-                                if (newStatus === 'completed' || newStatus === 'cancelled') {
-                                    // Remove from list
+                                if (newStatus === 'completed') {
+                                    // Remove from orders and add to completedOrders locally
+                                    order.status = 'completed';
+                                    order.completed_at = new Date().toISOString();
                                     this.orders = this.orders.filter(o => o.id !== order.id);
+                                    // Add to completed list (limit to 20 for memory)
+                                    this.completedOrders = [order, ...this.completedOrders.slice(0, 19)];
+                                } else if (newStatus === 'ready' && order.status === 'completed') {
+                                    // Revert completed back to ready
+                                    order.status = 'ready';
+                                    this.completedOrders = this.completedOrders.filter(o => o.id !== order.id);
+                                    this.orders = [...this.orders, order];
                                 } else {
                                     // Update status locally
                                     order.status = newStatus;

@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- Immediate theme prevention flash script -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المدينة POS - واجهة الكاشير</title>
@@ -28,6 +36,12 @@
             color: #1e293b;
             background-image: radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.04) 0%, transparent 45%),
                               radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.04) 0%, transparent 45%);
+        }
+        .dark body {
+            background-color: #020617; /* slate-950 */
+            color: #f8fafc;
+            background-image: radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 45%),
+                              radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.08) 0%, transparent 45%);
         }
         @keyframes pageFadeIn {
             from { opacity: 0; transform: translateY(4px); }
@@ -203,6 +217,13 @@
                     <span class="w-2.5 h-2.5 rounded-full" :class="isOnline ? 'bg-emerald-550 animate-pulse' : 'bg-rose-550'"></span>
                     <span x-text="isOnline ? 'متصل بالشبكة' : 'الوضع المحلي'"></span>
                 </div>
+
+                <!-- Sound Toggle Widget -->
+                <button @click="soundEnabled = !soundEnabled; localStorage.setItem('soundEnabled', soundEnabled)" 
+                        class="bg-white/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-205 font-black text-xs px-4 py-2.5 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm hover:scale-[1.01] active:scale-[0.99] w-full lg:w-auto">
+                    <span x-text="soundEnabled ? '🔊' : '🔇'"></span>
+                    <span x-text="soundEnabled ? 'مؤثرات الصوت: تفعيل' : 'مؤثرات الصوت: كتم'"></span>
+                </button>
 
                 <!-- Sync Button -->
                 <button @click="triggerManualSync()" :disabled="syncing" class="relative bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-slate-200 disabled:to-slate-200 text-slate-950 disabled:text-slate-400 font-black text-xs px-5 py-3 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-550/15 hover:shadow-orange-550/25 active:scale-[0.98] disabled:scale-100 w-full lg:w-auto">
@@ -646,6 +667,7 @@
                     locations: @json($locations),
                     
                     selectedLocation: '',
+                    soundEnabled: localStorage.getItem('soundEnabled') !== 'false',
                     selectedCategory: 'All',
                     orderType: 'takeaway',
                     printerIp: localStorage.getItem('printerIp') || '',
@@ -713,6 +735,67 @@
                         setInterval(() => this.triggerAutoSync(), 30000);
                     },
 
+                    playAudio(type) {
+                        if (!this.soundEnabled) return;
+                        try {
+                            const AudioContext = window.AudioContext || window.webkitAudioContext;
+                            if (!AudioContext) return;
+                            const ctx = new AudioContext();
+                            
+                            if (type === 'click') {
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.connect(gain);
+                                gain.connect(ctx.destination);
+                                
+                                osc.type = 'sine';
+                                osc.frequency.setValueAtTime(600, ctx.currentTime);
+                                
+                                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+                                
+                                osc.start(ctx.currentTime);
+                                osc.stop(ctx.currentTime + 0.05);
+                            } else if (type === 'success') {
+                                const playNote = (freq, time, duration) => {
+                                    const osc = ctx.createOscillator();
+                                    const gain = ctx.createGain();
+                                    osc.connect(gain);
+                                    gain.connect(ctx.destination);
+                                    
+                                    osc.type = 'triangle';
+                                    osc.frequency.setValueAtTime(freq, time);
+                                    
+                                    gain.gain.setValueAtTime(0.12, time);
+                                    gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+                                    
+                                    osc.start(time);
+                                    osc.stop(time + duration);
+                                };
+                                const start = ctx.currentTime;
+                                playNote(523.25, start, 0.15); // C5
+                                playNote(659.25, start + 0.08, 0.15); // E5
+                                playNote(783.99, start + 0.16, 0.3); // G5
+                            } else if (type === 'error') {
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.connect(gain);
+                                gain.connect(ctx.destination);
+                                
+                                osc.type = 'sawtooth';
+                                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                                
+                                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                                gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                                
+                                osc.start(ctx.currentTime);
+                                osc.stop(ctx.currentTime + 0.3);
+                            }
+                        } catch (e) {
+                            console.error('Audio synthesis failed:', e);
+                        }
+                    },
+
                     changeLocation() {
                         localStorage.setItem('selectedLocation', this.selectedLocation);
                     },
@@ -753,6 +836,7 @@
                     },
 
                     addToCart(product) {
+                        this.playAudio('click');
                         const existingIndex = this.cart.findIndex(item => item.product.id === product.id);
                         if (existingIndex > -1) {
                             this.cart[existingIndex].quantity++;
@@ -770,10 +854,12 @@
                     },
 
                     incrementQty(index) {
+                        this.playAudio('click');
                         this.cart[index].quantity++;
                     },
 
                     decrementQty(index) {
+                        this.playAudio('click');
                         if (this.cart[index].quantity > 1) {
                             this.cart[index].quantity--;
                         } else {
@@ -782,6 +868,7 @@
                     },
 
                     clearCart() {
+                        this.playAudio('click');
                         this.cart = [];
                         this.discount = 0;
                         this.tax = 0;
@@ -827,6 +914,7 @@
                         tx.objectStore("inventory_transactions").put(inventoryTx);
 
                         tx.oncomplete = () => {
+                            this.playAudio('success');
                             this.updatePendingSyncCount();
                             
                             // Populate Receipt Preview data
@@ -930,6 +1018,7 @@
                                 }
                             })
                             .catch(() => {
+                                this.playAudio('error');
                                 this.checkoutStatusText = "النظام غير متصل أو انتهت المهلة. تم الحفظ للمعالجة لاحقاً.";
                             });
                         } else {
@@ -1068,6 +1157,7 @@
 
                     triggerLocalPrinter(orderId) {
                         if (!this.printerIp) {
+                            this.playAudio('error');
                             alert("يرجى تهيئة وإدخال عنوان IP الخاص بالطابعة الشبكية في الشريط العلوي أولاً!");
                             return;
                         }
@@ -1085,6 +1175,7 @@
                             if (data.success) {
                                 alert("تم إرسال أمر الطباعة بنجاح للطابعة الشبكية!");
                             } else {
+                                this.playAudio('error');
                                 alert("فشل الاتصال بالطابعة الشبكية. يرجى التحقق من اتصالها بالشبكة.");
                             }
                         });

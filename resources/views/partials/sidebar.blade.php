@@ -12,14 +12,30 @@
 
         <div class="p-6 space-y-8 relative z-10">
             <!-- Logo Header -->
-            <div class="flex items-center gap-3.5 border-b border-slate-850 pb-5">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-xl shadow-orange-500/20 text-xl tracking-wider hover:rotate-12 transition-transform duration-300">
-                    M
+            <div class="flex items-center gap-3.5 border-b border-slate-850 pb-5 justify-between">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 flex items-center justify-center font-black text-slate-950 shadow-xl shadow-orange-500/20 text-xl tracking-wider hover:rotate-12 transition-transform duration-300">
+                        M
+                    </div>
+                    <div>
+                        <h1 class="text-xs font-black tracking-tight text-white uppercase">Al-Madina POS</h1>
+                        <span class="text-[9px] text-amber-500 font-extrabold uppercase tracking-widest block mt-0.5">منظومة المدينة المتكاملة</span>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-xs font-black tracking-tight text-white uppercase">Al-Madina POS</h1>
-                    <span class="text-[9px] text-amber-500 font-extrabold uppercase tracking-widest block mt-0.5">منظومة المدينة المتكاملة</span>
-                </div>
+            </div>
+
+            <!-- Theme Toggle Widget (Sun/Moon Switch) -->
+            <div class="flex items-center justify-between bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-2.5 shadow-inner">
+                <span class="text-[10px] font-black text-slate-350">مظهر المنظومة</span>
+                <button @click="toggleTheme()" 
+                        class="relative w-12 h-6.5 rounded-full transition-colors duration-300 focus:outline-none flex items-center p-1 bg-slate-800 border border-slate-700/60"
+                        :class="isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-slate-800 border-slate-700/60'">
+                    <!-- Moving Dial -->
+                    <div class="w-4.5 h-4.5 rounded-full flex items-center justify-center text-[9px] transition-all duration-300 transform shadow-md"
+                         :class="isDark ? 'translate-x-0 bg-amber-550 text-slate-950 rotate-0' : '-translate-x-5.5 bg-slate-700 text-slate-300 rotate-180'">
+                        <span x-text="isDark ? '🌙' : '☀️'"></span>
+                    </div>
+                </button>
             </div>
 
             <!-- Navigation Links -->
@@ -191,11 +207,29 @@
             isOpen: false,
             lowStockCount: 0,
             notificationPermission: 'default',
+            isDark: localStorage.getItem('theme') === 'dark',
+
+            toggleTheme() {
+                this.isDark = !this.isDark;
+                if (this.isDark) {
+                    localStorage.setItem('theme', 'dark');
+                    document.documentElement.classList.add('dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    document.documentElement.classList.remove('dark');
+                }
+                window.dispatchEvent(new CustomEvent('theme-changed', { detail: { isDark: this.isDark } }));
+            },
 
             init() {
                 if ('Notification' in window) {
                     this.notificationPermission = Notification.permission;
                 }
+
+                // Add transition class after initial loading
+                setTimeout(() => {
+                    document.documentElement.classList.add('theme-transition');
+                }, 100);
                 
                 // Perform initial check
                 this.checkLowStock();
