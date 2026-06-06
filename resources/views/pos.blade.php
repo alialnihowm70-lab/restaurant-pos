@@ -1331,12 +1331,27 @@
                                 wipeTx.objectStore("inventory_transactions").clear();
                             }
 
+                            console.log("Auto Sync: Reading local IndexedDB data...");
                             const pushTx = db.transaction(["orders", "order_items", "payments", "inventory_transactions"], "readonly");
                             
-                            const localOrders = await new Promise(r => pushTx.objectStore("orders").getAll().onsuccess = e => r(e.target.result));
-                            const localItems = await new Promise(r => pushTx.objectStore("order_items").getAll().onsuccess = e => r(e.target.result));
-                            const localPayments = await new Promise(r => pushTx.objectStore("payments").getAll().onsuccess = e => r(e.target.result));
-                            const localTx = await new Promise(r => pushTx.objectStore("inventory_transactions").getAll().onsuccess = e => r(e.target.result));
+                            const ordersPromise = new Promise(r => { pushTx.objectStore("orders").getAll().onsuccess = e => r(e.target.result); });
+                            const itemsPromise = new Promise(r => { pushTx.objectStore("order_items").getAll().onsuccess = e => r(e.target.result); });
+                            const paymentsPromise = new Promise(r => { pushTx.objectStore("payments").getAll().onsuccess = e => r(e.target.result); });
+                            const txPromise = new Promise(r => { pushTx.objectStore("inventory_transactions").getAll().onsuccess = e => r(e.target.result); });
+
+                            const [localOrders, localItems, localPayments, localTx] = await Promise.all([
+                                ordersPromise,
+                                itemsPromise,
+                                paymentsPromise,
+                                txPromise
+                            ]);
+
+                            console.log("Auto Sync: Local data read successfully", {
+                                ordersCount: localOrders.length,
+                                itemsCount: localItems.length,
+                                paymentsCount: localPayments.length,
+                                txCount: localTx.length
+                            });
 
                             const unsyncedOrders = localOrders.filter(o => o.sync_status === 'pending');
                             
@@ -1350,6 +1365,7 @@
                                     inventory_transactions: localTx
                                 };
 
+                                console.log("Auto Sync: Pushing payload to server...", payload);
                                 const pushRes = await fetch('/api/sync/push', {
                                     method: 'POST',
                                     headers: {
@@ -1360,6 +1376,7 @@
                                 });
                                 
                                 const pushData = await pushRes.json();
+                                console.log("Auto Sync: Push response from server", pushData);
                                 
                                 if (pushData.success) {
                                     const markTx = db.transaction(["orders"], "readwrite");
@@ -1377,8 +1394,11 @@
                                     }
                                     
                                     markTx.oncomplete = () => {
+                                        console.log("Auto Sync: Marked local orders as synced!");
                                         this.updatePendingSyncCount();
                                     };
+                                } else {
+                                    console.error("Auto Sync: Push failed on server", pushData.message);
                                 }
                             }
 
