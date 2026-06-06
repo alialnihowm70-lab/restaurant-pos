@@ -16,6 +16,40 @@ Route::get('/', function () {
     return redirect('/pos');
 });
 
+// Database Connection Test Route
+Route::get('/db-test', function () {
+    try {
+        $dbName = DB::connection()->getDatabaseName();
+        $driver = DB::connection()->getDriverName();
+        
+        // Try a simple query
+        $now = DB::select('SELECT NOW() as current_time');
+        
+        // Try creating a temporary table or insert/update to test write capability
+        DB::beginTransaction();
+        DB::statement('CREATE TEMPORARY TABLE test_write_table (id serial PRIMARY KEY, val varchar(50))');
+        DB::insert('insert into test_write_table (val) values (?)', ['test_write']);
+        $testResult = DB::select('select * from test_write_table');
+        DB::rollBack();
+        
+        return response()->json([
+            'status' => 'success',
+            'driver' => $driver,
+            'database' => $dbName,
+            'current_time' => $now[0]->current_time ?? null,
+            'write_test' => 'successful',
+            'records' => $testResult,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'driver' => DB::connection()->getDriverName() ?? 'unknown',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+});
+
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
