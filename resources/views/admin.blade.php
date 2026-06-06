@@ -111,12 +111,12 @@
     <!-- Main Workspace Area -->
     <div class="flex-grow flex flex-col h-screen overflow-hidden relative">
         <!-- Top bar inside content area -->
-        <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right z-20">
+        <header class="relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right z-20">
             <!-- Mobile Header Row -->
             <div class="flex items-center justify-between w-full lg:w-auto">
                 <div class="flex items-center gap-3">
                     <!-- Mobile Sidebar Toggle -->
-                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-750 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white focus:outline-none text-2xl leading-none">
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-755 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white focus:outline-none text-2xl leading-none">
                         ☰
                     </button>
                     <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-lg shadow-lg shadow-orange-500/20 flex-shrink-0">
@@ -127,10 +127,15 @@
                         <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-0.5">Admin Dashboard & Analytics</span>
                     </div>
                 </div>
-                <!-- Report button on mobile -->
-                <button @click="showReportModal = true" class="lg:hidden p-2 text-amber-650 hover:text-amber-850 text-lg leading-none">
-                    💼
-                </button>
+                <!-- Right side: Report button + Backup Cashier Button -->
+                <div class="flex items-center gap-2">
+                    <a href="/pos" class="lg:hidden bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-250 dark:border-slate-700 px-3.5 py-2 rounded-2xl text-[10px] font-black tracking-wider transition-all shadow-sm flex items-center gap-1.5">
+                        🧾 الكاشير
+                    </a>
+                    <button @click="showReportModal = true" class="lg:hidden p-2 text-amber-650 hover:text-amber-850 text-lg leading-none">
+                        💼
+                    </button>
+                </div>
             </div>
             
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
