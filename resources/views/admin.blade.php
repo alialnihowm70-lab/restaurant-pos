@@ -893,178 +893,182 @@
     <!-- Chart.js rendering scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const trendCtx = document.getElementById('salesTrendChart').getContext('2d');
-            const isDark = document.documentElement.classList.contains('dark');
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
-            const textColor = isDark ? '#94a3b8' : '#64748b';
-
-            // Generate trend gradient
-            const trendGradient = trendCtx.createLinearGradient(0, 0, 0, 250);
-            trendGradient.addColorStop(0, 'rgba(245, 158, 11, 0.25)'); // Amber glow
-            trendGradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
-
-            const salesTrendData = @json($salesTrend);
-            const trendLabels = Object.keys(salesTrendData).length > 0 ? Object.keys(salesTrendData) : ['لا يوجد بيانات'];
-            const trendValues = Object.keys(salesTrendData).length > 0 ? Object.values(salesTrendData) : [0];
-
-            const trendChart = new Chart(trendCtx, {
-                type: 'line',
-                data: {
-                    labels: trendLabels,
-                    datasets: [{
-                        label: 'المبيعات اليومية',
-                        data: trendValues,
-                        borderColor: '#f59e0b',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#f59e0b',
-                        pointBorderColor: '#ffffff',
-                        pointHoverRadius: 6,
-                        pointRadius: 4,
-                        fill: true,
-                        backgroundColor: trendGradient,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            rtl: true,
-                            backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                            titleColor: isDark ? '#ffffff' : '#0f172a',
-                            bodyColor: isDark ? '#ffffff' : '#0f172a',
-                            borderColor: '#f59e0b',
-                            borderWidth: 1,
-                            padding: 10,
-                            bodyFont: { family: 'Cairo' },
-                            titleFont: { family: 'Cairo' },
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.raw.toFixed(2) + ' د.ل';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
-                        },
-                        y: {
-                            grid: { color: gridColor },
-                            ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
-                        }
-                    }
-                }
-            });
-
-            // 2. Payment Methods Doughnut Chart
-            const paymentCtx = document.getElementById('paymentMethodsChart').getContext('2d');
-            const paymentValues = [
-                {{ $salesByPayment['cash'] ?? 0 }},
-                {{ $salesByPayment['sadad'] ?? 0 }},
-                {{ $salesByPayment['mobicash'] ?? 0 }},
-                {{ $salesByPayment['tadawul'] ?? 0 }}
-            ];
-            
-            const paymentChart = new Chart(paymentCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['نقدًا (كاش)', 'سداد', 'موبي كاش', 'تداول'],
-                    datasets: [{
-                        data: paymentValues,
-                        backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'],
-                        borderWidth: isDark ? 2 : 0,
-                        borderColor: '#1e293b',
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '65%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            rtl: true,
-                            bodyFont: { family: 'Cairo' },
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.label + ': ' + context.raw.toFixed(2) + ' د.ل';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // 3. Locations Bar Chart
-            const locCtx = document.getElementById('locationsChart').getContext('2d');
-            const locData = @json($salesByLocation);
-            const locLabels = Object.keys(locData).length > 0 ? Object.keys(locData) : ['لا يوجد فروع'];
-            const locValues = Object.keys(locData).length > 0 ? Object.values(locData) : [0];
-
-            const locChart = new Chart(locCtx, {
-                type: 'bar',
-                data: {
-                    labels: locLabels,
-                    datasets: [{
-                        data: locValues,
-                        backgroundColor: '#f59e0b',
-                        borderRadius: 8,
-                        hoverBackgroundColor: '#d97706'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            rtl: true,
-                            bodyFont: { family: 'Cairo' },
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.raw.toFixed(2) + ' د.ل';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: gridColor },
-                            ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
-                        }
-                    }
-                }
-            });
-
-            // Listen to theme change to update colors dynamically
-            window.addEventListener('theme-changed', (e) => {
-                const isDark = e.detail.isDark;
+            try {
+                const trendCtx = document.getElementById('salesTrendChart').getContext('2d');
+                const isDark = document.documentElement.classList.contains('dark');
                 const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
                 const textColor = isDark ? '#94a3b8' : '#64748b';
 
-                [trendChart, locChart].forEach(chart => {
-                    chart.options.scales.x.ticks.color = textColor;
-                    chart.options.scales.y.ticks.color = textColor;
-                    if (chart.options.scales.y.grid) chart.options.scales.y.grid.color = gridColor;
-                    if (chart.options.scales.x.grid) chart.options.scales.x.grid.color = gridColor;
+                // Generate trend gradient
+                const trendGradient = trendCtx.createLinearGradient(0, 0, 0, 250);
+                trendGradient.addColorStop(0, 'rgba(245, 158, 11, 0.25)'); // Amber glow
+                trendGradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
+
+                const salesTrendData = @json($salesTrend);
+                const trendLabels = Object.keys(salesTrendData).length > 0 ? Object.keys(salesTrendData) : ['لا يوجد بيانات'];
+                const trendValues = Object.keys(salesTrendData).length > 0 ? Object.values(salesTrendData) : [0];
+
+                const trendChart = new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: trendLabels,
+                        datasets: [{
+                            label: 'المبيعات اليومية',
+                            data: trendValues,
+                            borderColor: '#f59e0b',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#f59e0b',
+                            pointBorderColor: '#ffffff',
+                            pointHoverRadius: 6,
+                            pointRadius: 4,
+                            fill: true,
+                            backgroundColor: trendGradient,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                rtl: true,
+                                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                                titleColor: isDark ? '#ffffff' : '#0f172a',
+                                bodyColor: isDark ? '#ffffff' : '#0f172a',
+                                borderColor: '#f59e0b',
+                                borderWidth: 1,
+                                padding: 10,
+                                bodyFont: { family: 'Cairo' },
+                                titleFont: { family: 'Cairo' },
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.raw.toFixed(2) + ' د.ل';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
+                            },
+                            y: {
+                                grid: { color: gridColor },
+                                ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
+                            }
+                        }
+                    }
                 });
+
+                // 2. Payment Methods Doughnut Chart
+                const paymentCtx = document.getElementById('paymentMethodsChart').getContext('2d');
+                const paymentValues = [
+                    {{ $salesByPayment['cash'] ?? 0 }},
+                    {{ $salesByPayment['sadad'] ?? 0 }},
+                    {{ $salesByPayment['mobicash'] ?? 0 }},
+                    {{ $salesByPayment['tadawul'] ?? 0 }}
+                ];
                 
-                paymentChart.data.datasets[0].borderWidth = isDark ? 2 : 0;
-                
-                trendChart.update();
-                paymentChart.update();
-                locChart.update();
-            });
+                const paymentChart = new Chart(paymentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['نقدًا (كاش)', 'سداد', 'موبي كاش', 'تداول'],
+                        datasets: [{
+                            data: paymentValues,
+                            backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'],
+                            borderWidth: isDark ? 2 : 0,
+                            borderColor: '#1e293b',
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                rtl: true,
+                                bodyFont: { family: 'Cairo' },
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.label + ': ' + context.raw.toFixed(2) + ' د.ل';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 3. Locations Bar Chart
+                const locCtx = document.getElementById('locationsChart').getContext('2d');
+                const locData = @json($salesByLocation);
+                const locLabels = Object.keys(locData).length > 0 ? Object.keys(locData) : ['لا يوجد فروع'];
+                const locValues = Object.keys(locData).length > 0 ? Object.values(locData) : [0];
+
+                const locChart = new Chart(locCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: locLabels,
+                        datasets: [{
+                            data: locValues,
+                            backgroundColor: '#f59e0b',
+                            borderRadius: 8,
+                            hoverBackgroundColor: '#d97706'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                rtl: true,
+                                bodyFont: { family: 'Cairo' },
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.raw.toFixed(2) + ' د.ل';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: gridColor },
+                                ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: textColor, font: { family: 'Cairo', size: 10 } }
+                            }
+                        }
+                    }
+                });
+
+                // Listen to theme change to update colors dynamically
+                window.addEventListener('theme-changed', (e) => {
+                    const isDark = e.detail.isDark;
+                    const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
+                    const textColor = isDark ? '#94a3b8' : '#64748b';
+
+                    [trendChart, locChart].forEach(chart => {
+                        chart.options.scales.x.ticks.color = textColor;
+                        chart.options.scales.y.ticks.color = textColor;
+                        if (chart.options.scales.y.grid) chart.options.scales.y.grid.color = gridColor;
+                        if (chart.options.scales.x.grid) chart.options.scales.x.grid.color = gridColor;
+                    });
+                    
+                    paymentChart.data.datasets[0].borderWidth = isDark ? 2 : 0;
+                    
+                    trendChart.update();
+                    paymentChart.update();
+                    locChart.update();
+                });
+            } catch (err) {
+                console.error("Failed to render Chart.js analytics: ", err);
+            }
         });
 
         function exportAdminReportToCSV(rentVal, salariesVal, utilitiesVal, miscVal) {
