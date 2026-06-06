@@ -92,15 +92,15 @@
     @include('partials.sidebar')
 
     <!-- Main Workspace -->
-    <div class="flex-grow flex flex-col h-screen overflow-hidden relative z-10">
+    <div class="flex-grow flex flex-col h-screen overflow-hidden relative">
         
         <!-- Header Bar -->
-        <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right">
+        <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right z-20">
             <!-- Mobile Header Row -->
             <div class="flex items-center justify-between w-full lg:w-auto">
                 <div class="flex items-center gap-3">
                     <!-- Mobile Sidebar Toggle -->
-                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 focus:outline-none text-xl leading-none">
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden p-2 text-slate-750 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white focus:outline-none text-2xl leading-none">
                         ☰
                     </button>
                     <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-lg shadow-lg shadow-orange-500/20 flex-shrink-0">
