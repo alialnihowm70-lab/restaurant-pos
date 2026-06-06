@@ -211,7 +211,7 @@
                                 <tr class="orders-row transition-colors"
                                     x-show="currentFilter === 'all' || '{{ $order->status }}' === currentFilter">
                                     <td class="px-5 py-3.5">
-                                        <span class="font-mono font-black text-slate-700 dark:text-slate-300 text-[11px]">#{{ strtoupper(substr($order->id, 0, 8)) }}</span>
+                                        <span class="font-mono font-black text-slate-700 dark:text-slate-300 text-[11px]">{{ $order->invoice_number ?? '#' . strtoupper(substr($order->id, 0, 8)) }}</span>
                                     </td>
                                     <td class="px-5 py-3.5 font-bold text-slate-600 dark:text-slate-400">{{ $order->location->name }}</td>
                                     <td class="px-5 py-3.5">
@@ -290,7 +290,7 @@
                 <div class="text-[11px] space-y-1">
                     <div class="flex justify-between">
                         <span>رقم الفاتورة:</span>
-                        <span class="font-bold" x-text="selectedOrder.id.substring(0,8).toUpperCase()"></span>
+                        <span class="font-bold" x-text="selectedOrder.invoice_number || selectedOrder.id.substring(0,8).toUpperCase()"></span>
                     </div>
                     <div class="flex justify-between">
                         <span>التاريخ:</span>

@@ -90,6 +90,7 @@ class SyncController extends Controller
                     'discount' => $orderData['discount'],
                     'tax' => $orderData['tax'],
                     'notes' => $orderData['notes'] ?? null,
+                    'invoice_number' => $orderData['invoice_number'] ?? null,
                     'sync_status' => 'synced', // mark as synced on the server
                     'created_at' => $orderData['created_at'] ?? Carbon::now(),
                     'updated_at' => Carbon::now(),

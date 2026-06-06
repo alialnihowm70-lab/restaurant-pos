@@ -21,6 +21,7 @@ class Order extends Model
         'tax',
         'sync_status',
         'notes',
+        'invoice_number',
     ];
 
     protected $casts = [

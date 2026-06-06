@@ -263,7 +263,7 @@
                             <div class="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-black text-white text-sm tracking-tight" x-text="'#' + order.id.substring(0,8).toUpperCase()"></span>
+                                        <span class="font-black text-white text-sm tracking-tight" x-text="order.invoice_number || '#' + order.id.substring(0,8).toUpperCase()"></span>
                                         <span class="text-[9px] font-black px-2 py-0.5 rounded-lg"
                                               :class="order.status==='cooking' ? 'badge-cooking' : 'badge-pending'"
                                               x-text="order.status==='cooking' ? '🔥 جاري التحضير' : '⏳ انتظار'"></span>
@@ -361,7 +361,7 @@
                             <div class="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-black text-white text-sm tracking-tight" x-text="'#' + order.id.substring(0,8).toUpperCase()"></span>
+                                        <span class="font-black text-white text-sm tracking-tight" x-text="order.invoice_number || '#' + order.id.substring(0,8).toUpperCase()"></span>
                                         <span class="text-[9px] font-black px-2 py-0.5 rounded-lg badge-ready">✅ جاهز</span>
                                         <span class="text-[9px] font-black px-2 py-0.5 rounded-lg"
                                               :class="getOrderTypeBadgeClass(order.notes)">
@@ -442,7 +442,7 @@
                             <div class="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
                                 <div>
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-black text-slate-400 text-sm line-through" x-text="'#' + order.id.substring(0,8).toUpperCase()"></span>
+                                        <span class="font-black text-slate-400 text-sm line-through" x-text="order.invoice_number || '#' + order.id.substring(0,8).toUpperCase()"></span>
                                         <span class="text-[9px] font-black px-2 py-0.5 rounded-lg badge-done">✅ تم التسليم</span>
                                     </div>
                                     <span class="text-[10px] text-slate-600 font-bold block mt-1"

@@ -206,6 +206,12 @@
                     <input type="text" x-model="printerIp" placeholder="192.168.1.100" class="w-2/3 lg:w-36 bg-white/80 border border-slate-200 text-xs rounded-2xl px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-slate-800 text-center font-mono shadow-sm transition-all" dir="ltr" />
                 </div>
 
+                <!-- Device Code Configuration -->
+                <div class="flex items-center justify-between lg:justify-start gap-2 w-full lg:w-auto">
+                    <span class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">رمز الجهاز:</span>
+                    <input type="text" x-model="devicePrefix" placeholder="REG1" class="w-2/3 lg:w-20 bg-white/80 border border-slate-200 text-xs rounded-2xl px-3 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-slate-800 text-center font-black uppercase shadow-sm transition-all" maxlength="6" />
+                </div>
+
                 <!-- Network Connection Status (Desktop only) -->
                 <div class="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black tracking-wider border shadow-sm"
                      :class="isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-250' : 'bg-rose-50 text-rose-700 border-rose-250'">
@@ -750,6 +756,7 @@
                     selectedCategory: 'All',
                     orderType: 'takeaway',
                     printerIp: localStorage.getItem('printerIp') || '',
+                    devicePrefix: localStorage.getItem('devicePrefix') || '',
                     activeTab: 'menu', // 'menu' or 'cart' for mobile layout toggling
                     showMobileSettings: false, // compact settings toggler on mobile header
                     showConnectionToast: false, // dynamic internet alert toast on mobile
@@ -796,6 +803,13 @@
                     init() {
                         this.selectedLocation = localStorage.getItem('selectedLocation') || '';
                         
+                        // Auto-generate device prefix if not set
+                        if (!this.devicePrefix) {
+                            const randNum = Math.floor(100 + Math.random() * 900);
+                            this.devicePrefix = 'REG' + randNum;
+                            localStorage.setItem('devicePrefix', this.devicePrefix);
+                        }
+                        
                         // Connection awareness listeners for floating toast notification
                         window.addEventListener('online', () => { 
                             this.isOnline = true; 
@@ -811,6 +825,11 @@
                         window.addEventListener('db-ready', () => { this.updatePendingSyncCount(); });
                         
                         this.$watch('printerIp', val => localStorage.setItem('printerIp', val));
+                        this.$watch('devicePrefix', val => {
+                            val = val.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                            this.devicePrefix = val;
+                            localStorage.setItem('devicePrefix', val);
+                        });
                         setInterval(() => this.triggerAutoSync(), 30000);
                     },
 
@@ -1035,7 +1054,7 @@
                             // Populate Receipt Preview data
                             const activeLoc = this.locations.find(l => l.id === this.selectedLocation);
                             this.receiptData = {
-                                orderId: order.id.substring(0, 8).toUpperCase(),
+                                orderId: order.invoice_number || order.id.substring(0, 8).toUpperCase(),
                                 orderIdRaw: order.id,
                                 date: new Date(order.created_at).toLocaleString('ar-LY'),
                                 locationName: activeLoc ? activeLoc.name : 'فرع طرابلس',
@@ -1068,8 +1087,14 @@
                         const paymentId = this.generateUUID();
                         const txId = this.generateUUID();
                         
+                        let counter = parseInt(localStorage.getItem('invoice_counter') || '1');
+                        const formattedCounter = String(counter).padStart(4, '0');
+                        const invoiceNumber = `${this.devicePrefix}-${formattedCounter}`;
+                        localStorage.setItem('invoice_counter', (counter + 1).toString());
+                        
                         const order = {
                             id: orderId,
+                            invoice_number: invoiceNumber,
                             location_id: this.selectedLocation,
                             status: 'pending',
                             payment_status: 'paid',
@@ -1218,8 +1243,15 @@
 
                     finalizeOrderGatewaySuccess(method) {
                         const orderId = this.currentOrderUuid;
+                        
+                        let counter = parseInt(localStorage.getItem('invoice_counter') || '1');
+                        const formattedCounter = String(counter).padStart(4, '0');
+                        const invoiceNumber = `${this.devicePrefix}-${formattedCounter}`;
+                        localStorage.setItem('invoice_counter', (counter + 1).toString());
+                        
                         const order = {
                             id: orderId,
+                            invoice_number: invoiceNumber,
                             location_id: this.selectedLocation,
                             status: 'cooking',
                             payment_status: 'paid',
