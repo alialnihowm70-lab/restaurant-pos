@@ -231,6 +231,23 @@ Route::middleware(['role:admin'])->group(function () {
         return redirect('/admin')->with('success', 'Supplier bank account registered successfully.');
     });
 
+    Route::post('/admin/suppliers/{supplier}/update', function (SupplierBankAccount $supplier) {
+        request()->validate([
+            'supplier_name' => 'required|string|max:255',
+            'bank_name' => 'required|string|max:255',
+            'account_no' => 'required|string|max:255',
+            'swift_code' => 'nullable|string|max:255',
+        ]);
+
+        $supplier->update(request()->only('supplier_name', 'bank_name', 'account_no', 'swift_code'));
+        return redirect('/admin')->with('success', 'تم تحديث بيانات المورد بنجاح.');
+    });
+
+    Route::post('/admin/suppliers/{supplier}/delete', function (SupplierBankAccount $supplier) {
+        $supplier->delete();
+        return redirect('/admin')->with('success', 'تم حذف المورد بنجاح.');
+    });
+
     // User CRUD Management
     Route::post('/admin/users', function () {
         request()->validate([
@@ -418,6 +435,11 @@ Route::middleware(['role:admin'])->group(function () {
         return redirect('/admin/inventory')->with('success', 'Product stock restocked successfully.');
     });
 
+    Route::post('/admin/inventory/transactions/{transaction}/delete', function (InventoryTransaction $transaction) {
+        $transaction->delete();
+        return redirect('/admin/inventory')->with('success', 'تم حذف عملية التوريد بنجاح.');
+    });
+
     // Order History View
     Route::get('/admin/orders', function () {
         $orders = Order::with('location', 'payments', 'items.product')
@@ -433,6 +455,14 @@ Route::middleware(['role:admin'])->group(function () {
         ]);
         Location::create(request()->only('name'));
         return redirect('/admin/inventory')->with('success', 'Branch location registered successfully.');
+    });
+
+    Route::post('/admin/locations/{location}/update', function (Location $location) {
+        request()->validate([
+            'name' => 'required|string|max:255',
+        ]);
+        $location->update(request()->only('name'));
+        return redirect('/admin/inventory')->with('success', 'تم تحديث بيانات الفرع بنجاح.');
     });
 
     Route::post('/admin/locations/{location}/delete', function (Location $location) {

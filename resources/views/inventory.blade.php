@@ -59,6 +59,8 @@
 <body class="min-h-screen flex bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 relative overflow-x-hidden page-animate" x-data="{ 
     tab: 'stock', 
     editingIngredient: null,
+    editingProduct: null,
+    editingLocation: null,
     selectedReconcileLocation: '{{ $locations->first()?->id }}',
     locationStocks: {{ json_encode($locationStocks) }},
     products: {{ json_encode($products->map(fn($p) => ['id' => $p->id, 'name' => $p->name, 'category' => $p->category, 'base_price' => (float)$p->base_price])) }},
@@ -379,12 +381,17 @@
                                         </td>
                                         <td class="px-6 py-4 text-left font-black text-slate-800" dir="ltr">{{ number_format($prod->base_price, 2) }} د.ل</td>
                                         <td class="px-6 py-4 text-center">
-                                            <form action="/admin/products/{{ $prod->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الصنف من القائمة نهائياً؟');">
-                                                @csrf
-                                                <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-650 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
-                                                    🗑️ حذف الصنف
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button @click="editingProduct = {{ json_encode($prod) }}" class="bg-amber-50 hover:bg-amber-500 text-amber-600 hover:text-white border border-amber-100 hover:border-amber-500 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                    ✏️ تعديل
                                                 </button>
-                                            </form>
+                                                <form action="/admin/products/{{ $prod->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الصنف من القائمة نهائياً؟');">
+                                                    @csrf
+                                                    <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-650 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                        🗑️ حذف
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -491,12 +498,17 @@
                                         <td class="px-6 py-4 font-mono text-xs text-amber-600 font-extrabold">{{ $ing->unit }}</td>
                                         <td class="px-6 py-4 text-left font-black text-slate-800" dir="ltr">{{ number_format($ing->alert_threshold, 2) }}</td>
                                         <td class="px-6 py-4 text-center">
-                                            <form action="/admin/ingredients/{{ $ing->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المكون الخام نهائياً؟');">
-                                                @csrf
-                                                <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-650 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
-                                                    🗑️ حذف المكون
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button @click="editingIngredient = {{ json_encode($ing) }}" class="bg-amber-50 hover:bg-amber-500 text-amber-600 hover:text-white border border-amber-100 hover:border-amber-500 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                    ✏️ تعديل
                                                 </button>
-                                            </form>
+                                                <form action="/admin/ingredients/{{ $ing->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المكون الخام نهائياً؟');">
+                                                    @csrf
+                                                    <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-650 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                        🗑️ حذف
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -658,12 +670,17 @@
                                         <td class="px-6 py-4 font-black text-slate-800">{{ $loc->name }}</td>
                                         <td class="px-6 py-4 font-mono text-[10px] text-slate-450 font-bold">{{ $loc->id }}</td>
                                         <td class="px-6 py-4 text-center">
-                                            <form action="/admin/locations/{{ $loc->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الفرع نهائياً؟');">
-                                                @csrf
-                                                <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-650 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
-                                                    🗑️ حذف الفرع
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button @click="editingLocation = {{ json_encode($loc) }}" class="bg-amber-50 hover:bg-amber-500 text-amber-600 hover:text-white border border-amber-100 hover:border-amber-500 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                    ✏️ تعديل
                                                 </button>
-                                            </form>
+                                                <form action="/admin/locations/{{ $loc->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الفرع نهائياً؟');">
+                                                    @csrf
+                                                    <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-650 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                        🗑️ حذف
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -718,6 +735,7 @@
                                     <th class="px-6 py-4.5 text-left">تكلفة الوحدة</th>
                                     <th class="px-6 py-4.5 text-center">نوع العملية</th>
                                     <th class="px-6 py-4.5 text-right">التاريخ والوقت</th>
+                                    <th class="px-6 py-4.5 text-center">الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 bg-white">
@@ -754,6 +772,16 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 text-slate-400 font-bold font-mono">{{ $tx->created_at->format('Y-m-d H:i:s') }}</td>
+                                        <td class="px-6 py-4 text-center">
+                                            @if(($tx->type ?? '') === 'restock' || !isset($tx->type) && $tx->quantity > 0)
+                                            <form action="/admin/inventory/transactions/{{ $tx->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من إلغاء/حذف عملية التوريد هذه؟ سيعود المخزون كما كان.');">
+                                                @csrf
+                                                <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-650 text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                    🗑️ حذف / تراجع
+                                                </button>
+                                            </form>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -769,5 +797,91 @@
         </main>
     </div>
 
+    <!-- Edit Product Modal -->
+    <div x-show="editingProduct !== null"
+         x-transition.opacity
+         class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+         style="display: none;">
+        <div @click.away="editingProduct = null"
+             class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+            <h3 class="text-lg font-black text-slate-800 dark:text-white mb-4">تعديل الصنف</h3>
+            <form :action="'/admin/inventory/products/' + editingProduct?.id" method="POST" class="space-y-4">
+                @csrf
+                <div class="space-y-1.5 text-right">
+                    <label class="text-xs text-slate-500 font-bold">اسم الصنف</label>
+                    <input type="text" name="name" :value="editingProduct?.name" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                </div>
+                <div class="space-y-1.5 text-right">
+                    <label class="text-xs text-slate-500 font-bold">التصنيف</label>
+                    <select name="category" :value="editingProduct?.category" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none">
+                        <option value="main">وجبات رئيسية</option>
+                        <option value="appetizers">مقبلات</option>
+                        <option value="drinks">مشروبات</option>
+                        <option value="desserts">حلويات</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5 text-right">
+                    <label class="text-xs text-slate-500 font-bold">السعر الأساسي</label>
+                    <input type="number" step="0.25" name="base_price" :value="editingProduct?.base_price" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="w-2/3 bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl transition-all">حفظ التعديلات</button>
+                    <button type="button" @click="editingProduct = null" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black py-3 rounded-xl transition-all">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Ingredient Modal -->
+    <div x-show="editingIngredient !== null"
+         x-transition.opacity
+         class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+         style="display: none;">
+        <div @click.away="editingIngredient = null"
+             class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+            <h3 class="text-lg font-black text-slate-800 dark:text-white mb-4">تعديل المادة الخام</h3>
+            <form :action="'/admin/ingredients/' + editingIngredient?.id" method="POST" class="space-y-4">
+                @csrf
+                <div class="space-y-1.5 text-right">
+                    <label class="text-xs text-slate-500 font-bold">اسم المادة</label>
+                    <input type="text" name="name" :value="editingIngredient?.name" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                </div>
+                <div class="space-y-1.5 text-right">
+                    <label class="text-xs text-slate-500 font-bold">وحدة القياس</label>
+                    <input type="text" name="unit" :value="editingIngredient?.unit" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                </div>
+                <div class="space-y-1.5 text-right">
+                    <label class="text-xs text-slate-500 font-bold">حد التنبيه (أقل كمية)</label>
+                    <input type="number" step="0.1" name="alert_threshold" :value="editingIngredient?.alert_threshold" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="w-2/3 bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl transition-all">حفظ التعديلات</button>
+                    <button type="button" @click="editingIngredient = null" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black py-3 rounded-xl transition-all">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Location Modal -->
+    <div x-show="editingLocation !== null"
+         x-transition.opacity
+         class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+         style="display: none;">
+        <div @click.away="editingLocation = null"
+             class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+            <h3 class="text-lg font-black text-slate-800 dark:text-white mb-4">تعديل بيانات الفرع</h3>
+            <form :action="'/admin/locations/' + editingLocation?.id + '/update'" method="POST" class="space-y-4">
+                @csrf
+                <div class="space-y-1.5 text-right">
+                    <label class="text-xs text-slate-500 font-bold">اسم الفرع / نقطة البيع</label>
+                    <input type="text" name="name" :value="editingLocation?.name" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="w-2/3 bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl transition-all">حفظ التعديلات</button>
+                    <button type="button" @click="editingLocation = null" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black py-3 rounded-xl transition-all">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

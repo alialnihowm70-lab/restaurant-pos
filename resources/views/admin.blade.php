@@ -157,7 +157,8 @@
             </div>
         </header>
 
-        <main class="flex-grow overflow-y-auto p-5 lg:p-7 space-y-6" x-data="{ supplierTab: 'list', showReportModal: false, rent: '', salaries: '', utilities: '', misc: '' }" dir="rtl">
+
+        <main class="flex-grow overflow-y-auto p-5 lg:p-7 space-y-6" x-data="{ supplierTab: 'list', showReportModal: false, rent: '', salaries: '', utilities: '', misc: '', editingSupplier: null, editingUser: null }" dir="rtl">
         
         <!-- Flash Alert Notification -->
         @if(session('success'))
@@ -364,6 +365,7 @@
                                 <th class="px-6 py-4.5 text-right">رقم الحساب البنكي / IBAN</th>
                                 <th class="px-6 py-4.5 text-right">رمز السويفت SWIFT</th>
                                 <th class="px-6 py-4.5 text-right">تاريخ التسجيل</th>
+                                <th class="px-6 py-4.5 text-center">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white">
@@ -377,6 +379,19 @@
                                     <td class="px-6 py-4 font-mono font-bold text-slate-800" dir="ltr">{{ $supplier->account_no }}</td>
                                     <td class="px-6 py-4 font-mono text-slate-400 font-bold">{{ $supplier->swift_code ?? 'N/A' }}</td>
                                     <td class="px-6 py-4 text-slate-400 font-bold font-mono">{{ $supplier->created_at->format('Y-m-d') }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button @click="editingSupplier = {{ json_encode($supplier) }}" class="bg-amber-50 hover:bg-amber-500 text-amber-600 hover:text-white border border-amber-100 hover:border-amber-500 text-[10px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                ✏️ تعديل
+                                            </button>
+                                            <form action="/admin/suppliers/{{ $supplier->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف المورد نهائياً؟');" class="inline-block">
+                                                @csrf
+                                                <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-600 text-[10px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                    🗑️ حذف
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -472,12 +487,17 @@
                                     <td class="px-6 py-4 text-slate-400 font-bold font-mono">{{ $user->created_at->format('Y-m-d') }}</td>
                                     <td class="px-6 py-4 text-center">
                                         @if($user->id !== auth()->id())
-                                            <form action="/admin/users/{{ $user->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟');" class="inline-block">
-                                                @csrf
-                                                <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-600 text-[10px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
-                                                    🗑️ حذف الموظف
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button @click="editingUser = {{ json_encode($user) }}" class="bg-amber-50 hover:bg-amber-500 text-amber-600 hover:text-white border border-amber-100 hover:border-amber-500 text-[10px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                    ✏️ تعديل
                                                 </button>
-                                            </form>
+                                                <form action="/admin/users/{{ $user->id }}/delete" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟');" class="inline-block">
+                                                    @csrf
+                                                    <button type="submit" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-100 hover:border-rose-600 text-[10px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                                        🗑️ حذف
+                                                    </button>
+                                                </form>
+                                            </div>
                                         @else
                                             <span class="text-[10px] text-slate-450 italic font-bold">حسابك الحالي</span>
                                         @endif
@@ -775,6 +795,99 @@
             </div>
         </div> <!-- closes Modal Container -->
     </div> <!-- closes fixed outer -->
+        <!-- Edit Supplier Modal -->
+        <div x-show="editingSupplier !== null"
+             x-transition.opacity
+             class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+             style="display: none;">
+            <div @click.away="editingSupplier = null"
+                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+                
+                <h3 class="text-lg font-black text-slate-800 dark:text-white mb-4">تعديل بيانات المورد</h3>
+                
+                <form :action="'/admin/suppliers/' + editingSupplier?.id + '/update'" method="POST" class="space-y-4">
+                    @csrf
+                    
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">اسم المورد</label>
+                        <input type="text" name="supplier_name" :value="editingSupplier?.supplier_name" required
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                    </div>
+
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">اسم المصرف</label>
+                        <input type="text" name="bank_name" :value="editingSupplier?.bank_name" required
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                    </div>
+
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">رقم الحساب</label>
+                        <input type="text" name="account_no" :value="editingSupplier?.account_no" required
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                    </div>
+
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">رمز السويفت</label>
+                        <input type="text" name="swift_code" :value="editingSupplier?.swift_code"
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="w-2/3 bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl transition-all">حفظ التعديلات</button>
+                        <button type="button" @click="editingSupplier = null" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black py-3 rounded-xl transition-all">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit User Modal -->
+        <div x-show="editingUser !== null"
+             x-transition.opacity
+             class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+             style="display: none;">
+            <div @click.away="editingUser = null"
+                 class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+                
+                <h3 class="text-lg font-black text-slate-800 dark:text-white mb-4">تعديل بيانات الموظف</h3>
+                
+                <form :action="'/admin/users/' + editingUser?.id + '/update'" method="POST" class="space-y-4">
+                    @csrf
+                    
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">اسم الموظف</label>
+                        <input type="text" name="name" :value="editingUser?.name" required
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                    </div>
+
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">البريد الإلكتروني</label>
+                        <input type="email" name="email" :value="editingUser?.email" required
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                    </div>
+
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">كلمة المرور (اختياري)</label>
+                        <input type="password" name="password" placeholder="اتركه فارغاً لعدم التغيير"
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                    </div>
+
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">الصلاحية</label>
+                        <select name="role" :value="editingUser?.role" required
+                                class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none">
+                            <option value="cashier">كاشير صالة (Cashier)</option>
+                            <option value="chef">طاهي المطبخ (Chef)</option>
+                            <option value="admin">مدير نظام كامل (Admin)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="w-2/3 bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl transition-all">حفظ التعديلات</button>
+                        <button type="button" @click="editingUser = null" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black py-3 rounded-xl transition-all">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 </main>
 </div>
     <!-- Chart.js rendering scripts -->
