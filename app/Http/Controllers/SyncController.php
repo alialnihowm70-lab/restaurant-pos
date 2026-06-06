@@ -77,70 +77,80 @@ class SyncController extends Controller
         try {
             // 1. Reconcile Orders
             foreach ($orders as $orderData) {
-                Order::updateOrCreate(
-                    ['id' => $orderData['id']],
-                    [
-                        'location_id' => $orderData['location_id'],
-                        'status' => $orderData['status'],
-                        'payment_status' => $orderData['payment_status'],
-                        'total_amount' => $orderData['total_amount'],
-                        'discount' => $orderData['discount'],
-                        'tax' => $orderData['tax'],
-                        'notes' => $orderData['notes'] ?? null,
-                        'sync_status' => 'synced', // mark as synced on the server
-                        'created_at' => $orderData['created_at'] ?? Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                    ]
-                );
+                $order = Order::withTrashed()->find($orderData['id']);
+                if (!$order) {
+                    $order = new Order();
+                    $order->id = $orderData['id'];
+                }
+                $order->forceFill([
+                    'location_id' => $orderData['location_id'],
+                    'status' => $orderData['status'],
+                    'payment_status' => $orderData['payment_status'],
+                    'total_amount' => $orderData['total_amount'],
+                    'discount' => $orderData['discount'],
+                    'tax' => $orderData['tax'],
+                    'notes' => $orderData['notes'] ?? null,
+                    'sync_status' => 'synced', // mark as synced on the server
+                    'created_at' => $orderData['created_at'] ?? Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ])->save();
+                
                 $syncedOrderIds[] = $orderData['id'];
             }
 
             // 2. Reconcile Order Items
             foreach ($orderItems as $itemData) {
-                OrderItem::updateOrCreate(
-                    ['id' => $itemData['id']],
-                    [
-                        'order_id' => $itemData['order_id'],
-                        'product_id' => $itemData['product_id'],
-                        'quantity' => $itemData['quantity'],
-                        'price' => $itemData['price'],
-                        'created_at' => $itemData['created_at'] ?? Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                    ]
-                );
+                $item = OrderItem::find($itemData['id']);
+                if (!$item) {
+                    $item = new OrderItem();
+                    $item->id = $itemData['id'];
+                }
+                $item->forceFill([
+                    'order_id' => $itemData['order_id'],
+                    'product_id' => $itemData['product_id'],
+                    'quantity' => $itemData['quantity'],
+                    'price' => $itemData['price'],
+                    'created_at' => $itemData['created_at'] ?? Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ])->save();
             }
 
             // 3. Reconcile Payments
             foreach ($payments as $paymentData) {
-                Payment::updateOrCreate(
-                    ['id' => $paymentData['id']],
-                    [
-                        'order_id' => $paymentData['order_id'],
-                        'amount' => $paymentData['amount'],
-                        'payment_method' => $paymentData['payment_method'],
-                        'transaction_id' => $paymentData['transaction_id'] ?? null,
-                        'status' => $paymentData['status'],
-                        'created_at' => $paymentData['created_at'] ?? Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                    ]
-                );
+                $payment = Payment::find($paymentData['id']);
+                if (!$payment) {
+                    $payment = new Payment();
+                    $payment->id = $paymentData['id'];
+                }
+                $payment->forceFill([
+                    'order_id' => $paymentData['order_id'],
+                    'amount' => $paymentData['amount'],
+                    'payment_method' => $paymentData['payment_method'],
+                    'transaction_id' => $paymentData['transaction_id'] ?? null,
+                    'status' => $paymentData['status'],
+                    'created_at' => $paymentData['created_at'] ?? Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ])->save();
             }
 
             // 4. Reconcile Inventory Transactions
             foreach ($inventoryTransactions as $txData) {
-                InventoryTransaction::updateOrCreate(
-                    ['id' => $txData['id']],
-                    [
-                        'product_id' => $txData['product_id'],
-                        'location_id' => $txData['location_id'],
-                        'quantity' => $txData['quantity'],
-                        'unit_cost' => $txData['unit_cost'],
-                        'source_id' => $txData['source_id'] ?? null,
-                        'type' => $txData['type'] ?? ($txData['quantity'] >= 0 ? 'restock' : 'sale'),
-                        'created_at' => $txData['created_at'] ?? Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                    ]
-                );
+                $tx = InventoryTransaction::find($txData['id']);
+                if (!$tx) {
+                    $tx = new InventoryTransaction();
+                    $tx->id = $txData['id'];
+                }
+                $tx->forceFill([
+                    'product_id' => $txData['product_id'],
+                    'location_id' => $txData['location_id'],
+                    'quantity' => $txData['quantity'],
+                    'unit_cost' => $txData['unit_cost'],
+                    'source_id' => $txData['source_id'] ?? null,
+                    'type' => $txData['type'] ?? ($txData['quantity'] >= 0 ? 'restock' : 'sale'),
+                    'created_at' => $txData['created_at'] ?? Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ])->save();
+                
                 $syncedTransactionIds[] = $txData['id'];
             }
 
