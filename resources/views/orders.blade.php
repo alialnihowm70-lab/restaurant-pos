@@ -103,10 +103,14 @@
                     🧾 الكاشير
                 </a>
                 <div class="bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl">
-                    <span class="text-[11px] text-amber-600 dark:text-amber-400 font-black">الإيرادات: {{ number_format($orders->where('status', '!=', 'cancelled')->sum('total_amount'), 2) }} د.ل</span>
+                    <span class="text-[11px] text-amber-600 dark:text-amber-400 font-black">
+                        الإيرادات: <span x-text="formatCurrency(orders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + parseFloat(o.total_amount), 0))"></span> د.ل
+                    </span>
                 </div>
                 <div class="hidden sm:flex bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl">
-                    <span class="text-[11px] text-slate-600 dark:text-slate-300 font-black">{{ count($orders) }} فاتورة</span>
+                    <span class="text-[11px] text-slate-600 dark:text-slate-300 font-black">
+                        <span x-text="orders.length"></span> فاتورة
+                    </span>
                 </div>
             </div>
         </header>
@@ -120,7 +124,10 @@
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm">
                     <div>
                         <p class="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1">إجمالي الإيرادات</p>
-                        <p class="text-xl font-black text-amber-600 dark:text-amber-400" dir="ltr">{{ number_format($orders->where('status', '!=', 'cancelled')->sum('total_amount'), 2) }} <span class="text-xs font-bold">د.ل</span></p>
+                        <p class="text-xl font-black text-amber-600 dark:text-amber-400" dir="ltr">
+                            <span x-text="formatCurrency(orders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + parseFloat(o.total_amount), 0))"></span>
+                            <span class="text-xs font-bold">د.ل</span>
+                        </p>
                     </div>
                     <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/15 flex items-center justify-center text-2xl">💰</div>
                 </div>
@@ -128,7 +135,10 @@
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm">
                     <div>
                         <p class="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1">الفواتير المكتملة</p>
-                        <p class="text-xl font-black text-emerald-600 dark:text-emerald-400">{{ $orders->where('status','completed')->count() }} <span class="text-xs font-bold text-slate-400">فاتورة</span></p>
+                        <p class="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                            <span x-text="orders.filter(o => o.status === 'completed').length"></span>
+                            <span class="text-xs font-bold text-slate-400">فاتورة</span>
+                        </p>
                     </div>
                     <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-2xl">✅</div>
                 </div>
@@ -136,7 +146,10 @@
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm">
                     <div>
                         <p class="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1">الطلبات النشطة</p>
-                        <p class="text-xl font-black text-indigo-600 dark:text-indigo-400">{{ $orders->whereIn('status',['pending','cooking','ready'])->count() }} <span class="text-xs font-bold text-slate-400">طلب</span></p>
+                        <p class="text-xl font-black text-indigo-600 dark:text-indigo-400">
+                            <span x-text="orders.filter(o => ['pending','cooking','ready'].includes(o.status)).length"></span>
+                            <span class="text-xs font-bold text-slate-400">طلب</span>
+                        </p>
                     </div>
                     <div class="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center text-2xl">⏳</div>
                 </div>
@@ -163,32 +176,32 @@
                         <button @click="currentFilter='all'"
                                 :class="currentFilter==='all' ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'"
                                 class="px-4 py-1.5 rounded-xl text-xs font-black transition-all flex-shrink-0">
-                            الكل ({{ count($orders) }})
+                            الكل (<span x-text="orders.length"></span>)
                         </button>
                         <button @click="currentFilter='pending'"
                                 :class="currentFilter==='pending' ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'"
                                 class="px-4 py-1.5 rounded-xl text-xs font-black transition-all flex-shrink-0">
-                            ⏳ معلقة ({{ $orders->where('status','pending')->count() }})
+                            ⏳ معلقة (<span x-text="orders.filter(o => o.status === 'pending').length"></span>)
                         </button>
                         <button @click="currentFilter='cooking'"
                                 :class="currentFilter==='cooking' ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'"
                                 class="px-4 py-1.5 rounded-xl text-xs font-black transition-all flex-shrink-0">
-                            🔥 قيد التحضير ({{ $orders->where('status','cooking')->count() }})
+                            🔥 قيد التحضير (<span x-text="orders.filter(o => o.status === 'cooking').length"></span>)
                         </button>
                         <button @click="currentFilter='ready'"
                                 :class="currentFilter==='ready' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'"
                                 class="px-4 py-1.5 rounded-xl text-xs font-black transition-all flex-shrink-0">
-                            🟢 جاهزة ({{ $orders->where('status','ready')->count() }})
+                            🟢 جاهزة (<span x-text="orders.filter(o => o.status === 'ready').length"></span>)
                         </button>
                         <button @click="currentFilter='completed'"
                                 :class="currentFilter==='completed' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'"
                                 class="px-4 py-1.5 rounded-xl text-xs font-black transition-all flex-shrink-0">
-                            ✅ مكتملة ({{ $orders->where('status','completed')->count() }})
+                            ✅ مكتملة (<span x-text="orders.filter(o => o.status === 'completed').length"></span>)
                         </button>
                         <button @click="currentFilter='cancelled'"
                                 :class="currentFilter==='cancelled' ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'"
                                 class="px-4 py-1.5 rounded-xl text-xs font-black transition-all flex-shrink-0">
-                            ❌ ملغية ({{ $orders->where('status','cancelled')->count() }})
+                            ❌ ملغية (<span x-text="orders.filter(o => o.status === 'cancelled').length"></span>)
                         </button>
                     </div>
                 </div>
@@ -212,23 +225,13 @@
                         <tbody class="divide-y divide-slate-50 dark:divide-slate-800/60">
                             @forelse($orders as $order)
                                 <tr class="orders-row transition-colors"
-                                    x-show="currentFilter === 'all' || '{{ $order->status }}' === currentFilter">
+                                    x-show="currentFilter === 'all' || getOrderStatus('{{ $order->id }}') === currentFilter">
                                     <td class="px-5 py-3.5">
                                         <span class="font-mono font-black text-slate-700 dark:text-slate-300 text-[11px]">{{ $order->invoice_number ?? '#' . strtoupper(substr($order->id, 0, 8)) }}</span>
                                     </td>
                                     <td class="px-5 py-3.5 font-bold text-slate-600 dark:text-slate-400">{{ $order->location->name }}</td>
                                     <td class="px-5 py-3.5">
-                                        <span class="badge
-                                            @if($order->status === 'completed') badge-completed
-                                            @elseif($order->status === 'cooking')  badge-cooking
-                                            @elseif($order->status === 'ready')    badge-ready
-                                            @elseif($order->status === 'pending')  badge-pending
-                                            @else badge-cancelled @endif">
-                                            @if($order->status === 'completed')  ✅ مكتمل
-                                            @elseif($order->status === 'cooking') 🔥 قيد التحضير
-                                            @elseif($order->status === 'ready')   🟢 جاهز
-                                            @elseif($order->status === 'pending') ⏳ معلق
-                                            @else ❌ ملغي @endif
+                                        <span class="badge" :class="getBadgeClass('{{ $order->id }}')" x-text="getStatusText('{{ $order->id }}')">
                                         </span>
                                     </td>
                                     <td class="px-5 py-3.5">
@@ -251,7 +254,51 @@
                                         <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">{{ $order->created_at->format('Y-m-d H:i') }}</span>
                                     </td>
                                     <td class="px-5 py-3.5">
-                                        <div class="flex items-center justify-center gap-1.5">
+                                        <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                            <!-- Status actions -->
+                                            <template x-if="getOrderStatus('{{ $order->id }}') === 'pending'">
+                                                <div class="flex items-center gap-1">
+                                                    <button @click="updateOrderStatus('{{ $order->id }}', 'cooking')"
+                                                            class="bg-amber-400/10 hover:bg-amber-400 text-amber-700 dark:text-amber-400 dark:hover:text-slate-900 border border-amber-400/20 text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all">
+                                                        🔥 بدء التحضير
+                                                    </button>
+                                                    <button @click="updateOrderStatus('{{ $order->id }}', 'cancelled')"
+                                                            class="bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 dark:hover:text-white border border-rose-500/20 text-[10px] font-black px-2 py-1.5 rounded-lg transition-all" title="إلغاء الفاتورة">
+                                                        ❌
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <template x-if="getOrderStatus('{{ $order->id }}') === 'cooking'">
+                                                <div class="flex items-center gap-1">
+                                                    <button @click="updateOrderStatus('{{ $order->id }}', 'ready')"
+                                                            class="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-400 dark:hover:text-white border border-indigo-500/20 text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all">
+                                                        🟢 جاهز للتسليم
+                                                    </button>
+                                                    <button @click="updateOrderStatus('{{ $order->id }}', 'cancelled')"
+                                                            class="bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 dark:hover:text-white border border-rose-500/20 text-[10px] font-black px-2 py-1.5 rounded-lg transition-all" title="إلغاء الفاتورة">
+                                                        ❌
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <template x-if="getOrderStatus('{{ $order->id }}') === 'ready'">
+                                                <div class="flex items-center gap-1">
+                                                    <button @click="updateOrderStatus('{{ $order->id }}', 'completed')"
+                                                            class="bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 dark:text-emerald-400 dark:hover:text-white border border-emerald-500/20 text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all">
+                                                        🍽️ تسليم وإتمام
+                                                    </button>
+                                                    <button @click="updateOrderStatus('{{ $order->id }}', 'cancelled')"
+                                                            class="bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 dark:hover:text-white border border-rose-500/20 text-[10px] font-black px-2 py-1.5 rounded-lg transition-all" title="إلغاء الفاتورة">
+                                                        ❌
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <template x-if="getOrderStatus('{{ $order->id }}') === 'completed'">
+                                                <button @click="updateOrderStatus('{{ $order->id }}', 'ready')"
+                                                        class="bg-slate-500/10 hover:bg-slate-500 text-slate-600 dark:text-slate-400 dark:hover:text-white border border-slate-500/20 text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all">
+                                                    ↺ إرجاع
+                                                </button>
+                                            </template>
+
                                             <button @click="reprintReceipt('{{ $order->id }}')"
                                                     class="bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 dark:hover:bg-amber-500 dark:hover:text-slate-950 text-slate-600 dark:text-slate-400 text-[10px] font-black px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-amber-500 transition-all">
                                                 🖨️ IP
@@ -335,10 +382,69 @@
                 currentFilter: 'all',
                 printerIp: localStorage.getItem('printerIp') || '',
                 selectedOrder: null,
-                orders: @json($orders->load('items.product', 'location')),
+                orders: @json($orders->load('items.product', 'location', 'payments')),
 
                 init() {
                     this.$watch('printerIp', val => localStorage.setItem('printerIp', val));
+                },
+
+                formatCurrency(val) {
+                    return parseFloat(val).toLocaleString('ar-LY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                },
+
+                getOrderStatus(orderId) {
+                    const order = this.orders.find(o => o.id === orderId);
+                    return order ? order.status : 'pending';
+                },
+
+                getStatusText(orderId) {
+                    const status = this.getOrderStatus(orderId);
+                    const dict = {
+                        completed: '✅ مكتمل',
+                        cooking: '🔥 قيد التحضير',
+                        ready: '🟢 جاهز',
+                        pending: '⏳ معلق',
+                        cancelled: '❌ ملغي'
+                    };
+                    return dict[status] || status;
+                },
+
+                getBadgeClass(orderId) {
+                    const status = this.getOrderStatus(orderId);
+                    const dict = {
+                        completed: 'badge-completed',
+                        cooking: 'badge-cooking',
+                        ready: 'badge-ready',
+                        pending: 'badge-pending',
+                        cancelled: 'badge-cancelled'
+                    };
+                    return dict[status] || 'badge-cancelled';
+                },
+
+                updateOrderStatus(orderId, newStatus) {
+                    fetch(`/pos/orders/${orderId}/status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.success) {
+                            const order = this.orders.find(o => o.id === orderId);
+                            if (order) {
+                                order.status = newStatus;
+                            }
+                        } else {
+                            alert('حدث خطأ أثناء تحديث حالة الطلب.');
+                        }
+                    })
+                    .catch(e => {
+                        console.error(e);
+                        alert('حدث خطأ في الشبكة.');
+                    });
                 },
 
                 translatePaymentMethod(method) {

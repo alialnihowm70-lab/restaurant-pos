@@ -96,6 +96,15 @@ Route::middleware(['role:cashier'])->group(function () {
             ->toArray();
         return response()->json(['occupied' => $occupied]);
     });
+
+    Route::post('/pos/orders/{order}/status', function (Order $order) {
+        request()->validate([
+            'status' => 'required|in:pending,cooking,ready,completed,cancelled'
+        ]);
+
+        $order->update(['status' => request('status')]);
+        return response()->json(['success' => true]);
+    });
 });
 
 // 2. Kitchen Display System (KDS) Routes (Restricted to Chef and Admin)
