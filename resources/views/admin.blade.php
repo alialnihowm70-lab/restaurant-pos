@@ -196,6 +196,45 @@
             </div>
         @endif
 
+        <!-- Global Continuous Revenue Summary -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Today's Revenue -->
+            <div class="bg-gradient-to-br from-amber-500/10 to-orange-600/10 border border-amber-500/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+                <div class="space-y-1">
+                    <span class="text-[9px] font-black text-amber-700 dark:text-amber-500 uppercase tracking-wider block">💰 إيرادات اليوم الحالي</span>
+                    <h3 class="text-xl font-black text-orange-600 dark:text-orange-400 tracking-tight" dir="ltr">
+                        {{ number_format($todayRevenue, 2) }} <span class="text-xs font-bold text-slate-500">د.ل</span>
+                    </h3>
+                    <span class="text-[8px] text-slate-400 block font-bold">جميع الفواتير النشطة والمكتملة لليوم</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-orange-500/15 text-orange-600 flex items-center justify-center text-lg shadow-inner">📅</div>
+            </div>
+
+            <!-- This Month's Revenue -->
+            <div class="bg-gradient-to-br from-indigo-500/10 to-blue-600/10 border border-indigo-550/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+                <div class="space-y-1">
+                    <span class="text-[9px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-wider block">📊 إيرادات الشهر الحالي</span>
+                    <h3 class="text-xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight" dir="ltr">
+                        {{ number_format($monthlyRevenue, 2) }} <span class="text-xs font-bold text-slate-500">د.ل</span>
+                    </h3>
+                    <span class="text-[8px] text-slate-400 block font-bold">إجمالي مبيعات الشهر التقويمية</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-600 flex items-center justify-center text-lg shadow-inner">📈</div>
+            </div>
+
+            <!-- This Year's Revenue -->
+            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-600/10 border border-emerald-500/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+                <div class="space-y-1">
+                    <span class="text-[9px] font-black text-emerald-700 dark:text-emerald-550 uppercase tracking-wider block">🏛️ إجمالي إيرادات السنة</span>
+                    <h3 class="text-xl font-black text-emerald-600 dark:text-emerald-450 tracking-tight" dir="ltr">
+                        {{ number_format($yearlyRevenue, 2) }} <span class="text-xs font-bold text-slate-500">د.ل</span>
+                    </h3>
+                    <span class="text-[8px] text-slate-400 block font-bold">إجمالي المبيعات التراكمية للسنة الجارية</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center text-lg shadow-inner">💼</div>
+            </div>
+        </section>
+
         <!-- 1. Real-Time Accounting Analytics Cards -->
         <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <!-- Total Revenue Card -->

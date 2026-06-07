@@ -492,6 +492,7 @@
                                 <tr>
                                     <th class="px-6 py-4.5 text-right">اسم المادة الخام</th>
                                     <th class="px-6 py-4.5 text-right">وحدة القياس المعتمدة</th>
+                                    <th class="px-6 py-4.5 text-center">الرصيد الفعلي الحالي</th>
                                     <th class="px-6 py-4.5 text-left">حد الطلب الأدنى للتنبيه</th>
                                     <th class="px-6 py-4.5 text-center">الإجراءات</th>
                                 </tr>
@@ -501,6 +502,11 @@
                                     <tr class="hover:bg-slate-50/50 transition-colors">
                                         <td class="px-6 py-4 font-black text-slate-800">{{ $ing->name }}</td>
                                         <td class="px-6 py-4 font-mono text-xs text-amber-600 font-extrabold">{{ $ing->unit }}</td>
+                                        <td class="px-6 py-4 text-center font-bold" dir="ltr">
+                                            <span class="{{ $ing->current_stock <= $ing->alert_threshold ? 'text-rose-650 font-extrabold animate-pulse' : 'text-emerald-650' }}">
+                                                {{ number_format($ing->current_stock, 2) }}
+                                            </span>
+                                        </td>
                                         <td class="px-6 py-4 text-left font-black text-slate-800" dir="ltr">{{ number_format($ing->alert_threshold, 2) }}</td>
                                         <td class="px-6 py-4 text-center">
                                             <div class="flex items-center justify-center gap-2">
@@ -810,7 +816,7 @@
         <div @click.away="editingProduct = null"
              class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
             <h3 class="text-lg font-black text-slate-800 dark:text-white mb-4">تعديل الصنف</h3>
-            <form :action="'/admin/inventory/products/' + editingProduct?.id" method="POST" class="space-y-4">
+            <form :action="'/admin/products/' + editingProduct?.id + '/update'" method="POST" class="space-y-4">
                 @csrf
                 <div class="space-y-1.5 text-right">
                     <label class="text-xs text-slate-500 font-bold">اسم الصنف</label>

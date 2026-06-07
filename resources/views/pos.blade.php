@@ -1130,6 +1130,7 @@
                             quantity: -i.quantity,
                             unit_cost: i.price * 0.4,
                             source_id: null,
+                            order_id: orderId,
                             type: 'sale',
                             created_at: new Date().toISOString()
                         }));
@@ -1288,6 +1289,7 @@
                             quantity: -i.quantity,
                             unit_cost: i.price * 0.4,
                             source_id: null,
+                            order_id: orderId,
                             type: 'sale',
                             created_at: new Date().toISOString()
                         }));

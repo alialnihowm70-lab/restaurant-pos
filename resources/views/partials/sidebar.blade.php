@@ -122,12 +122,21 @@
                     <!-- Order Sales History Link (Admin & Cashier only) -->
                     @if(in_array(auth()->user()->role, ['admin', 'cashier']))
                         <a href="/admin/orders" 
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders*') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">📜</span>
-                                <span>سجل الفواتير</span>
+                                <span>الفواتير اليومية</span>
                             </div>
-                            <span class="text-[9px] {{ request()->is('admin/orders*') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Sales</span>
+                            <span class="text-[9px] {{ request()->is('admin/orders') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Today</span>
+                        </a>
+
+                        <a href="/admin/orders/archive" 
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders/archive') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                            <div class="flex items-center gap-4">
+                                <span class="text-lg group-hover:scale-110 transition-transform">🗄️</span>
+                                <span>أرشيف الفواتير</span>
+                            </div>
+                            <span class="text-[9px] {{ request()->is('admin/orders/archive') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Archive</span>
                         </a>
                     @endif
                 @endif

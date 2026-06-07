@@ -11,7 +11,7 @@ class InventoryTransaction extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['product_id', 'location_id', 'quantity', 'unit_cost', 'source_id', 'type'];
+    protected $fillable = ['product_id', 'location_id', 'quantity', 'unit_cost', 'source_id', 'type', 'order_id'];
 
     protected $casts = [
         'quantity' => 'decimal:4',
@@ -26,6 +26,11 @@ class InventoryTransaction extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     public function source(): BelongsTo

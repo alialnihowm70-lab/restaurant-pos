@@ -147,6 +147,7 @@ class SyncController extends Controller
                     'quantity' => $txData['quantity'],
                     'unit_cost' => $txData['unit_cost'],
                     'source_id' => $txData['source_id'] ?? null,
+                    'order_id' => $txData['order_id'] ?? null,
                     'type' => $txData['type'] ?? ($txData['quantity'] >= 0 ? 'restock' : 'sale'),
                     'created_at' => $txData['created_at'] ?? Carbon::now(),
                     'updated_at' => Carbon::now(),

@@ -105,6 +105,99 @@ Route::middleware(['role:cashier'])->group(function () {
         $order->update(['status' => request('status')]);
         return response()->json(['success' => true]);
     });
+
+    // View Daily Orders (Today's only)
+    Route::get('/admin/orders', function () {
+        $orders = Order::with('location', 'payments', 'items.product')
+            ->whereDate('created_at', \Illuminate\Support\Carbon::today())
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $products = Product::all();
+        $isArchive = false;
+        return view('orders', compact('orders', 'products', 'isArchive'));
+    });
+
+    // View Archive Orders (Based on Date Filter)
+    Route::get('/admin/orders/archive', function () {
+        $startDate = \Illuminate\Support\Carbon::parse(session('start_date'));
+        $endDate = \Illuminate\Support\Carbon::parse(session('end_date'));
+
+        $orders = Order::with('location', 'payments', 'items.product')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $products = Product::all();
+        $isArchive = true;
+        return view('orders', compact('orders', 'products', 'isArchive'));
+    });
+
+    // Edit Order Action
+    Route::post('/pos/orders/{order}/update', function (Order $order) {
+        request()->validate([
+            'items' => 'required|array',
+            'items.*.product_id' => 'required|uuid|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'discount' => 'required|numeric|min:0',
+            'tax' => 'required|numeric|min:0',
+        ]);
+
+        DB::transaction(function () use ($order) {
+            $itemsData = request('items');
+            $discount = (float)request('discount');
+            $tax = (float)request('tax');
+            
+            $subtotal = 0;
+            $itemsToCreate = [];
+            
+            foreach ($itemsData as $item) {
+                $product = Product::findOrFail($item['product_id']);
+                $qty = (int)$item['quantity'];
+                $price = (float)$product->base_price;
+                $subtotal += $qty * $price;
+                
+                $itemsToCreate[] = [
+                    'id' => (string)\Illuminate\Support\Str::uuid(),
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => $qty,
+                    'price' => $price,
+                    'created_at' => $order->created_at,
+                    'updated_at' => \Illuminate\Support\Carbon::now(),
+                ];
+            }
+            
+            $totalAmount = max(0, $subtotal - $discount + $tax);
+            
+            // Update order details
+            $order->update([
+                'discount' => $discount,
+                'tax' => $tax,
+                'total_amount' => $totalAmount,
+                'sync_status' => 'synced', // mark as synced
+            ]);
+            
+            // Rebuild OrderItems
+            $order->items()->delete();
+            OrderItem::insert($itemsToCreate);
+            
+            // Recreate Inventory Transactions for this order
+            InventoryTransaction::where('order_id', $order->id)->delete();
+            
+            foreach ($itemsToCreate as $item) {
+                InventoryTransaction::create([
+                    'product_id' => $item['product_id'],
+                    'location_id' => $order->location_id,
+                    'quantity' => -$item['quantity'],
+                    'unit_cost' => $item['price'] * 0.40, // standard cost
+                    'type' => 'sale',
+                    'order_id' => $order->id,
+                    'source_id' => null,
+                ]);
+            }
+        });
+
+        return redirect()->back()->with('success', 'تم تعديل الفاتورة بنجاح وتحديث الجرد المرتبط بها!');
+    });
 });
 
 // 2. Kitchen Display System (KDS) Routes (Restricted to Chef and Admin)
@@ -133,6 +226,19 @@ Route::middleware(['role:admin'])->group(function () {
     Route::get('/admin', function () {
         $startDate = \Illuminate\Support\Carbon::parse(session('start_date'));
         $endDate = \Illuminate\Support\Carbon::parse(session('end_date'));
+
+        $todayRevenue = (float)Order::where('status', '!=', 'cancelled')
+            ->whereDate('created_at', \Illuminate\Support\Carbon::today())
+            ->sum('total_amount');
+
+        $monthlyRevenue = (float)Order::where('status', '!=', 'cancelled')
+            ->whereMonth('created_at', \Illuminate\Support\Carbon::now()->month)
+            ->whereYear('created_at', \Illuminate\Support\Carbon::now()->year)
+            ->sum('total_amount');
+
+        $yearlyRevenue = (float)Order::where('status', '!=', 'cancelled')
+            ->whereYear('created_at', \Illuminate\Support\Carbon::now()->year)
+            ->sum('total_amount');
 
         $suppliers = SupplierBankAccount::all();
         $products = Product::all();
@@ -245,7 +351,8 @@ Route::middleware(['role:admin'])->group(function () {
             'suppliers', 'products', 'locations', 'salesCount', 'salesTotal', 'taxTotal', 'discountTotal',
             'stockLevel', 'totalCogs', 'grossProfit', 'profitMargin', 'inventoryAssetValue',
             'salesByPayment', 'salesByLocation', 'topSelling', 'startDate', 'endDate',
-            'totalWasteCost', 'totalAdjustmentSurplus', 'users', 'lowStockIngredients'
+            'totalWasteCost', 'totalAdjustmentSurplus', 'users', 'lowStockIngredients',
+            'todayRevenue', 'monthlyRevenue', 'yearlyRevenue'
         ));
     });
 
@@ -337,7 +444,7 @@ Route::middleware(['role:admin'])->group(function () {
 
         $products = Product::with('ingredients')->get();
         $locations = Location::all();
-        $ingredients = Ingredient::all();
+        $ingredients = Ingredient::with('products')->get();
         $transactions = InventoryTransaction::with('product', 'location')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at', 'desc')
@@ -358,16 +465,16 @@ Route::middleware(['role:admin'])->group(function () {
                 return $items->pluck('stock', 'product_id');
             });
 
-        // Dynamic Low Stock Ingredients List
+        // Dynamic Low Stock Ingredients List & attach current stock
         $lowStockIngredients = [];
         foreach ($ingredients as $ing) {
             $stock = 0;
             foreach ($ing->products as $product) {
-                $productStock = (float)DB::table('inventory_transactions')
-                    ->where('product_id', $product->id)
-                    ->sum('quantity') ?? 0;
+                $productStock = (float)($stockLevels[$product->id] ?? 0);
                 $stock += $productStock * $product->pivot->quantity_needed;
             }
+            $ing->current_stock = $stock;
+
             if ($stock <= $ing->alert_threshold) {
                 $lowStockIngredients[] = [
                     'id' => $ing->id,
@@ -475,18 +582,6 @@ Route::middleware(['role:admin'])->group(function () {
     Route::post('/admin/inventory/transactions/{transaction}/delete', function (InventoryTransaction $transaction) {
         $transaction->delete();
         return redirect('/admin/inventory')->with('success', 'تم حذف عملية التوريد بنجاح.');
-    });
-
-    // Order History View
-    Route::get('/admin/orders', function () {
-        $startDate = \Illuminate\Support\Carbon::parse(session('start_date'));
-        $endDate = \Illuminate\Support\Carbon::parse(session('end_date'));
-
-        $orders = Order::with('location', 'payments', 'items.product')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc')
-            ->get();
-        return view('orders', compact('orders'));
     });
 
     // Branch Locations CRUD

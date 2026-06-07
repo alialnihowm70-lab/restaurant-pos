@@ -10,7 +10,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>المدينة POS - سجل المبيعات والطلبات</title>
+    <title>المدينة POS - {{ $isArchive ? 'أرشيف الفواتير' : 'سجل الفواتير اليومية' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -80,43 +80,72 @@
     <div class="flex-grow flex flex-col overflow-hidden h-screen">
 
         <!-- ── Top Header ── -->
-        <header class="relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex items-center justify-between gap-4 flex-shrink-0 z-20">
-            <div class="flex items-center gap-3">
-                <button @click="$dispatch('toggle-sidebar')" class="lg:hidden w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors text-lg">☰</button>
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-lg shadow-lg shadow-orange-500/20 flex-shrink-0">📜</div>
-                <div>
-                    <h1 class="text-sm font-black text-slate-900 dark:text-white leading-none">سجل الفواتير والمبيعات</h1>
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-0.5">Orders & Billing History</span>
+        <header class="relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-4 flex-shrink-0 z-20">
+            <div class="flex items-center justify-between w-full lg:w-auto">
+                <div class="flex items-center gap-3">
+                    <button @click="$dispatch('toggle-sidebar')" class="lg:hidden w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors text-lg">☰</button>
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-lg shadow-lg shadow-orange-500/20 flex-shrink-0">🗄️</div>
+                    <div>
+                        <h1 class="text-sm font-black text-slate-900 dark:text-white leading-none">
+                            {{ $isArchive ? 'أرشيف الفواتير العام' : 'سجل الفواتير اليومية' }}
+                        </h1>
+                        <span class="text-[10px] text-slate-450 dark:text-slate-500 font-bold block mt-0.5 leading-none">
+                            {{ $isArchive ? 'Historical Archives' : 'Today\'s Orders & Billings' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a href="/pos" class="lg:hidden bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-250 dark:border-slate-700 px-3.5 py-2 rounded-2xl text-[10px] font-black tracking-wider transition-all shadow-sm flex items-center gap-1.5 flex-shrink-0">
+                        🧾 الكاشير
+                    </a>
+                    <div class="bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl">
+                        <span class="text-[11px] text-amber-600 dark:text-amber-400 font-black">
+                            الإيرادات: <span x-text="formatCurrency(orders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + parseFloat(o.total_amount), 0))"></span> د.ل
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Printer IP input -->
-            <div class="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3.5 py-2 rounded-xl">
-                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider whitespace-nowrap">🖨️ IP الطابعة:</span>
-                <input type="text" x-model="printerIp" placeholder="192.168.1.100"
-                       class="w-36 bg-transparent text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none text-center" dir="ltr" />
-            </div>
+            <!-- Date filter only for Archive -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto justify-end">
+                @if($isArchive)
+                <form action="/admin/orders/archive" method="GET" class="flex items-center justify-between sm:justify-start gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl shadow-sm w-full sm:w-auto">
+                    <div class="flex items-center gap-1 px-1.5">
+                        <span class="text-[8px] text-slate-400 font-black uppercase">من:</span>
+                        <input type="date" name="start_date" value="{{ session('start_date') ? \Illuminate\Support\Carbon::parse(session('start_date'))->format('Y-m-d') : \Illuminate\Support\Carbon::today()->format('Y-m-d') }}" class="bg-transparent text-[11px] font-bold text-slate-750 dark:text-slate-200 focus:outline-none w-24 sm:w-auto" />
+                    </div>
+                    <div class="h-3 w-px bg-slate-250 dark:bg-slate-700"></div>
+                    <div class="flex items-center gap-1 px-1.5">
+                        <span class="text-[8px] text-slate-400 font-black uppercase">إلى:</span>
+                        <input type="date" name="end_date" value="{{ session('end_date') ? \Illuminate\Support\Carbon::parse(session('end_date'))->format('Y-m-d') : \Illuminate\Support\Carbon::today()->format('Y-m-d') }}" class="bg-transparent text-[11px] font-bold text-slate-750 dark:text-slate-200 focus:outline-none w-24 sm:w-auto" />
+                    </div>
+                    <button type="submit" class="bg-slate-900 hover:bg-slate-950 dark:bg-slate-800 dark:hover:bg-slate-755 text-white text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow">
+                        تصفية
+                    </button>
+                    @if(request('start_date') || request('end_date'))
+                        <a href="/admin/orders/archive" class="text-rose-600 hover:text-rose-700 text-[10px] font-bold px-2">إعادة</a>
+                    @endif
+                </form>
+                @endif
 
-            <!-- Total summary pill -->
-            <div class="flex items-center gap-2">
-                <a href="/pos" class="lg:hidden bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-250 dark:border-slate-700 px-3.5 py-2 rounded-2xl text-[10px] font-black tracking-wider transition-all shadow-sm flex items-center gap-1.5 flex-shrink-0">
-                    🧾 الكاشير
-                </a>
-                <div class="bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl">
-                    <span class="text-[11px] text-amber-600 dark:text-amber-400 font-black">
-                        الإيرادات: <span x-text="formatCurrency(orders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + parseFloat(o.total_amount), 0))"></span> د.ل
-                    </span>
-                </div>
-                <div class="hidden sm:flex bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl">
-                    <span class="text-[11px] text-slate-600 dark:text-slate-300 font-black">
-                        <span x-text="orders.length"></span> فاتورة
-                    </span>
+                <div class="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3.5 py-2 rounded-xl">
+                    <span class="text-[10px] text-slate-550 dark:text-slate-400 font-black uppercase tracking-wider whitespace-nowrap">🖨️ IP:</span>
+                    <input type="text" x-model="printerIp" placeholder="192.168.1.100"
+                           class="w-28 bg-transparent text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none text-center" dir="ltr" />
                 </div>
             </div>
         </header>
 
         <!-- ── Body ── -->
         <main class="flex-grow overflow-y-auto p-5 lg:p-6 space-y-5 fade-up" dir="rtl">
+
+            @if(session('success'))
+                <div class="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-250 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 p-4 rounded-2xl text-xs font-bold flex items-center gap-3 animate-pulse shadow-sm text-right">
+                    <span>✅</span>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
 
             <!-- ── KPI Cards ── -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -160,7 +189,9 @@
 
                 <!-- Table header toolbar -->
                 <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 flex-wrap">
-                    <h2 class="text-sm font-black text-slate-800 dark:text-white">أرشيف الفواتير والمعاملات</h2>
+                    <h2 class="text-sm font-black text-slate-800 dark:text-white">
+                        {{ $isArchive ? 'أرشيف الفواتير والمعاملات التاريخية' : 'سجل الفواتير والمعاملات لليوم' }}
+                    </h2>
 
                     <!-- Printer IP (mobile) -->
                     <div class="md:hidden flex items-center gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl">
@@ -299,6 +330,14 @@
                                                 </button>
                                             </template>
 
+                                            <!-- Edit order button (only if not cancelled) -->
+                                            <template x-if="getOrderStatus('{{ $order->id }}') !== 'cancelled'">
+                                                <button @click="openEditModal('{{ $order->id }}')"
+                                                        class="bg-amber-500/10 dark:bg-amber-550/10 hover:bg-amber-505 hover:text-slate-950 dark:hover:bg-amber-505 dark:hover:text-slate-950 text-amber-700 dark:text-amber-400 text-[10px] font-black px-2.5 py-1.5 rounded-lg border border-amber-500/20 hover:border-amber-600 transition-all">
+                                                    ✏️ تعديل
+                                                </button>
+                                            </template>
+
                                             <button @click="reprintReceipt('{{ $order->id }}')"
                                                     class="bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 dark:hover:bg-amber-500 dark:hover:text-slate-950 text-slate-600 dark:text-slate-400 text-[10px] font-black px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-amber-500 transition-all">
                                                 🖨️ IP
@@ -325,6 +364,118 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Edit Order Modal -->
+    <div x-show="showEditModal"
+         x-transition.opacity
+         class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 text-right"
+         style="display: none;">
+        <div @click.away="showEditModal = false"
+             class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white leading-none">تعديل الفاتورة رقم: <span x-text="editingOrder?.invoice_number || ''"></span></h3>
+                    <span class="text-[9px] text-slate-400 dark:text-slate-500 font-bold block mt-1">تعديل الوجبات، الكميات، الخصومات والضرائب</span>
+                </div>
+                <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-650 text-xl font-bold">×</button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="flex-grow overflow-y-auto space-y-4 pr-1 pl-1">
+                <!-- Items Table -->
+                <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+                    <table class="w-full text-right text-xs">
+                        <thead class="bg-slate-50 dark:bg-slate-950/50 text-[10px] font-black text-slate-400 dark:text-slate-600 border-b border-slate-200 dark:border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3">الوجبة</th>
+                                <th class="px-4 py-3 text-center">الكمية</th>
+                                <th class="px-4 py-3 text-left">السعر</th>
+                                <th class="px-4 py-3 text-left">الإجمالي</th>
+                                <th class="px-4 py-3 text-center">إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            <template x-for="(item, index) in (editingOrder ? editingOrder.items : [])" :key="item.id">
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-950/20">
+                                    <td class="px-4 py-3 font-bold text-slate-800 dark:text-slate-200" x-text="item.product ? item.product.name : 'منتج غير معروف'"></td>
+                                    <td class="px-4 py-2 text-center">
+                                        <div class="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-850 px-2 py-1 rounded-xl">
+                                            <button type="button" @click="decrementEditQty(item)" class="w-6 h-6 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">-</button>
+                                            <span class="font-mono font-bold text-xs w-6 text-center" x-text="item.quantity"></span>
+                                            <button type="button" @click="incrementEditQty(item)" class="w-6 h-6 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-400" x-text="parseFloat(item.price).toFixed(2) + ' د.ل'"></td>
+                                    <td class="px-4 py-3 text-left font-black text-slate-800 dark:text-slate-200" x-text="parseFloat(item.price * item.quantity).toFixed(2) + ' د.ل'"></td>
+                                    <td class="px-4 py-2 text-center">
+                                        <button type="button" @click="removeEditItem(index)" class="text-rose-600 hover:text-rose-800 font-black text-sm p-1">🗑️</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add New Item Section -->
+                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/80 p-4 rounded-2xl">
+                    <h4 class="text-xs font-black text-slate-800 dark:text-slate-350 mb-3">إضافة صنف جديد للفاتورة</h4>
+                    <div class="flex items-end gap-3 flex-wrap sm:flex-nowrap">
+                        <!-- Product selection -->
+                        <div class="space-y-1.5 flex-grow text-right">
+                            <label class="text-[10px] text-slate-400 dark:text-slate-500 font-bold block">الوجبة / الصنف</label>
+                            <select x-model="selectedAddProductId" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none">
+                                <option value="">اختر وجبة...</option>
+                                <template x-for="prod in allProducts" :key="prod.id">
+                                    <option :value="prod.id" x-text="prod.name + ' (' + parseFloat(prod.base_price).toFixed(2) + ' د.ل)'"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <!-- Quantity -->
+                        <div class="space-y-1.5 w-24 text-right flex-shrink-0">
+                            <label class="text-[10px] text-slate-400 dark:text-slate-550 font-bold block">الكمية</label>
+                            <input type="number" x-model="selectedAddQty" min="1" step="1" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-center text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-bold" />
+                        </div>
+                        <!-- Add Button -->
+                        <button type="button" @click="addEditItem()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs px-4 py-2 rounded-xl transition-all shadow h-9 flex items-center justify-center">
+                            ＋ إضافة صنف
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Discount and Tax Fields -->
+                <div class="grid grid-cols-2 gap-4" x-if="editingOrder">
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">الخصم المباشر (د.ل)</label>
+                        <input type="number" step="0.01" min="0" x-model="editingOrder.discount" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-bold text-right" />
+                    </div>
+                    <div class="space-y-1.5 text-right">
+                        <label class="text-xs text-slate-500 font-bold">الضرائب (د.ل)</label>
+                        <input type="number" step="0.01" min="0" x-model="editingOrder.tax" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-bold text-right" />
+                    </div>
+                </div>
+
+                <!-- Live Totals Summary -->
+                <div class="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 flex justify-between items-center shadow-inner">
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 block font-bold">المجموع الفرعي للأصناف</span>
+                        <span class="text-xs font-black text-slate-700 dark:text-slate-350" x-text="parseFloat(getEditingSubtotal()).toFixed(2) + ' د.ل'"></span>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 block font-bold text-left">صافي إجمالي الفاتورة الجديد</span>
+                        <span class="text-lg font-black text-amber-600 dark:text-amber-450" x-text="parseFloat(getEditingTotal()).toFixed(2) + ' د.ل'"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-4 flex-shrink-0">
+                <button type="button" @click="submitOrderEdits()" class="w-2/3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3.5 rounded-xl transition-all shadow-lg shadow-amber-500/10">حفظ وتعديل الفاتورة</button>
+                <button type="button" @click="showEditModal = false" class="w-1/3 bg-slate-250 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-755 text-slate-800 dark:text-slate-200 font-black py-3.5 rounded-xl transition-all">إلغاء</button>
+            </div>
+        </div>
     </div>
 
     <!-- Hidden printable receipt -->
@@ -384,8 +535,122 @@
                 selectedOrder: null,
                 orders: @json($orders->load('items.product', 'location', 'payments')),
 
+                // Edit order Alpine state
+                showEditModal: false,
+                editingOrder: null,
+                allProducts: @json($products),
+                selectedAddProductId: '',
+                selectedAddQty: 1,
+
                 init() {
                     this.$watch('printerIp', val => localStorage.setItem('printerIp', val));
+                },
+
+                openEditModal(orderId) {
+                    const order = this.orders.find(o => o.id === orderId);
+                    if (!order) return;
+                    this.editingOrder = JSON.parse(JSON.stringify(order));
+                    this.selectedAddProductId = '';
+                    this.selectedAddQty = 1;
+                    this.showEditModal = true;
+                },
+
+                getEditingSubtotal() {
+                    if (!this.editingOrder) return 0;
+                    return this.editingOrder.items.reduce((sum, item) => {
+                        const price = parseFloat(item.price || (item.product ? item.product.base_price : 0));
+                        return sum + (price * item.quantity);
+                    }, 0);
+                },
+
+                getEditingTotal() {
+                    const subtotal = this.getEditingSubtotal();
+                    if (!this.editingOrder) return 0;
+                    const discount = parseFloat(this.editingOrder.discount || 0);
+                    const tax = parseFloat(this.editingOrder.tax || 0);
+                    return Math.max(0, subtotal - discount + tax);
+                },
+
+                incrementEditQty(item) {
+                    item.quantity++;
+                },
+
+                decrementEditQty(item) {
+                    if (item.quantity > 1) {
+                        item.quantity--;
+                    }
+                },
+
+                removeEditItem(index) {
+                    this.editingOrder.items.splice(index, 1);
+                },
+
+                addEditItem() {
+                    if (!this.selectedAddProductId) return;
+                    const product = this.allProducts.find(p => p.id === this.selectedAddProductId);
+                    if (!product) return;
+
+                    const existingItem = this.editingOrder.items.find(i => i.product_id === product.id);
+                    if (existingItem) {
+                        existingItem.quantity += parseInt(this.selectedAddQty || 1);
+                    } else {
+                        this.editingOrder.items.push({
+                            id: 'NEW_' + Math.random().toString(36).substr(2, 9),
+                            product_id: product.id,
+                            product: product,
+                            quantity: parseInt(this.selectedAddQty || 1),
+                            price: parseFloat(product.base_price)
+                        });
+                    }
+
+                    this.selectedAddProductId = '';
+                    this.selectedAddQty = 1;
+                },
+
+                submitOrderEdits() {
+                    if (!this.editingOrder || this.editingOrder.items.length === 0) {
+                        alert('يجب أن تحتوي الفاتورة على صنف واحد على الأقل.');
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/pos/orders/${this.editingOrder.id}/update`;
+
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
+
+                    this.editingOrder.items.forEach((item, index) => {
+                        const pidInput = document.createElement('input');
+                        pidInput.type = 'hidden';
+                        pidInput.name = `items[${index}][product_id]`;
+                        pidInput.value = item.product_id;
+                        form.appendChild(pidInput);
+
+                        const qtyInput = document.createElement('input');
+                        qtyInput.type = 'hidden';
+                        qtyInput.name = `items[${index}][quantity]`;
+                        qtyInput.value = item.quantity;
+                        form.appendChild(qtyInput);
+                    });
+
+                    const discInput = document.createElement('input');
+                    discInput.type = 'hidden';
+                    discInput.name = 'discount';
+                    discInput.value = this.editingOrder.discount;
+                    form.appendChild(discInput);
+
+                    const taxInput = document.createElement('input');
+                    taxInput.type = 'hidden';
+                    taxInput.name = 'tax';
+                    taxInput.value = this.editingOrder.tax;
+                    form.appendChild(taxInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
                 },
 
                 formatCurrency(val) {
