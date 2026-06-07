@@ -9,12 +9,12 @@
         <div class="p-6 space-y-8 relative z-10 overflow-y-auto hide-scrollbar">
             <!-- Logo Header -->
             <div class="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
-                <div class="w-12 h-12 flex-shrink-0 rounded-[14px] bg-amber-500 flex items-center justify-center font-black text-white shadow-[0_4px_12px_rgba(245,158,11,0.3)] text-xl hover:rotate-6 transition-transform duration-300">
-                    M
+                <div class="w-12 h-12 flex-shrink-0 rounded-[14px] bg-gradient-to-br from-emerald-500 to-orange-500 flex items-center justify-center font-black text-white shadow-[0_4px_12px_rgba(16,185,129,0.35)] text-xl hover:rotate-6 transition-transform duration-300">
+                    N
                 </div>
                 <div>
-                    <h1 class="text-sm font-black tracking-tight text-slate-900 dark:text-white leading-tight">Al-Madina POS</h1>
-                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block mt-0.5">منظومة ذكية متكاملة</span>
+                    <h1 class="text-sm font-black tracking-tight text-slate-900 dark:text-white leading-tight">alnihowm</h1>
+                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block mt-0.5">بيلو سماش كيق</span>
                 </div>
             </div>
 
@@ -23,11 +23,11 @@
                 <span class="text-xs font-bold text-slate-700 dark:text-slate-300">مظهر المنظومة</span>
                 <button @click="toggleTheme()" 
                         class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none flex items-center p-1 shadow-inner"
-                        :class="isDark ? 'bg-amber-500' : 'bg-slate-300'">
+                        :class="isDark ? 'bg-gradient-to-r from-emerald-500 to-orange-500' : 'bg-slate-300'">
                     <!-- Moving Dial -->
                     <div class="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] transition-transform duration-300 shadow-sm"
                          :class="isDark ? 'translate-x-0' : '-translate-x-6'">
-                        <span x-show="!isDark" class="text-amber-500">☀️</span>
+                        <span x-show="!isDark" class="text-orange-500">☀️</span>
                         <span x-show="isDark" class="text-slate-900">🌙</span>
                     </div>
                 </button>
@@ -68,7 +68,7 @@
 
                     <!-- Apply Button -->
                     <button type="submit" 
-                            class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs py-2 rounded-xl transition-all shadow-md shadow-amber-500/10 hover:shadow-amber-500/20">
+                            class="w-full bg-gradient-to-r from-emerald-500 to-orange-500 hover:from-emerald-600 hover:to-orange-600 text-white font-black text-xs py-2 rounded-xl transition-all shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20">
                         تطبيق الفلترة ⚡
                     </button>
                 </form>
@@ -81,50 +81,50 @@
                     <!-- POS Cashier Link (Admin & Cashier only) -->
                     @if(in_array(auth()->user()->role, ['admin', 'cashier']))
                         <a href="/pos"
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('pos') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('pos') ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">🛒</span>
                                 <span>شاشة الكاشير</span>
                             </div>
-                            <span class="text-[9px] {{ request()->is('pos') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">POS</span>
+                            <span class="text-[9px] {{ request()->is('pos') ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">POS</span>
                         </a>
                     @endif
 
                     <!-- Active Orders Board (Admin, Cashier & Chef) -->
                     @if(in_array(auth()->user()->role, ['admin', 'cashier', 'chef']))
                         <a href="/admin/orders/active"
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders/active') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders/active') ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">⚡</span>
                                 <span>الطلبات النشطة</span>
                             </div>
-                            <span class="text-[9px] {{ request()->is('admin/orders/active') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Live</span>
+                            <span class="text-[9px] {{ request()->is('admin/orders/active') ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Live</span>
                         </a>
                     @endif
 
                     <!-- Dashboard Statistics (Admin only) -->
                     @if(auth()->user()->role === 'admin')
                         <a href="/admin"
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin') ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">📊</span>
                                 <span>التحليلات</span>
                             </div>
-                            <span class="text-[9px] {{ request()->is('admin') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Stats</span>
+                            <span class="text-[9px] {{ request()->is('admin') ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Stats</span>
                         </a>
                     @endif
 
                     <!-- Inventory Manager Link (Admin only) -->
                     @if(auth()->user()->role === 'admin')
                         <a href="/admin/inventory"
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/inventory*') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/inventory*') ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">📦</span>
                                 <span>المخازن والجرد</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span x-show="lowStockCount > 0" class="bg-rose-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold" x-text="lowStockCount" style="display: none;"></span>
-                                <span class="text-[9px] {{ request()->is('admin/inventory*') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Stock</span>
+                                <span class="text-[9px] {{ request()->is('admin/inventory*') ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Stock</span>
                             </div>
                         </a>
                     @endif
@@ -132,21 +132,21 @@
                     <!-- Order Sales History (Admin & Cashier) -->
                     @if(in_array(auth()->user()->role, ['admin', 'cashier']))
                         <a href="/admin/orders"
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders') && !request()->is('admin/orders/*') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders') && !request()->is('admin/orders/*') ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">📜</span>
                                 <span>الفواتير اليومية</span>
                             </div>
-                            <span class="text-[9px] {{ request()->is('admin/orders') && !request()->is('admin/orders/*') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Today</span>
+                            <span class="text-[9px] {{ request()->is('admin/orders') && !request()->is('admin/orders/*') ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Today</span>
                         </a>
 
                         <a href="/admin/orders/archive"
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders/archive') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders/archive') ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">🗄️</span>
                                 <span>أرشيف الفواتير</span>
                             </div>
-                            <span class="text-[9px] {{ request()->is('admin/orders/archive') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Archive</span>
+                            <span class="text-[9px] {{ request()->is('admin/orders/archive') ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Archive</span>
                         </a>
                     @endif
                 @endif
@@ -164,7 +164,7 @@
                     </div>
                     <button @click="requestPermission()" 
                             class="p-2 rounded-xl text-[10px] transition-all duration-300 font-bold"
-                            :class="notificationPermission === 'granted' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm'">
+                            :class="notificationPermission === 'granted' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-gradient-to-r from-emerald-500 to-orange-500 hover:from-emerald-600 hover:to-orange-600 text-white shadow-sm'">
                         <span x-text="notificationPermission === 'granted' ? '🔔 نشط' : '🔔 تفعيل'"></span>
                     </button>
                 </div>
@@ -187,7 +187,7 @@
                     <div class="flex gap-2">
                         <!-- Role badge -->
                         <div class="flex-1 text-[10px] font-bold uppercase py-2 rounded-xl flex items-center justify-center border
-                            @if(auth()->user()->role === 'admin') bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500 border-amber-200 dark:border-amber-500/20
+                            @if(auth()->user()->role === 'admin') bg-gradient-to-r from-emerald-50 to-orange-50 dark:from-emerald-500/10 dark:to-orange-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20
                             @elseif(auth()->user()->role === 'chef') bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border-emerald-200 dark:border-emerald-500/20
                             @else bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 border-blue-200 dark:border-blue-500/20 @endif">
                             @if(auth()->user()->role === 'admin') 👑 المدير
@@ -299,9 +299,9 @@
         animation: pulseGlow 2s infinite;
     }
     @keyframes pulseGlow {
-        0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-        70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+        70% { box-shadow: 0 0 0 8px rgba(249, 115, 22, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 </style>
 
