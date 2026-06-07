@@ -30,7 +30,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>منظومة المدينة - لوحة الإدارة والتحليلات</title>
+    <title>alnihowm | Bello Smash - لوحة الإدارة والتحليلات</title>
     <!-- Chart.js CDN (async to avoid blocking page render) -->
     <script async src="https://cdn.jsdelivr.net/npm/chart.js" onload="window.__chartJsLoaded = true; window.dispatchEvent(new Event('chartjs-ready'));"></script>
     <!-- Fonts -->
@@ -672,7 +672,7 @@
                 <!-- Report Header -->
                 <div class="flex justify-between items-start border-b border-slate-200 print:border-black pb-4 text-right">
                     <div>
-                        <h2 class="text-lg font-black text-slate-900 print:text-black">مطعم المدينة المنورة - تقرير الأرباح والخسائر</h2>
+                        <h2 class="text-lg font-black text-slate-900 print:text-black">Bello Smash - تقرير الأرباح والخسائر</h2>
                         <p class="text-[10px] text-amber-600 print:text-gray-700 font-extrabold uppercase tracking-wider mt-1">تقرير قائمة الدخل الجردي للمبيعات والمخزن • Income Statement</p>
                     </div>
                     <div class="text-left text-[9px] text-slate-450 print:text-black font-mono" dir="ltr">

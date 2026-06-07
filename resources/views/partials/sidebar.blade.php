@@ -9,12 +9,12 @@
         <div class="p-6 space-y-8 relative z-10 overflow-y-auto hide-scrollbar">
             <!-- Logo Header -->
             <div class="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
-                <div class="w-12 h-12 flex-shrink-0 rounded-[14px] bg-gradient-to-br from-emerald-500 to-orange-500 flex items-center justify-center font-black text-white shadow-[0_4px_12px_rgba(16,185,129,0.35)] text-xl hover:rotate-6 transition-transform duration-300">
-                    N
+                <div class="w-12 h-12 flex-shrink-0 rounded-[14px] overflow-hidden hover:rotate-6 transition-transform duration-300 shadow-[0_4px_12px_rgba(16,185,129,0.3)]">
+                    <img src="/images/logo.png" alt="Bello Smash" class="w-full h-full object-cover" />
                 </div>
                 <div>
                     <h1 class="text-sm font-black tracking-tight text-slate-900 dark:text-white leading-tight">alnihowm</h1>
-                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block mt-0.5">بيلو سماش كيق</span>
+                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block mt-0.5">Bello Smash Burger & Milkshake</span>
                 </div>
             </div>
 

@@ -38,12 +38,12 @@
         
         <!-- Branding Logo & Header -->
         <div class="text-center space-y-4">
-            <div class="w-18 h-18 rounded-[24px] bg-gradient-to-tr from-emerald-500 via-green-500 to-orange-500 flex items-center justify-center font-black text-white shadow-2xl shadow-emerald-500/20 text-3xl tracking-wider mx-auto animate-pulse">
-                N
+            <div class="w-24 h-24 rounded-[24px] overflow-hidden shadow-2xl shadow-emerald-500/20 mx-auto">
+                <img src="/images/logo.png" alt="Bello Smash" class="w-full h-full object-cover" />
             </div>
             <div class="space-y-1">
                 <h1 class="text-2xl font-black text-slate-900 tracking-tight">alnihowm</h1>
-                <span class="text-xs text-emerald-700 font-extrabold tracking-widest block uppercase">بيلو سماش كيق | بوابة تسجيل دخول الموظفين</span>
+                <span class="text-xs text-emerald-700 font-extrabold tracking-widest block uppercase">Bello Smash Burger &amp; Milkshake</span>
             </div>
         </div>
 

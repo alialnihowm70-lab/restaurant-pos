@@ -11,7 +11,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>المدينة POS - واجهة الكاشير</title>
+    <title>alnihowm | Bello Smash - واجهة الكاشير</title>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;650;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;850&display=swap" rel="stylesheet">
     <!-- Compiled Vite Assets -->
@@ -188,7 +188,7 @@
                         M
                     </div>
                     <div>
-                        <h1 class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white leading-tight">المدينة POS</h1>
+                        <h1 class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white leading-tight">Bello Smash</h1>
                         <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block mt-0.5">واجهة الكاشير المزامنة</span>
                     </div>
                 </div>
@@ -587,7 +587,7 @@
                     <!-- Real-looking invoice receipt -->
                     <div id="printable-receipt-card" class="paper-receipt p-6 space-y-4 text-right" dir="rtl">
                         <div class="text-center space-y-1">
-                            <h2 class="text-base font-black tracking-tight text-slate-900">مطعم المدينة المنورة</h2>
+                            <h2 class="text-base font-black tracking-tight text-slate-900">Bello Smash Burger &amp; Milkshake</h2>
                             <p class="text-[10px] text-slate-500 font-bold" x-text="receiptData.locationName"></p>
                             <p class="text-[9px] text-slate-400">الهاتف: 091-0000000</p>
                         </div>
