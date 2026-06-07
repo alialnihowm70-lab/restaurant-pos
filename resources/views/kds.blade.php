@@ -167,7 +167,7 @@
     @include('partials.sidebar')
 
     <!-- Main Content Area -->
-    <div class="flex-grow flex flex-col overflow-hidden h-screen">
+    <div class="flex-grow flex flex-col overflow-hidden h-screen" x-data="{}">
 
         <!-- ──────────── Top Header ──────────── -->
         <header class="kds-header px-5 py-3 flex items-center justify-between gap-4 flex-shrink-0 z-20">

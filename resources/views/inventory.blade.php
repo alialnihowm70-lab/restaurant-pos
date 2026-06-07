@@ -92,7 +92,7 @@
     @include('partials.sidebar')
 
     <!-- Main Workspace -->
-    <div class="flex-grow flex flex-col h-screen overflow-hidden relative">
+    <div class="flex-grow flex flex-col h-screen overflow-hidden relative" x-data="{}">
         
         <!-- Header Bar -->
         <header class="relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right z-20">

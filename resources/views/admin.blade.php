@@ -31,8 +31,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>منظومة المدينة - لوحة الإدارة والتحليلات</title>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js CDN (async to avoid blocking page render) -->
+    <script async src="https://cdn.jsdelivr.net/npm/chart.js" onload="window.__chartJsLoaded = true; window.dispatchEvent(new Event('chartjs-ready'));"></script>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;650;750;850;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Compiled Vite Assets -->
@@ -109,7 +109,7 @@
     @include('partials.sidebar')
 
     <!-- Main Workspace Area -->
-    <div class="flex-grow flex flex-col h-screen overflow-hidden relative">
+    <div class="flex-grow flex flex-col h-screen overflow-hidden relative" x-data="{ supplierTab: 'list', showReportModal: false, rent: '', salaries: '', utilities: '', misc: '', editingSupplier: null, editingUser: null }" dir="rtl">
         <!-- Top bar inside content area -->
         <header class="relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-3 flex-shrink-0 text-right z-20">
             <!-- Mobile Header Row -->
@@ -163,7 +163,7 @@
         </header>
 
 
-        <main class="flex-grow overflow-y-auto p-5 lg:p-7 space-y-6" x-data="{ supplierTab: 'list', showReportModal: false, rent: '', salaries: '', utilities: '', misc: '', editingSupplier: null, editingUser: null }" dir="rtl">
+        <main class="flex-grow overflow-y-auto p-5 lg:p-7 space-y-6">
         
         <!-- Flash Alert Notification -->
         @if(session('success'))
@@ -897,7 +897,7 @@
 </div>
     <!-- Chart.js rendering scripts -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        function initAdminCharts() {
             try {
                 const trendCtx = document.getElementById('salesTrendChart').getContext('2d');
                 const isDark = document.documentElement.classList.contains('dark');
@@ -1074,7 +1074,26 @@
             } catch (err) {
                 console.error("Failed to render Chart.js analytics: ", err);
             }
-        });
+        }
+
+        // Wait for Chart.js to load (it's async now)
+        if (window.__chartJsLoaded || typeof Chart !== 'undefined') {
+            // Chart.js already loaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initAdminCharts);
+            } else {
+                initAdminCharts();
+            }
+        } else {
+            // Wait for the async script to finish loading
+            window.addEventListener('chartjs-ready', () => {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initAdminCharts);
+                } else {
+                    initAdminCharts();
+                }
+            });
+        }
 
         function exportAdminReportToCSV(rentVal, salariesVal, utilitiesVal, miscVal) {
             const rent = parseFloat(rentVal) || 0;
