@@ -587,7 +587,7 @@
                     <!-- Real-looking invoice receipt -->
                     <div id="printable-receipt-card" class="paper-receipt p-6 space-y-4 text-right" dir="rtl">
                         <div class="text-center space-y-1">
-                            <h2 class="text-base font-black tracking-tight text-slate-900">Bello Smash Burger &amp; Milkshake</h2>
+                            <h2 class="text-base font-black tracking-tight text-slate-900">Bello Smash Burger</h2>
                             <p class="text-[10px] text-slate-500 font-bold" x-text="receiptData.locationName"></p>
                             <p class="text-[9px] text-slate-400">الهاتف: 091-0000000</p>
                         </div>

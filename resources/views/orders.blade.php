@@ -488,7 +488,7 @@
         <template x-if="selectedOrder">
             <div>
                 <div class="text-center space-y-0.5 mb-3">
-                    <h2 class="text-base font-extrabold">Bello Smash Burger &amp; Milkshake</h2>
+                    <h2 class="text-base font-extrabold">Bello Smash Burger</h2>
                     <p class="text-[11px] text-gray-500 font-bold" x-text="selectedOrder.location ? selectedOrder.location.name : ''"></p>
                     <p class="text-[10px] text-gray-400">الهاتف: 091-0000000</p>
                 </div>

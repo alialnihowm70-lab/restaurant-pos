@@ -43,7 +43,7 @@
             </div>
             <div class="space-y-1">
                 <h1 class="text-2xl font-black text-slate-900 tracking-tight">alnihowm</h1>
-                <span class="text-xs text-emerald-700 font-extrabold tracking-widest block uppercase">Bello Smash Burger &amp; Milkshake</span>
+                <span class="text-xs text-emerald-700 font-extrabold tracking-widest block uppercase">Bello Smash Burger</span>
             </div>
         </div>
 

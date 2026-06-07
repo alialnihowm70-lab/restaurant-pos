@@ -14,7 +14,7 @@
                 </div>
                 <div>
                     <h1 class="text-sm font-black tracking-tight text-slate-900 dark:text-white leading-tight">alnihowm</h1>
-                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block mt-0.5">Bello Smash Burger & Milkshake</span>
+                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block mt-0.5">Bello Smash Burger</span>
                 </div>
             </div>
 
