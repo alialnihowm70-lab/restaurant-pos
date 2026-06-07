@@ -747,8 +747,8 @@
                                 @forelse($transactions as $tx)
                                     <tr class="hover:bg-slate-50/50 transition-colors">
                                         <td class="px-6 py-4 font-mono text-[10px] text-slate-400 font-bold" dir="ltr">{{ substr($tx->id, 0, 8) }}...</td>
-                                        <td class="px-6 py-4 font-black text-slate-800">{{ $tx->product->name }}</td>
-                                        <td class="px-6 py-4 text-slate-600 font-bold">{{ $tx->location->name }}</td>
+                                        <td class="px-6 py-4 font-black text-slate-800">{{ $tx->product->name ?? 'منتج محذوف' }}</td>
+                                        <td class="px-6 py-4 text-slate-600 font-bold">{{ $tx->location->name ?? 'فرع محذوف' }}</td>
                                         <td class="px-6 py-4 text-left font-black {{ $tx->quantity > 0 ? 'text-emerald-600' : 'text-rose-600' }}" dir="ltr">
                                             {{ $tx->quantity > 0 ? '+' : '' }}{{ number_format($tx->quantity, 0) }}
                                         </td>

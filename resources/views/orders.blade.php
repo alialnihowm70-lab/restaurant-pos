@@ -229,7 +229,7 @@
                                     <td class="px-5 py-3.5">
                                         <span class="font-mono font-black text-slate-700 dark:text-slate-300 text-[11px]">{{ $order->invoice_number ?? '#' . strtoupper(substr($order->id, 0, 8)) }}</span>
                                     </td>
-                                    <td class="px-5 py-3.5 font-bold text-slate-600 dark:text-slate-400">{{ $order->location->name }}</td>
+                                    <td class="px-5 py-3.5 font-bold text-slate-600 dark:text-slate-400">{{ $order->location->name ?? 'فرع محذوف' }}</td>
                                     <td class="px-5 py-3.5">
                                         <span class="badge" :class="getBadgeClass('{{ $order->id }}')" x-text="getStatusText('{{ $order->id }}')">
                                         </span>
