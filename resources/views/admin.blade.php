@@ -302,11 +302,6 @@
                     <span class="text-[8px] text-slate-400 block font-medium truncate">قيمة الأصول الحالية</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base shadow-inner">📦</div>
-            </div>se tracking-wider block">أصول المستودعات</span>
-                    <h3 class="text-lg font-black text-emerald-650 tracking-tight" dir="ltr">{{ number_format($inventoryAssetValue, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
-                    <span class="text-[8px] text-slate-400 block font-medium truncate">قيمة الأصول الحالية</span>
-                </div>
-                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base shadow-inner">📦</div>
             </div>
         </section>
 
