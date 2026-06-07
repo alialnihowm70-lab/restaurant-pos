@@ -190,7 +190,13 @@
                         <span class="text-slate-500 font-bold block mt-1">يوجد عدد {{ count($lowStockIngredients) }} مكونات أساسية تحت حد الطلب الأدنى حالياً. يرجى توريدها لضمان استمرارية التشغيل.</span>
                     </div>
                 </div>
-                <a href="/admin/inventory" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 px-4.5 py-3 rounded-2xl transition-all shadow-md shadow-orange-550/15 font-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="/admin/inventory" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 px-4.5 py-3 rounded-2xl transition-all shadow-md shadow-orange-550/15 font-bold">
+                    عرض المخزون
+                </a>
+            </div>
+        @endif
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Today's Revenue -->
             <div class="bg-gradient-to-br from-amber-500/10 to-orange-600/10 border border-amber-500/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right hover-float">
                 <div class="space-y-1">
