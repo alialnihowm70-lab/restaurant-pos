@@ -113,19 +113,24 @@
                 <form action="/admin/orders/archive" method="GET" class="flex items-center justify-between sm:justify-start gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl shadow-sm w-full sm:w-auto">
                     <div class="flex items-center gap-1 px-1.5">
                         <span class="text-[8px] text-slate-400 font-black uppercase">من:</span>
-                        <input type="date" name="start_date" value="{{ session('start_date') ? \Illuminate\Support\Carbon::parse(session('start_date'))->format('Y-m-d') : \Illuminate\Support\Carbon::today()->format('Y-m-d') }}" class="bg-transparent text-[11px] font-bold text-slate-750 dark:text-slate-200 focus:outline-none w-24 sm:w-auto" />
+                        <input type="date" name="start_date"
+                               value="{{ $filterStart ?? \Illuminate\Support\Carbon::today()->format('Y-m-d') }}"
+                               class="bg-transparent text-[11px] font-bold text-slate-750 dark:text-slate-200 focus:outline-none w-24 sm:w-auto" />
                     </div>
                     <div class="h-3 w-px bg-slate-250 dark:bg-slate-700"></div>
                     <div class="flex items-center gap-1 px-1.5">
                         <span class="text-[8px] text-slate-400 font-black uppercase">إلى:</span>
-                        <input type="date" name="end_date" value="{{ session('end_date') ? \Illuminate\Support\Carbon::parse(session('end_date'))->format('Y-m-d') : \Illuminate\Support\Carbon::today()->format('Y-m-d') }}" class="bg-transparent text-[11px] font-bold text-slate-750 dark:text-slate-200 focus:outline-none w-24 sm:w-auto" />
+                        <input type="date" name="end_date"
+                               value="{{ $filterEnd ?? \Illuminate\Support\Carbon::today()->format('Y-m-d') }}"
+                               class="bg-transparent text-[11px] font-bold text-slate-750 dark:text-slate-200 focus:outline-none w-24 sm:w-auto" />
                     </div>
-                    <button type="submit" class="bg-slate-900 hover:bg-slate-950 dark:bg-slate-800 dark:hover:bg-slate-755 text-white text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow">
-                        تصفية
-                    </button>
-                    @if(request('start_date') || request('end_date'))
-                        <a href="/admin/orders/archive" class="text-rose-600 hover:text-rose-700 text-[10px] font-bold px-2">إعادة</a>
-                    @endif
+                    <div class="flex items-center gap-1">
+                        <button type="submit" class="bg-slate-900 hover:bg-slate-950 dark:bg-slate-800 dark:hover:bg-slate-755 text-white text-[9px] font-black px-3.5 py-2 rounded-xl transition-all shadow">
+                            تصفية
+                        </button>
+                        <a href="/admin/orders/archive?start_date={{ \Illuminate\Support\Carbon::today()->format('Y-m-d') }}&end_date={{ \Illuminate\Support\Carbon::today()->format('Y-m-d') }}"
+                           class="text-amber-600 hover:text-amber-700 text-[9px] font-black px-2 py-2 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all">اليوم</a>
+                    </div>
                 </form>
                 @endif
 

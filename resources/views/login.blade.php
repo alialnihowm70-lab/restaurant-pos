@@ -61,10 +61,10 @@
             <form action="/login" method="POST" class="space-y-4" id="loginForm">
                 @csrf
                 
-                <!-- Email Input -->
+                <!-- Login Identifier Input -->
                 <div class="space-y-1.5 text-right">
-                    <label class="text-[10px] font-bold text-slate-550 uppercase tracking-wider block">البريد الإلكتروني</label>
-                    <input type="email" name="email" required x-model="email" placeholder="مثال: cashier@pos.ly"
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">اسم الموظف أو البريد الإلكتروني</label>
+                    <input type="text" name="login" required x-model="login" placeholder="مثال: أحمد علي أو cashier@pos.ly"
                            class="w-full bg-white/50 border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3.5 text-sm text-slate-800 focus:outline-none transition-all duration-300 text-right shadow-sm" />
                 </div>
 
@@ -91,55 +91,13 @@
             </form>
         </div>
 
-        <!-- Quick Demo Accounts Selector (Phase 8 premium detail) -->
-        <div class="space-y-4">
-            <div class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
-                الدخول التجريبي السريع • Quick Access Demo Accounts
-            </div>
-            
-            <div class="grid grid-cols-3 gap-3">
-                <!-- Admin Card -->
-                <div @click="quickLogin('admin@pos.ly', 'admin123')"
-                     class="bg-white/80 backdrop-blur-md hover:bg-amber-50/10 border border-slate-200 hover:border-amber-500/40 p-4 rounded-2xl cursor-pointer text-center space-y-1.5 transition-all duration-300 group shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                    <span class="text-2xl group-hover:scale-110 transition-transform block">📊</span>
-                    <span class="text-[10px] font-extrabold text-slate-800 block">مدير النظام</span>
-                    <span class="text-[8px] text-slate-400 font-bold block">Admin</span>
-                </div>
-
-                <!-- Cashier Card -->
-                <div @click="quickLogin('cashier@pos.ly', 'cashier123')"
-                     class="bg-white/80 backdrop-blur-md hover:bg-amber-50/10 border border-slate-200 hover:border-amber-500/40 p-4 rounded-2xl cursor-pointer text-center space-y-1.5 transition-all duration-300 group shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                    <span class="text-2xl group-hover:scale-110 transition-transform block">🛒</span>
-                    <span class="text-[10px] font-extrabold text-slate-800 block">كاشير الصالة</span>
-                    <span class="text-[8px] text-slate-400 font-bold block">Cashier</span>
-                </div>
-
-                <!-- Chef Card -->
-                <div @click="quickLogin('chef@pos.ly', 'chef123')"
-                     class="bg-white/80 backdrop-blur-md hover:bg-amber-50/10 border border-slate-200 hover:border-amber-500/40 p-4 rounded-2xl cursor-pointer text-center space-y-1.5 transition-all duration-300 group shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                    <span class="text-2xl group-hover:scale-110 transition-transform block">🍳</span>
-                    <span class="text-[10px] font-extrabold text-slate-800 block">طاهي المطبخ</span>
-                    <span class="text-[8px] text-slate-400 font-bold block">Chef</span>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
         function loginApp() {
             return {
-                email: '',
-                password: '',
-                
-                quickLogin(demoEmail, demoPassword) {
-                    this.email = demoEmail;
-                    this.password = demoPassword;
-                    // Submit the form automatically after a slight delay for visual feedback
-                    setTimeout(() => {
-                        document.getElementById('loginForm').submit();
-                    }, 200);
-                }
+                login: '',
+                password: ''
             };
         }
     </script>

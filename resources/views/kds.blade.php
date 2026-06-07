@@ -485,10 +485,17 @@
                 completedOrders: [],
                 currentTime: Date.now(),
                 soundEnabled: localStorage.getItem('soundEnabled') !== 'false',
+                kdsErrors: 0,
 
                 init() {
                     setInterval(() => { this.currentTime = Date.now(); }, 1000);
-                    setInterval(() => { this.pollNewOrders(); }, 10000);
+                    // Adaptive polling: 4s normally, slows to 30s after 5 errors
+                    const poll = () => {
+                        this.pollNewOrders();
+                        const delay = this.kdsErrors >= 5 ? 30000 : 4000;
+                        setTimeout(poll, delay);
+                    };
+                    setTimeout(poll, 2000); // start after 2s
                 },
 
                 playDoubleChime() {
@@ -514,19 +521,27 @@
                 },
 
                 pollNewOrders() {
-                    fetch('/kds')
-                        .then(r => r.text())
-                        .then(html => {
-                            const match = html.match(/orders":\s*(\[.*?\]),/s);
-                            if (match && match[1]) {
-                                try {
-                                    const newOrders = JSON.parse(match[1]);
-                                    const oldIds = this.orders.map(o => o.id);
-                                    const hasNew = newOrders.some(o => !oldIds.includes(o.id));
-                                    if (hasNew && oldIds.length > 0) this.playDoubleChime();
-                                    this.orders = newOrders;
-                                } catch(e) { console.error('KDS parse error', e); }
+                    fetch('/api/orders/active.json')
+                        .then(r => {
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return r.json();
+                        })
+                        .then(data => {
+                            const newOrders = data.orders || [];
+                            const oldIds = this.orders.map(o => o.id);
+
+                            // New orders just arrived
+                            const brandNew = newOrders.filter(o => !oldIds.includes(o.id));
+                            if (brandNew.length > 0 && oldIds.length > 0) {
+                                this.playDoubleChime();
                             }
+
+                            this.orders = newOrders;
+                            this.kdsErrors = 0;
+                        })
+                        .catch(err => {
+                            this.kdsErrors = (this.kdsErrors || 0) + 1;
+                            console.warn('KDS poll error #' + this.kdsErrors, err);
                         });
                 },
 
@@ -581,27 +596,27 @@
                 },
 
                 getOrderType(notes) {
-                    if (!notes) return 'سفري';
-                    if (notes.includes('[محلي')) return 'محلي';
+                    if (!notes) return 'في سيارة';
+                    if (notes.includes('[في المطعم') || notes.includes('[محلي')) return 'في المطعم';
                     if (notes.includes('[توصيل]')) return 'توصيل';
-                    return 'سفري';
+                    return 'في سيارة';
                 },
 
                 cleanNotes(notes) {
                     if (!notes) return '';
-                    return notes.replace(/\[(محلي[^\]]*|سفري|توصيل)\]\s*/g, '').trim();
+                    return notes.replace(/\[(محلي[^\]]*|في المطعم[^\]]*|سفري|في سيارة|توصيل)\]\s*/g, '').trim();
                 },
 
                 getOrderTypeBadgeClass(notes) {
                     const t = this.getOrderType(notes);
-                    if (t === 'محلي') return 'badge-dinein';
+                    if (t === 'في المطعم') return 'badge-dinein';
                     if (t === 'توصيل') return 'badge-delivery';
                     return 'badge-takeaway';
                 },
 
                 getOrderTypeIcon(notes) {
                     const t = this.getOrderType(notes);
-                    if (t === 'محلي') return '🛋️ ';
+                    if (t === 'في المطعم') return '🛋️ ';
                     if (t === 'توصيل') return '🚗 ';
                     return '🛍️ ';
                 }

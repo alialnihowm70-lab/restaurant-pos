@@ -23,19 +23,31 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
+        $request->validate([
+            'login' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        if (Auth::attempt($credentials, $request->has('remember'))) {
+        $login = $request->input('login');
+        $password = $request->input('password');
+        $remember = $request->has('remember');
+
+        // Check if the input is an email, otherwise treat as username/name
+        $loginField = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+
+        $credentials = [
+            $loginField => $login,
+            'password' => $password,
+        ];
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             return $this->redirectBasedOnRole(Auth::user());
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records. (البريد الإلكتروني أو كلمة المرور غير صحيحة)',
-        ])->onlyInput('email');
+            'login' => 'البيانات المدخلة لا تطابق سجلاتنا. (اسم الموظف/البريد الإلكتروني أو كلمة المرور غير صحيحة)',
+        ])->onlyInput('login');
     }
 
     /**

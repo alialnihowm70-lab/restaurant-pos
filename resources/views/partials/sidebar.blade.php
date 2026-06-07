@@ -80,7 +80,7 @@
                 @if(auth()->check())
                     <!-- POS Cashier Link (Admin & Cashier only) -->
                     @if(in_array(auth()->user()->role, ['admin', 'cashier']))
-                        <a href="/pos" 
+                        <a href="/pos"
                            class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('pos') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">🛒</span>
@@ -90,11 +90,33 @@
                         </a>
                     @endif
 
+                    <!-- Active Orders Board (Admin & Cashier) -->
+                    @if(in_array(auth()->user()->role, ['admin', 'cashier']))
+                        <a href="/admin/orders/active"
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders/active') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                            <div class="flex items-center gap-4">
+                                <span class="text-lg group-hover:scale-110 transition-transform">⚡</span>
+                                <span>الطلبات النشطة</span>
+                            </div>
+                            <span class="text-[9px] {{ request()->is('admin/orders/active') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Live</span>
+                        </a>
+                    @endif
 
+                    <!-- KDS Kitchen Display (Admin & Chef) -->
+                    @if(in_array(auth()->user()->role, ['admin', 'chef']))
+                        <a href="/kds"
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('kds') ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                            <div class="flex items-center gap-4">
+                                <span class="text-lg group-hover:scale-110 transition-transform">👨‍🍳</span>
+                                <span>شاشة المطبخ</span>
+                            </div>
+                            <span class="text-[9px] {{ request()->is('kds') ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">KDS</span>
+                        </a>
+                    @endif
 
                     <!-- Dashboard Statistics (Admin only) -->
                     @if(auth()->user()->role === 'admin')
-                        <a href="/admin" 
+                        <a href="/admin"
                            class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">📊</span>
@@ -106,7 +128,7 @@
 
                     <!-- Inventory Manager Link (Admin only) -->
                     @if(auth()->user()->role === 'admin')
-                        <a href="/admin/inventory" 
+                        <a href="/admin/inventory"
                            class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/inventory*') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">📦</span>
@@ -119,18 +141,18 @@
                         </a>
                     @endif
 
-                    <!-- Order Sales History Link (Admin & Cashier only) -->
+                    <!-- Order Sales History (Admin & Cashier) -->
                     @if(in_array(auth()->user()->role, ['admin', 'cashier']))
-                        <a href="/admin/orders" 
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
+                        <a href="/admin/orders"
+                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders') && !request()->is('admin/orders/*') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">📜</span>
                                 <span>الفواتير اليومية</span>
                             </div>
-                            <span class="text-[9px] {{ request()->is('admin/orders') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Today</span>
+                            <span class="text-[9px] {{ request()->is('admin/orders') && !request()->is('admin/orders/*') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">Today</span>
                         </a>
 
-                        <a href="/admin/orders/archive" 
+                        <a href="/admin/orders/archive"
                            class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('admin/orders/archive') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
                             <div class="flex items-center gap-4">
                                 <span class="text-lg group-hover:scale-110 transition-transform">🗄️</span>

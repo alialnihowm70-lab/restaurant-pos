@@ -55,6 +55,41 @@ Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// ── JSON API Endpoints (authenticated users only, any role) ──
+Route::middleware(['auth'])->group(function () {
+    // Real-time active orders polling (JSON) – used by POS, Active Orders board, KDS
+    Route::get('/api/orders/active.json', function () {
+        $orders = Order::with('items.product', 'location')
+            ->whereIn('status', ['pending', 'cooking', 'ready'])
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id'             => $order->id,
+                    'invoice_number' => $order->invoice_number,
+                    'status'         => $order->status,
+                    'notes'          => $order->notes,
+                    'total_amount'   => $order->total_amount,
+                    'created_at'     => $order->created_at->toISOString(),
+                    'location'       => ['id' => $order->location->id, 'name' => $order->location->name],
+                    'items'          => $order->items->map(fn($i) => [
+                        'id'       => $i->id,
+                        'quantity' => $i->quantity,
+                        'price'    => $i->price,
+                        'product'  => $i->product ? ['id' => $i->product->id, 'name' => $i->product->name] : null,
+                    ]),
+                ];
+            });
+        return response()->json(['orders' => $orders, 'timestamp' => now()->toISOString()]);
+    });
+
+    // Completed/ready orders count for cashier notification badge
+    Route::get('/api/orders/ready-count.json', function () {
+        $count = Order::whereIn('status', ['ready'])->count();
+        return response()->json(['ready_count' => $count]);
+    });
+});
+
 // 1. Cashier POS Routes (Restricted to Cashier and Admin)
 Route::middleware(['role:cashier'])->group(function () {
     Route::get('/pos', function () {
@@ -82,10 +117,13 @@ Route::middleware(['role:cashier'])->group(function () {
 
     Route::get('/api/active-tables', function () {
         $occupied = Order::whereIn('status', ['pending', 'cooking', 'ready'])
-            ->where('notes', 'like', '%[محلي - طاولة%')
+            ->where(function ($query) {
+                $query->where('notes', 'like', '%[محلي - طاولة%')
+                      ->orWhere('notes', 'like', '%[في المطعم - طاولة%');
+            })
             ->pluck('notes')
             ->map(function ($note) {
-                if (preg_match('/\[محلي - طاولة (\d+)\]/', $note, $matches)) {
+                if (preg_match('/\[(?:محلي|في المطعم) - طاولة (\d+)\]/', $note, $matches)) {
                     return (int)$matches[1];
                 }
                 return null;
@@ -108,19 +146,29 @@ Route::middleware(['role:cashier'])->group(function () {
 
     // View Daily Orders (Today's only)
     Route::get('/admin/orders', function () {
+        $today = \Illuminate\Support\Carbon::today();
         $orders = Order::with('location', 'payments', 'items.product')
-            ->whereDate('created_at', \Illuminate\Support\Carbon::today())
+            ->whereDate('created_at', $today)
             ->orderBy('created_at', 'desc')
             ->get();
-        $products = Product::all();
+        $products  = Product::all();
         $isArchive = false;
-        return view('orders', compact('orders', 'products', 'isArchive'));
+        $filterStart = $today->format('Y-m-d');
+        $filterEnd   = $today->format('Y-m-d');
+        return view('orders', compact('orders', 'products', 'isArchive', 'filterStart', 'filterEnd'));
     });
 
-    // View Archive Orders (Based on Date Filter)
+    // View Archive Orders (Based on Date Filter via GET query params)
     Route::get('/admin/orders/archive', function () {
-        $startDate = \Illuminate\Support\Carbon::parse(session('start_date'));
-        $endDate = \Illuminate\Support\Carbon::parse(session('end_date'));
+        // Accept from query string; fall back to session; fall back to today
+        $startRaw = request('start_date') ?? session('start_date') ?? \Illuminate\Support\Carbon::today()->toDateString();
+        $endRaw   = request('end_date')   ?? session('end_date')   ?? \Illuminate\Support\Carbon::today()->toDateString();
+
+        $startDate = \Illuminate\Support\Carbon::parse($startRaw)->startOfDay();
+        $endDate   = \Illuminate\Support\Carbon::parse($endRaw)->endOfDay();
+
+        // Persist to session for subsequent page loads
+        session(['start_date' => $startDate->toDateString(), 'end_date' => $endDate->toDateString()]);
 
         $orders = Order::with('location', 'payments', 'items.product')
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -128,7 +176,9 @@ Route::middleware(['role:cashier'])->group(function () {
             ->get();
         $products = Product::all();
         $isArchive = true;
-        return view('orders', compact('orders', 'products', 'isArchive'));
+        $filterStart = $startDate->format('Y-m-d');
+        $filterEnd   = $endDate->format('Y-m-d');
+        return view('orders', compact('orders', 'products', 'isArchive', 'filterStart', 'filterEnd'));
     });
 
     // Edit Order Action
@@ -197,6 +247,15 @@ Route::middleware(['role:cashier'])->group(function () {
         });
 
         return redirect()->back()->with('success', 'تم تعديل الفاتورة بنجاح وتحديث الجرد المرتبط بها!');
+    });
+
+    // Active Orders Board View (HTML page – initial server-render only)
+    Route::get('/admin/orders/active', function () {
+        $orders = Order::with('items.product', 'location')
+            ->whereIn('status', ['pending', 'cooking', 'ready'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+        return view('active_orders', compact('orders'));
     });
 });
 
@@ -651,5 +710,49 @@ Route::middleware(['role:admin'])->group(function () {
     Route::post('/admin/recipes/{product}/{ingredient}/delete', function (Product $product, Ingredient $ingredient) {
         $product->ingredients()->detach($ingredient->id);
         return redirect('/admin/inventory')->with('success', 'Recipe ingredient removed successfully.');
+    });
+
+    // Category Deletion
+    Route::post('/admin/categories/delete', function () {
+        request()->validate([
+            'category' => 'required|string',
+        ]);
+
+        $category = request('category');
+
+        DB::transaction(function () use ($category) {
+            $products = Product::where('category', $category)->get();
+            foreach ($products as $product) {
+                // Remove recipe associations
+                $product->ingredients()->detach();
+                // Delete inventory transactions
+                InventoryTransaction::where('product_id', $product->id)->delete();
+                // Delete the product
+                $product->delete();
+            }
+        });
+
+        return redirect('/admin/inventory')->with('success', 'تم حذف الفئة وجميع وجباتها بنجاح!');
+    });
+
+    // Edit Inventory Transaction
+    Route::post('/admin/inventory/transactions/{transaction}/update', function (InventoryTransaction $transaction) {
+        request()->validate([
+            'quantity' => 'required|numeric',
+            'unit_cost' => 'required|numeric|min:0',
+            'type' => 'required|in:restock,sale,waste,adjustment',
+            'created_at' => 'required|date',
+            'location_id' => 'required|uuid|exists:locations,id',
+        ]);
+
+        $transaction->update([
+            'quantity' => (float)request('quantity'),
+            'unit_cost' => (float)request('unit_cost'),
+            'type' => request('type'),
+            'created_at' => \Illuminate\Support\Carbon::parse(request('created_at')),
+            'location_id' => request('location_id'),
+        ]);
+
+        return redirect('/admin/inventory')->with('success', 'تم تحديث حركة المخزن بنجاح!');
     });
 });

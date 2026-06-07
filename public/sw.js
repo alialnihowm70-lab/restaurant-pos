@@ -1,8 +1,5 @@
-const CACHE_NAME = 'almadina-pos-cache-v1';
+const CACHE_NAME = 'almadina-pos-cache-v2';
 const ASSETS = [
-    '/pos',
-    '/kds',
-    '/admin',
     'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap',
     'https://cdn.tailwindcss.com',
     'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js'
@@ -33,29 +30,52 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-    // Never cache API sync calls, payments webhooks/status, print triggers, or non-GET requests
+    // Only cache GET requests
+    if (e.request.method !== 'GET') {
+        return;
+    }
+
+    const url = new URL(e.request.url);
+
+    // Never cache API sync calls, payments webhooks/status, print triggers, login, pos, admin, kds, or live HTML
     if (
-        e.request.url.includes('/api/') || 
-        e.request.url.includes('/print') || 
-        e.request.url.includes('/status') ||
-        e.request.method !== 'GET'
+        url.pathname.includes('/api/') || 
+        url.pathname.includes('/print') || 
+        url.pathname.includes('/status') ||
+        url.pathname === '/login' ||
+        url.pathname.startsWith('/pos') ||
+        url.pathname.startsWith('/admin') ||
+        url.pathname.startsWith('/kds') ||
+        (e.request.headers.get('accept') && e.request.headers.get('accept').includes('text/html'))
     ) {
         return;
     }
 
+    // Cache static assets and CDN calls
     e.respondWith(
-        fetch(e.request)
-            .then((res) => {
-                // Cache a copy of the retrieved page for offline use
-                const resClone = res.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(e.request, resClone);
-                });
+        caches.match(e.request).then((cachedResponse) => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            return fetch(e.request).then((res) => {
+                // Check if it's a valid static resource before caching
+                if (
+                    res.status === 200 && 
+                    (
+                        url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2|woff|ttf|eot)$/) || 
+                        url.host.includes('fonts.googleapis.com') ||
+                        url.host.includes('fonts.gstatic.com') ||
+                        url.host.includes('cdn.tailwindcss.com') ||
+                        url.host.includes('cdn.jsdelivr.net')
+                    )
+                ) {
+                    const resClone = res.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(e.request, resClone);
+                    });
+                }
                 return res;
-            })
-            .catch(() => {
-                // Serve cached copy when network is unreachable
-                return caches.match(e.request);
-            })
+            });
+        })
     );
 });

@@ -149,7 +149,25 @@
 </head>
 <body class="h-screen overflow-hidden flex relative page-animate" x-data="posApp()">
 
-    <!-- Removed Glow Circles for cleaner UI -->
+    <!-- ── Floating Toast Notifications (Ready Orders Alert) ── -->
+    <div class="fixed top-6 right-6 z-[9999] flex flex-col items-end gap-2 pointer-events-none" style="max-width:320px">
+        <template x-for="toast in posToasts" :key="toast.id">
+            <div :class="toast.cls"
+                 class="px-5 py-3.5 rounded-2xl text-xs font-black shadow-2xl flex items-center gap-3 pointer-events-auto"
+                 style="animation: toastSlideIn 0.35s cubic-bezier(0.16,1,0.3,1) both">
+                <span class="text-lg" x-text="toast.icon"></span>
+                <span x-text="toast.message"></span>
+                <button @click="posToasts = posToasts.filter(t => t.id !== toast.id)"
+                        class="opacity-60 hover:opacity-100 transition-opacity text-sm ml-2">✕</button>
+            </div>
+        </template>
+    </div>
+    <style>
+        @keyframes toastSlideIn {
+            from { opacity: 0; transform: translateX(24px) scale(0.95); }
+            to   { opacity: 1; transform: translateX(0) scale(1); }
+        }
+    </style>
 
     <!-- Unified left navigation sidebar -->
     @include('partials.sidebar')
@@ -295,9 +313,8 @@
                         <!-- Discount Input -->
                         <div class="flex flex-col gap-1.5 text-right">
                             <span class="text-[9px] text-slate-500 dark:text-slate-400 font-extrabold">الخصم الممنوح (د.ل)</span>
-                            <input type="number" min="0" x-model.number="discount" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-amber-500/80 focus:ring-4 focus:ring-amber-550/10 rounded-2xl px-3 py-2 text-center text-amber-600 dark:text-amber-400 font-black focus:outline-none text-xs transition-all shadow-inner" />
+                            <input type="number" min="0" x-model.number="discount" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl px-3 py-2 text-center text-emerald-600 dark:text-emerald-400 font-black focus:outline-none text-xs transition-all shadow-inner" />
                         </div>
-
                         <!-- Tax Input -->
                         <div class="flex flex-col gap-1.5 text-right">
                             <span class="text-[9px] text-slate-500 dark:text-slate-400 font-extrabold">الضريبة المضافة (د.ل)</span>
@@ -308,19 +325,18 @@
                     <!-- Order Type Selector -->
                     <div class="flex flex-col gap-1.5 text-right">
                         <div class="flex justify-between items-center">
-                            <label class="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
-                            <button x-show="orderType === 'dinein'" @click="openSeatingModal(); playAudio('click')" type="button" class="text-[8px] text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-600 font-black tracking-tight">(تغيير طاولة الجلوس)</button>
+                            <label class="text-[9px] font-black text-slate-500 dark:text-slate-455 uppercase tracking-wider block">نوع الطلب (المطبخ)</label>
                         </div>
                         <div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl flex gap-1" dir="rtl">
-                            <button @click="orderType = 'dinein'; openSeatingModal(); playAudio('click')" type="button"
+                            <button @click="orderType = 'dinein'; selectedTable = null; playAudio('click')" type="button"
                                     :class="orderType === 'dinein' ? 'bg-amber-500 text-white dark:text-slate-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800'"
-                                    class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
-                                محلي <span x-show="selectedTable" class="text-[10px] bg-slate-800 dark:bg-slate-900 text-amber-400 px-1.5 py-0.5 rounded" x-text="'ط ' + selectedTable"></span>
+                                    class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center">
+                                في المطعم
                             </button>
                             <button @click="orderType = 'takeaway'; selectedTable = null; playAudio('click')" type="button"
                                     :class="orderType === 'takeaway' ? 'bg-amber-500 text-white dark:text-slate-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800'"
                                     class="w-1/3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center">
-                                سفري
+                                في سيارة
                             </button>
                             <button @click="orderType = 'delivery'; selectedTable = null; playAudio('click')" type="button"
                                     :class="orderType === 'delivery' ? 'bg-amber-500 text-white dark:text-slate-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800'"
@@ -471,7 +487,6 @@
                                 
                                 <span class="text-xl" x-text="t.type === 'round' ? '⭕' : '⬜'"></span>
                                 <span class="text-xs font-black" x-text="'طاولة ' + t.id"></span>
-                                <span class="text-[8px] font-bold opacity-75" x-text="t.chairs + ' كراسي'"></span>
                                 
                                 <!-- Occupied badge overlay -->
                                 <span x-show="occupiedTables.includes(t.id)" class="absolute top-1 right-1 text-[7px] bg-rose-550 text-white px-1.5 py-0.5 rounded-md font-black">مشغولة</span>
@@ -784,6 +799,8 @@
                     sadadUrl: '',
                     tadawulMsg: '',
                     pollingInterval: null,
+                    posToasts: [],
+                    lastReadyCount: 0,
 
                     // Print preview receipt data (Phase 6 upgrade)
                     receiptData: {
@@ -831,6 +848,36 @@
                             localStorage.setItem('devicePrefix', val);
                         });
                         setInterval(() => this.triggerAutoSync(), 30000);
+
+                        // Poll for ready orders every 6s — notify cashier when kitchen finishes
+                        const pollReady = () => {
+                            fetch('/api/orders/ready-count.json')
+                                .then(r => r.ok ? r.json() : null)
+                                .then(data => {
+                                    if (!data) return;
+                                    const count = data.ready_count || 0;
+                                    if (count > this.lastReadyCount && this.lastReadyCount >= 0) {
+                                        const diff = count - this.lastReadyCount;
+                                        this.addPosToast(`✅ ${diff} طلب جاهز للتسليم من المطبخ!`, 'emerald');
+                                        this.playAudio('success');
+                                    }
+                                    this.lastReadyCount = count;
+                                })
+                                .catch(() => {}); // silent fail
+                        };
+                        setTimeout(() => { pollReady(); setInterval(pollReady, 6000); }, 3000);
+                    },
+
+                    addPosToast(message, color = 'amber') {
+                        const id = Date.now();
+                        const map = {
+                            amber:   { cls: 'bg-amber-500 text-slate-950',  icon: '🔔' },
+                            emerald: { cls: 'bg-emerald-600 text-white',     icon: '✅' },
+                            rose:    { cls: 'bg-rose-600 text-white',        icon: '⚠️' },
+                        };
+                        const t = map[color] || map.amber;
+                        this.posToasts.push({ id, message, cls: t.cls, icon: t.icon });
+                        setTimeout(() => { this.posToasts = this.posToasts.filter(x => x.id !== id); }, 5000);
                     },
 
                     playAudio(type) {
@@ -916,7 +963,7 @@
                                     const active = req.result.filter(o => o.status !== 'completed' && o.status !== 'cancelled');
                                     this.occupiedTables = active
                                         .map(o => {
-                                            const m = (o.notes || '').match(/\[محلي - طاولة (\d+)\]/);
+                                            const m = (o.notes || '').match(/\[(?:محلي|في المطعم) - طاولة (\d+)\]/);
                                             return m ? parseInt(m[1]) : null;
                                         })
                                         .filter(t => t !== null);
@@ -1100,7 +1147,7 @@
                             total_amount: this.getTotal(),
                             discount: this.discount,
                             tax: this.tax,
-                            notes: (this.orderType === 'dinein' ? ('[محلي' + (this.selectedTable ? ' - طاولة ' + this.selectedTable : '') + ']') : (this.orderType === 'delivery' ? '[توصيل]' : '[سفري]')) + (this.notes ? ' ' + this.notes : ''),
+                            notes: (this.orderType === 'dinein' ? ('[في المطعم' + (this.selectedTable ? ' - طاولة ' + this.selectedTable : '') + ']') : (this.orderType === 'delivery' ? '[توصيل]' : '[في سيارة]')) + (this.notes ? ' ' + this.notes : ''),
                             sync_status: 'pending',
                             created_at: new Date().toISOString()
                         };
@@ -1259,7 +1306,7 @@
                             total_amount: this.getTotal(),
                             discount: this.discount,
                             tax: this.tax,
-                            notes: (this.orderType === 'dinein' ? ('[محلي' + (this.selectedTable ? ' - طاولة ' + this.selectedTable : '') + ']') : (this.orderType === 'delivery' ? '[توصيل]' : '[سفري]')) + (this.notes ? ' ' + this.notes : ''),
+                            notes: (this.orderType === 'dinein' ? ('[في المطعم' + (this.selectedTable ? ' - طاولة ' + this.selectedTable : '') + ']') : (this.orderType === 'delivery' ? '[توصيل]' : '[في سيارة]')) + (this.notes ? ' ' + this.notes : ''),
                             sync_status: 'pending',
                             created_at: new Date().toISOString()
                         };
