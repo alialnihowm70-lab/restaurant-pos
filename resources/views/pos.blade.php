@@ -1038,14 +1038,14 @@
                         });
                     },
 
-                    saveOrderOffline(order, items, payment, inventoryTx) {
+                    saveOrderOffline(order, items, payment, inventoryTxs) {
                         if (!db) return;
                         const tx = db.transaction(["orders", "order_items", "payments", "inventory_transactions"], "readwrite");
                         
                         tx.objectStore("orders").put(order);
                         items.forEach(it => tx.objectStore("order_items").put(it));
                         tx.objectStore("payments").put(payment);
-                        tx.objectStore("inventory_transactions").put(inventoryTx);
+                        inventoryTxs.forEach(txObj => tx.objectStore("inventory_transactions").put(txObj));
 
                         tx.oncomplete = () => {
                             this.playAudio('success');
@@ -1085,7 +1085,6 @@
                     processCashPayment() {
                         const orderId = this.generateUUID();
                         const paymentId = this.generateUUID();
-                        const txId = this.generateUUID();
                         
                         let counter = parseInt(localStorage.getItem('invoice_counter') || '1');
                         const formattedCounter = String(counter).padStart(4, '0');
@@ -1124,17 +1123,18 @@
                             created_at: new Date().toISOString()
                         };
 
-                        const inventoryTx = {
-                            id: txId,
-                            product_id: items[0].product_id,
+                        const inventoryTxs = items.map(i => ({
+                            id: this.generateUUID(),
+                            product_id: i.product_id,
                             location_id: this.selectedLocation,
-                            quantity: -items.reduce((sum, i) => sum + i.quantity, 0),
-                            unit_cost: items[0].price * 0.4,
+                            quantity: -i.quantity,
+                            unit_cost: i.price * 0.4,
                             source_id: null,
+                            type: 'sale',
                             created_at: new Date().toISOString()
-                        };
+                        }));
 
-                        this.saveOrderOffline(order, items, payment, inventoryTx);
+                        this.saveOrderOffline(order, items, payment, inventoryTxs);
                     },
 
                     // 2. Process SADAD Integration
@@ -1281,17 +1281,18 @@
                             created_at: new Date().toISOString()
                         };
 
-                        const inventoryTx = {
+                        const inventoryTxs = items.map(i => ({
                             id: this.generateUUID(),
-                            product_id: items[0].product_id,
+                            product_id: i.product_id,
                             location_id: this.selectedLocation,
-                            quantity: -items.reduce((sum, i) => sum + i.quantity, 0),
-                            unit_cost: items[0].price * 0.4,
+                            quantity: -i.quantity,
+                            unit_cost: i.price * 0.4,
                             source_id: null,
+                            type: 'sale',
                             created_at: new Date().toISOString()
-                        };
+                        }));
 
-                        this.saveOrderOffline(order, items, payment, inventoryTx);
+                        this.saveOrderOffline(order, items, payment, inventoryTxs);
                     },
 
                     cancelCheckout() {
@@ -1411,8 +1412,9 @@
                                 console.log("Auto Sync: Push response from server", pushData);
                                 
                                 if (pushData.success) {
-                                    const markTx = db.transaction(["orders"], "readwrite");
+                                    const markTx = db.transaction(["orders", "inventory_transactions"], "readwrite");
                                     const store = markTx.objectStore("orders");
+                                    const txStore = markTx.objectStore("inventory_transactions");
                                     
                                     for (let id of pushData.synced_orders) {
                                         const getReq = store.get(id);
@@ -1424,9 +1426,15 @@
                                             }
                                         };
                                     }
+
+                                    if (pushData.synced_transactions && pushData.synced_transactions.length > 0) {
+                                        for (let id of pushData.synced_transactions) {
+                                            txStore.delete(id);
+                                        }
+                                    }
                                     
                                     markTx.oncomplete = () => {
-                                        console.log("Auto Sync: Marked local orders as synced!");
+                                        console.log("Auto Sync: Marked local orders as synced and cleared transactions!");
                                         this.updatePendingSyncCount();
                                     };
                                 } else {

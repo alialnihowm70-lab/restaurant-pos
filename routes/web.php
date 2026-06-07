@@ -142,16 +142,16 @@ Route::middleware(['role:admin'])->group(function () {
         $locations = Location::all();
         $users = User::all();
 
-        $salesCount = Order::where('status', 'completed')
+        $salesCount = Order::where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
-        $salesTotal = (float)Order::where('status', 'completed')
+        $salesTotal = (float)Order::where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('total_amount');
-        $taxTotal = (float)Order::where('status', 'completed')
+        $taxTotal = (float)Order::where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('tax');
-        $discountTotal = (float)Order::where('status', 'completed')
+        $discountTotal = (float)Order::where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('discount');
         
@@ -161,7 +161,7 @@ Route::middleware(['role:admin'])->group(function () {
         $totalCogs = (float)DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('orders.status', 'completed')
+            ->where('orders.status', '!=', 'cancelled')
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->sum(DB::raw('order_items.quantity * products.base_price * 0.40'));
 
@@ -190,7 +190,7 @@ Route::middleware(['role:admin'])->group(function () {
         // Sales by payment method
         $salesByPayment = DB::table('payments')
             ->join('orders', 'payments.order_id', '=', 'orders.id')
-            ->where('orders.status', 'completed')
+            ->where('orders.status', '!=', 'cancelled')
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->select('payments.payment_method', DB::raw('SUM(payments.amount) as total'))
             ->groupBy('payments.payment_method')
@@ -200,7 +200,7 @@ Route::middleware(['role:admin'])->group(function () {
         // Sales by location
         $salesByLocation = DB::table('orders')
             ->join('locations', 'orders.location_id', '=', 'locations.id')
-            ->where('orders.status', 'completed')
+            ->where('orders.status', '!=', 'cancelled')
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->select('locations.name', DB::raw('SUM(orders.total_amount) as total'))
             ->groupBy('locations.name')
@@ -209,7 +209,7 @@ Route::middleware(['role:admin'])->group(function () {
 
         $topSelling = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where('orders.status', 'completed')
+            ->where('orders.status', '!=', 'cancelled')
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->select('product_id', DB::raw('SUM(quantity) as total_qty'))
             ->groupBy('product_id')

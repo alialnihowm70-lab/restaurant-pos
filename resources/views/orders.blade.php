@@ -103,7 +103,7 @@
                     🧾 الكاشير
                 </a>
                 <div class="bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl">
-                    <span class="text-[11px] text-amber-600 dark:text-amber-400 font-black">الإيرادات: {{ number_format($orders->where('status','completed')->sum('total_amount'), 2) }} د.ل</span>
+                    <span class="text-[11px] text-amber-600 dark:text-amber-400 font-black">الإيرادات: {{ number_format($orders->where('status', '!=', 'cancelled')->sum('total_amount'), 2) }} د.ل</span>
                 </div>
                 <div class="hidden sm:flex bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl">
                     <span class="text-[11px] text-slate-600 dark:text-slate-300 font-black">{{ count($orders) }} فاتورة</span>
@@ -120,7 +120,7 @@
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm">
                     <div>
                         <p class="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1">إجمالي الإيرادات</p>
-                        <p class="text-xl font-black text-amber-600 dark:text-amber-400" dir="ltr">{{ number_format($orders->where('status','completed')->sum('total_amount'), 2) }} <span class="text-xs font-bold">د.ل</span></p>
+                        <p class="text-xl font-black text-amber-600 dark:text-amber-400" dir="ltr">{{ number_format($orders->where('status', '!=', 'cancelled')->sum('total_amount'), 2) }} <span class="text-xs font-bold">د.ل</span></p>
                     </div>
                     <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/15 flex items-center justify-center text-2xl">💰</div>
                 </div>

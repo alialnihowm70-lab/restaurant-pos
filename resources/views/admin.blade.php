@@ -9,7 +9,7 @@
     }
 
     $salesTrend = \DB::table('orders')
-        ->where('status', 'completed')
+        ->where('status', '!=', 'cancelled')
         ->whereBetween('created_at', [$startDate, $endDate])
         ->select(\DB::raw("$dateExpr as date"), \DB::raw('SUM(total_amount) as total'))
         ->groupBy('date')
@@ -260,40 +260,16 @@
         <!-- 2. Visual Analytics Section (SVG Charts) -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Line Chart Card -->
-            <div class="lg:col-span-2 bg-white/80 backdrop-blur-md border border-slate-200 rounded-[32px] p-6 space-y-4 shadow-sm text-right">
-                <div>
-                    <h3 class="text-sm font-black text-slate-800">مخطط المبيعات ومؤشر النشاط</h3>
-                    <span class="text-xs text-slate-400 font-bold">متابعة بيانية لحظية لسجل العمليات في الفترة المحددة</span>
+            <div class="lg:col-span-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 space-y-4 shadow-sm text-right">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 dark:text-white">مخطط المبيعات اليومي ومؤشر النشاط</h3>
+                        <span class="text-xs text-slate-400 font-bold dark:text-slate-500">متابعة بيانية لحظية لسجل العمليات في الفترة المحددة</span>
+                    </div>
+                    <span class="text-xs bg-amber-500/10 text-amber-600 dark:text-amber-500 px-3 py-1.5 rounded-xl font-black">تحليل زمني مباشر</span>
                 </div>
-                <!-- Clean Inline SVG Chart -->
-                <div class="w-full h-48 bg-slate-50/80 border border-slate-200/60 rounded-3xl p-4 flex items-center justify-center relative shadow-inner">
-                    <svg viewBox="0 0 500 150" class="w-full h-full overflow-visible">
-                        <defs>
-                            <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.2"/>
-                                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"/>
-                            </linearGradient>
-                        </defs>
-                        <!-- Grid Lines -->
-                        <line x1="0" y1="30" x2="500" y2="30" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4"/>
-                        <line x1="0" y1="75" x2="500" y2="75" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4"/>
-                        <line x1="0" y1="120" x2="500" y2="120" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4"/>
-                        
-                        <!-- Gradient Area -->
-                        <path d="M 0 130 Q 80 80 150 110 T 300 40 T 450 70 L 500 70 L 500 140 L 0 140 Z" fill="url(#salesGrad)"/>
-                        
-                        <!-- Trend Line -->
-                        <path d="M 0 130 Q 80 80 150 110 T 300 40 T 450 70 L 500 70" fill="none" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
-                        
-                        <!-- Chart points -->
-                        <circle cx="150" cy="110" r="6" fill="#ea580c" stroke="#ffffff" stroke-width="2.5"/>
-                        <circle cx="300" cy="40" r="6" fill="#ea580c" stroke="#ffffff" stroke-width="2.5"/>
-                        <circle cx="450" cy="70" r="6" fill="#ea580c" stroke="#ffffff" stroke-width="2.5"/>
-                    </svg>
-                    <!-- Floating Labels -->
-                    <div class="absolute bottom-2.5 right-6 text-[10px] font-black text-slate-450">الفترة الصباحية</div>
-                    <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 text-[10px] font-black text-orange-600">ذروة الغداء</div>
-                    <div class="absolute bottom-2.5 left-6 text-[10px] font-black text-slate-450">الفترة المسائية</div>
+                <div class="w-full h-64">
+                    <canvas id="salesTrendChart"></canvas>
                 </div>
             </div>
 
@@ -569,19 +545,6 @@
 
         <!-- Accounting & Sales Breakdown -->
         <section class="space-y-6" dir="rtl">
-            <!-- 1. Full-Width Daily Sales Trend Area Chart -->
-            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm text-right">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h3 class="text-sm font-black text-slate-800 dark:text-white">منحنى الإيرادات والمبيعات اليومي</h3>
-                        <span class="text-xs text-slate-400 font-bold dark:text-slate-500">تتبع حجم دخل المبيعات اليومية الإجمالية خلال الفترة المحددة</span>
-                    </div>
-                    <span class="text-xs bg-amber-500/10 text-amber-600 dark:text-amber-500 px-3 py-1.5 rounded-xl font-black">تحليل زمني مباشر</span>
-                </div>
-                <div class="w-full h-72">
-                    <canvas id="salesTrendChart"></canvas>
-                </div>
-            </div>
 
             <!-- 2. Side-by-Side Breakdown Charts -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
