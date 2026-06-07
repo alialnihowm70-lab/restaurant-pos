@@ -190,20 +190,13 @@
                         <span class="text-slate-500 font-bold block mt-1">يوجد عدد {{ count($lowStockIngredients) }} مكونات أساسية تحت حد الطلب الأدنى حالياً. يرجى توريدها لضمان استمرارية التشغيل.</span>
                     </div>
                 </div>
-                <a href="/admin/inventory" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 px-4.5 py-3 rounded-2xl transition-all shadow-md shadow-orange-550/15 font-black text-xs flex items-center gap-1.5 self-end md:self-auto">
-                    📦 مراجعة وجرد المخزن
-                </a>
-            </div>
-        @endif
-
-        <!-- Global Continuous Revenue Summary -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="/admin/inventory" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 px-4.5 py-3 rounded-2xl transition-all shadow-md shadow-orange-550/15 font-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Today's Revenue -->
-            <div class="bg-gradient-to-br from-amber-500/10 to-orange-600/10 border border-amber-500/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+            <div class="bg-gradient-to-br from-amber-500/10 to-orange-600/10 border border-amber-500/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right hover-float">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black text-amber-700 dark:text-amber-500 uppercase tracking-wider block">💰 إيرادات اليوم الحالي</span>
-                    <h3 class="text-xl font-black text-orange-600 dark:text-orange-400 tracking-tight" dir="ltr">
-                        {{ number_format($todayRevenue, 2) }} <span class="text-xs font-bold text-slate-500">د.ل</span>
+                    <h3 class="text-xl font-black text-orange-600 dark:text-orange-400 tracking-tight" dir="ltr" x-data="countUp({{ (float)$todayRevenue }})">
+                        <span x-text="format(current)">{{ number_format($todayRevenue, 2) }}</span> <span class="text-xs font-bold text-slate-500">د.ل</span>
                     </h3>
                     <span class="text-[8px] text-slate-400 block font-bold">جميع الفواتير النشطة والمكتملة لليوم</span>
                 </div>
@@ -211,11 +204,11 @@
             </div>
 
             <!-- This Month's Revenue -->
-            <div class="bg-gradient-to-br from-indigo-500/10 to-blue-600/10 border border-indigo-550/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+            <div class="bg-gradient-to-br from-indigo-500/10 to-blue-600/10 border border-indigo-550/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right hover-float">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-wider block">📊 إيرادات الشهر الحالي</span>
-                    <h3 class="text-xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight" dir="ltr">
-                        {{ number_format($monthlyRevenue, 2) }} <span class="text-xs font-bold text-slate-500">د.ل</span>
+                    <h3 class="text-xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight" dir="ltr" x-data="countUp({{ (float)$monthlyRevenue }})">
+                        <span x-text="format(current)">{{ number_format($monthlyRevenue, 2) }}</span> <span class="text-xs font-bold text-slate-500">د.ل</span>
                     </h3>
                     <span class="text-[8px] text-slate-400 block font-bold">إجمالي مبيعات الشهر التقويمية</span>
                 </div>
@@ -223,11 +216,11 @@
             </div>
 
             <!-- This Year's Revenue -->
-            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-600/10 border border-emerald-500/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right">
+            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-600/10 border border-emerald-500/15 rounded-[28px] p-5 flex items-center justify-between shadow-sm relative overflow-hidden text-right hover-float">
                 <div class="space-y-1">
-                    <span class="text-[9px] font-black text-emerald-700 dark:text-emerald-550 uppercase tracking-wider block">🏛️ إجمالي إيرادات السنة</span>
-                    <h3 class="text-xl font-black text-emerald-600 dark:text-emerald-450 tracking-tight" dir="ltr">
-                        {{ number_format($yearlyRevenue, 2) }} <span class="text-xs font-bold text-slate-500">د.ل</span>
+                    <span class="text-[9px] font-black text-emerald-700 dark:text-emerald-555 uppercase tracking-wider block">🏛️ إجمالي إيرادات السنة</span>
+                    <h3 class="text-xl font-black text-emerald-600 dark:text-emerald-450 tracking-tight" dir="ltr" x-data="countUp({{ (float)$yearlyRevenue }})">
+                        <span x-text="format(current)">{{ number_format($yearlyRevenue, 2) }}</span> <span class="text-xs font-bold text-slate-500">د.ل</span>
                     </h3>
                     <span class="text-[8px] text-slate-400 block font-bold">إجمالي المبيعات التراكمية للسنة الجارية</span>
                 </div>
@@ -238,57 +231,72 @@
         <!-- 1. Real-Time Accounting Analytics Cards -->
         <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <!-- Total Revenue Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1 hover-float">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-blue-500"></div>
                 <div class="space-y-1">
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">إجمالي المبيعات (Gross)</span>
-                    <h3 class="text-lg font-black text-blue-600 tracking-tight" dir="ltr">{{ number_format($salesTotal, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <h3 class="text-lg font-black text-blue-600 tracking-tight" dir="ltr" x-data="countUp({{ (float)$salesTotal }})">
+                        <span x-text="format(current)">{{ number_format($salesTotal, 2) }}</span> <span class="text-[9px] font-bold text-slate-400">د.ل</span>
+                    </h3>
                     <span class="text-[8px] text-slate-400 block font-medium truncate">مقبوضات الفترة الحالية</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base shadow-inner">💵</div>
             </div>
 
             <!-- Cost of Goods Sold Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1 hover-float">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-rose-500"></div>
                 <div class="space-y-1">
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">تكلفة الأغذية (COGS)</span>
-                    <h3 class="text-lg font-black text-rose-600 tracking-tight" dir="ltr">{{ number_format($totalCogs, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <h3 class="text-lg font-black text-rose-600 tracking-tight" dir="ltr" x-data="countUp({{ (float)$totalCogs }})">
+                        <span x-text="format(current)">{{ number_format($totalCogs, 2) }}</span> <span class="text-[9px] font-bold text-slate-400">د.ل</span>
+                    </h3>
                     <span class="text-[8px] text-slate-400 block font-medium truncate">التكلفة التقديرية للوجبات</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-rose-550/5 text-rose-600 flex items-center justify-center text-base shadow-inner">🥩</div>
             </div>
 
             <!-- Inventory Loss/Waste Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1 hover-float">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-red-500"></div>
                 <div class="space-y-1">
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">الهدر والتالف</span>
-                    <h3 class="text-lg font-black text-red-650 tracking-tight" dir="ltr">{{ number_format($totalWasteCost, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <h3 class="text-lg font-black text-red-655 tracking-tight" dir="ltr" x-data="countUp({{ (float)$totalWasteCost }})">
+                        <span x-text="format(current)">{{ number_format($totalWasteCost, 2) }}</span> <span class="text-[9px] font-bold text-slate-400">د.ل</span>
+                    </h3>
                     <span class="text-[8px] text-slate-400 block font-medium truncate">تسويات فروقات الجرد</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-base shadow-inner">🗑️</div>
             </div>
 
             <!-- Net Profit Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-1 hover-float">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-amber-500"></div>
                 <div class="space-y-1">
                     <div class="flex items-center gap-1">
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block truncate">صافي الربح</span>
                         <span class="text-[8px] font-black bg-amber-500/10 text-amber-600 px-1 py-0.5 rounded">{{ number_format($profitMargin, 0) }}%</span>
                     </div>
-                    <h3 class="text-lg font-black text-amber-650 tracking-tight" dir="ltr">{{ number_format($grossProfit, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
+                    <h3 class="text-lg font-black text-amber-650 tracking-tight" dir="ltr" x-data="countUp({{ (float)$grossProfit }})">
+                        <span x-text="format(current)">{{ number_format($grossProfit, 2) }}</span> <span class="text-[9px] font-bold text-slate-400">د.ل</span>
+                    </h3>
                     <span class="text-[8px] text-slate-400 block font-medium truncate">إجمالي صافي الأرباح</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base shadow-inner">📈</div>
             </div>
 
             <!-- Inventory Asset Value Card -->
-            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-2 md:col-span-1">
+            <div class="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-[28px] p-5 flex items-center justify-between shadow-sm hover:shadow transition-all group relative overflow-hidden text-right col-span-2 md:col-span-1 hover-float">
                 <div class="absolute inset-x-0 bottom-0 h-1.5 bg-emerald-500"></div>
                 <div class="space-y-1">
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">أصول المستودعات</span>
+                    <h3 class="text-lg font-black text-emerald-650 tracking-tight" dir="ltr" x-data="countUp({{ (float)$inventoryAssetValue }})">
+                        <span x-text="format(current)">{{ number_format($inventoryAssetValue, 2) }}</span> <span class="text-[9px] font-bold text-slate-400">د.ل</span>
+                    </h3>
+                    <span class="text-[8px] text-slate-400 block font-medium truncate">قيمة الأصول الحالية</span>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base shadow-inner">📦</div>
+            </div>se tracking-wider block">أصول المستودعات</span>
                     <h3 class="text-lg font-black text-emerald-650 tracking-tight" dir="ltr">{{ number_format($inventoryAssetValue, 2) }} <span class="text-[9px] font-bold text-slate-400">د.ل</span></h3>
                     <span class="text-[8px] text-slate-400 block font-medium truncate">قيمة الأصول الحالية</span>
                 </div>
@@ -1159,6 +1167,31 @@
             link.click();
             document.body.removeChild(link);
         }
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('countUp', (targetVal, durationMs = 1200) => ({
+                current: 0,
+                target: Number(targetVal),
+                init() {
+                    let startTimestamp = null;
+                    const step = (timestamp) => {
+                        if (!startTimestamp) startTimestamp = timestamp;
+                        const progress = Math.min((timestamp - startTimestamp) / durationMs, 1);
+                        const ease = progress * (2 - progress);
+                        this.current = ease * this.target;
+                        if (progress < 1) {
+                            window.requestAnimationFrame(step);
+                        } else {
+                            this.current = this.target;
+                        }
+                    };
+                    window.requestAnimationFrame(step);
+                },
+                format(val) {
+                    return Number(val).toLocaleString('ar-LY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            }));
+        });
     </script>
 </body>
 </html>

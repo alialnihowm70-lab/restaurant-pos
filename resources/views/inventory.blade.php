@@ -187,7 +187,7 @@
                                 @php
                                     $stock = $stockLevels[$product->id] ?? 0;
                                 @endphp
-                                <div class="bg-slate-50/70 border border-slate-200/80 p-5 rounded-[24px] flex items-center justify-between shadow-sm hover:border-amber-500/30 transition-all duration-300">
+                                <div class="bg-slate-50/70 border border-slate-200/80 p-5 rounded-[24px] flex items-center justify-between shadow-sm hover:border-amber-500/30 hover-float transition-all duration-300">
                                     <div>
                                         <span class="text-[8px] uppercase font-black text-amber-600 tracking-wider bg-amber-50 border border-amber-200/50 px-2 py-0.5 rounded-md shadow-sm">{{ $product->category }}</span>
                                         <h3 class="font-extrabold text-xs text-slate-800 mt-2.5">{{ $product->name }}</h3>
@@ -248,7 +248,7 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black py-4 rounded-2xl shadow-lg shadow-orange-550/15 transition-all text-xs tracking-wider">
+                            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black py-4 rounded-2xl shadow-lg shadow-orange-550/15 hover-float transition-all text-xs tracking-wider">
                                 تسجيل شحنة التوريد بالمستندات
                             </button>
                         </form>

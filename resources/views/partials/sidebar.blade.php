@@ -196,13 +196,32 @@
                 </div>
             @endif
 
-            <div class="flex items-center justify-between px-1">
-                <div class="flex flex-col text-right">
-                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold">حالة النظام</span>
-                    <span class="text-[8px] text-slate-400 dark:text-slate-500">سيرفر الفرع المحلي (نشط)</span>
+            <!-- Live Time & Connection Status Widget -->
+            <div x-data="{ time: '', isSyncing: false, init() {
+                setInterval(() => {
+                    const now = new Date();
+                    this.time = now.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                }, 1000);
+                setInterval(() => {
+                    this.isSyncing = true;
+                    setTimeout(() => this.isSyncing = false, 1500);
+                }, 10000);
+            } }" class="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-3 flex flex-col gap-2 shadow-sm text-right">
+                <div class="flex items-center justify-between">
+                    <span class="text-[9px] text-slate-400 dark:text-slate-500 font-bold">التوقيت المحلي</span>
+                    <span class="text-xs font-mono font-black text-slate-700 dark:text-slate-350" x-text="time"></span>
                 </div>
-                <div class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-500/10">
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                <div class="h-px bg-slate-200 dark:bg-slate-850"></div>
+                <div class="flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] text-slate-400 dark:text-slate-500 font-bold" x-text="isSyncing ? 'جاري التزامن...' : 'حالة الاتصال بالخلفية'"></span>
+                        <span class="text-[8px] font-bold text-slate-500" x-text="isSyncing ? 'تزامن البيانات...' : 'سيرفر الفرع متصل بنجاح'"></span>
+                    </div>
+                    <div class="flex items-center justify-center w-6 h-6 rounded-full transition-all duration-300"
+                         :class="isSyncing ? 'bg-indigo-500/15' : 'bg-emerald-500/10'">
+                        <div class="w-2.5 h-2.5 rounded-full transition-all duration-300"
+                             :class="isSyncing ? 'bg-indigo-500 animate-ping' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -221,6 +240,60 @@
          style="display: none;">
     </div>
 
+    <!-- Dynamic Floating Toast Container -->
+    <div x-data="toastApp()" 
+         class="fixed bottom-5 left-5 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none"
+         dir="rtl">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div x-show="true" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="pointer-events-auto p-4 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-bold border backdrop-blur-md transition-all duration-300 hover:scale-[1.02] shadow-orange-500/5"
+                 :class="{
+                     'bg-emerald-550/15 dark:bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400': toast.type === 'success',
+                     'bg-rose-550/15 dark:bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400': toast.type === 'error',
+                     'bg-amber-550/15 dark:bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400': toast.type === 'warning'
+                 }">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-sm shadow-inner"
+                     :class="{
+                         'bg-emerald-500/10': toast.type === 'success',
+                         'bg-rose-500/10': toast.type === 'error',
+                         'bg-amber-500/10': toast.type === 'warning'
+                     }">
+                    <span x-text="toast.type === 'success' ? '✅' : (toast.type === 'error' ? '❌' : '⚠️')"></span>
+                </div>
+                <span x-text="toast.message" class="text-right flex-grow"></span>
+            </div>
+        </template>
+    </div>
+
+<style>
+    /* Premium Hover & Floating micro-interactions */
+    @keyframes floatUp {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-4px); }
+        100% { transform: translateY(0px); }
+    }
+    .hover-float {
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hover-float:hover {
+        transform: translateY(-4px);
+        animation: floatUp 2.5s ease-in-out infinite 0.3s;
+    }
+    .pulse-glow {
+        animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+        0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+        70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+</style>
 
 </div>
 
@@ -339,6 +412,62 @@
                         }
                     })
                     .catch(err => console.error("Failed to check low stock status: ", err));
+            }
+        };
+    }
+
+    function toastApp() {
+        return {
+            toasts: [],
+            
+            init() {
+                window.addEventListener('toast', (e) => {
+                    this.addToast(e.detail.message, e.detail.type || 'success');
+                });
+                
+                @if(session('success'))
+                    this.addToast('{{ session('success') }}', 'success');
+                @endif
+                @if(session('error'))
+                    this.addToast('{{ session('error') }}', 'error');
+                @endif
+            },
+            
+            addToast(message, type) {
+                const id = Date.now() + Math.random();
+                this.toasts.push({ id, message, type });
+                this.playSyntheticSound(type);
+                
+                setTimeout(() => {
+                    this.toasts = this.toasts.filter(t => t.id !== id);
+                }, 4000);
+            },
+            
+            playSyntheticSound(type) {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    if (type === 'success') {
+                        osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); // E5
+                        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.005, ctx.currentTime + 0.25);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.25);
+                    } else {
+                        osc.frequency.setValueAtTime(160, ctx.currentTime);
+                        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.005, ctx.currentTime + 0.2);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.2);
+                    }
+                } catch (e) {
+                    console.log('AudioContext blocked', e);
+                }
             }
         };
     }

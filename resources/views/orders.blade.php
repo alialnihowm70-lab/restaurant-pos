@@ -99,9 +99,9 @@
                     <a href="/pos" class="lg:hidden bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-250 dark:border-slate-700 px-3.5 py-2 rounded-2xl text-[10px] font-black tracking-wider transition-all shadow-sm flex items-center gap-1.5 flex-shrink-0">
                         🧾 الكاشير
                     </a>
-                    <div class="bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl">
+                    <div class="bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl hover-float">
                         <span class="text-[11px] text-amber-600 dark:text-amber-400 font-black">
-                            الإيرادات: <span x-text="formatCurrency(orders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + parseFloat(o.total_amount), 0))"></span> د.ل
+                            الإيرادات: <span x-text="formatCurrency(animatedRevenue)"></span> د.ل
                         </span>
                     </div>
                 </div>
@@ -150,33 +150,33 @@
             <!-- ── KPI Cards ── -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <!-- Revenue -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm hover-float">
                     <div>
                         <p class="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1">إجمالي الإيرادات</p>
                         <p class="text-xl font-black text-amber-600 dark:text-amber-400" dir="ltr">
-                            <span x-text="formatCurrency(orders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + parseFloat(o.total_amount), 0))"></span>
+                            <span x-text="formatCurrency(animatedRevenue)"></span>
                             <span class="text-xs font-bold">د.ل</span>
                         </p>
                     </div>
                     <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/15 flex items-center justify-center text-2xl">💰</div>
                 </div>
                 <!-- Completed count -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm hover-float">
                     <div>
                         <p class="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1">الفواتير المكتملة</p>
                         <p class="text-xl font-black text-emerald-600 dark:text-emerald-400">
-                            <span x-text="orders.filter(o => o.status === 'completed').length"></span>
+                            <span x-text="animatedCompleted"></span>
                             <span class="text-xs font-bold text-slate-400">فاتورة</span>
                         </p>
                     </div>
                     <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-2xl">✅</div>
                 </div>
                 <!-- Active -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-sm hover-float">
                     <div>
                         <p class="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1">الطلبات النشطة</p>
                         <p class="text-xl font-black text-indigo-600 dark:text-indigo-400">
-                            <span x-text="orders.filter(o => ['pending','cooking','ready'].includes(o.status)).length"></span>
+                            <span x-text="animatedActive"></span>
                             <span class="text-xs font-bold text-slate-400">طلب</span>
                         </p>
                     </div>
@@ -535,6 +535,11 @@
                 selectedOrder: null,
                 orders: @json($orders->load('items.product', 'location', 'payments')),
 
+                // Animated KPI stats
+                animatedRevenue: 0,
+                animatedCompleted: 0,
+                animatedActive: 0,
+
                 // Edit order Alpine state
                 showEditModal: false,
                 editingOrder: null,
@@ -544,6 +549,44 @@
 
                 init() {
                     this.$watch('printerIp', val => localStorage.setItem('printerIp', val));
+                    this.animateKPIs();
+                    // Watch orders for deep changes to keep KPIs synchronized instantly
+                    this.$watch('orders', () => {
+                        const revTarget = this.orders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + parseFloat(o.total_amount), 0);
+                        const compTarget = this.orders.filter(o => o.status === 'completed').length;
+                        const activeTarget = this.orders.filter(o => ['pending','cooking','ready'].includes(o.status)).length;
+                        this.animatedRevenue = revTarget;
+                        this.animatedCompleted = compTarget;
+                        this.animatedActive = activeTarget;
+                    }, { deep: true });
+                },
+
+                animateKPIs() {
+                    const revTarget = this.orders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + parseFloat(o.total_amount), 0);
+                    const compTarget = this.orders.filter(o => o.status === 'completed').length;
+                    const activeTarget = this.orders.filter(o => ['pending','cooking','ready'].includes(o.status)).length;
+                    
+                    let startTimestamp = null;
+                    const duration = 1200; // 1.2s
+                    
+                    const step = (timestamp) => {
+                        if (!startTimestamp) startTimestamp = timestamp;
+                        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                        const ease = progress * (2 - progress);
+                        
+                        this.animatedRevenue = ease * revTarget;
+                        this.animatedCompleted = Math.floor(ease * compTarget);
+                        this.animatedActive = Math.floor(ease * activeTarget);
+                        
+                        if (progress < 1) {
+                            window.requestAnimationFrame(step);
+                        } else {
+                            this.animatedRevenue = revTarget;
+                            this.animatedCompleted = compTarget;
+                            this.animatedActive = activeTarget;
+                        }
+                    };
+                    window.requestAnimationFrame(step);
                 },
 
                 openEditModal(orderId) {
