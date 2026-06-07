@@ -48,17 +48,7 @@
                         </a>
                     @endif
 
-                    <!-- Kitchen Board KDS Link (Admin & Chef only) -->
-                    @if(in_array(auth()->user()->role, ['admin', 'chef']))
-                        <a href="/kds" 
-                           class="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group {{ request()->is('kds') ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900' }}">
-                            <div class="flex items-center gap-4">
-                                <span class="text-lg group-hover:scale-110 transition-transform">🍳</span>
-                                <span>شاشة المطبخ</span>
-                            </div>
-                            <span class="text-[9px] {{ request()->is('kds') ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">KDS</span>
-                        </a>
-                    @endif
+
 
                     <!-- Dashboard Statistics (Admin only) -->
                     @if(auth()->user()->role === 'admin')
