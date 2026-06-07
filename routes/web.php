@@ -131,20 +131,8 @@ Route::middleware(['role:chef'])->group(function () {
 Route::middleware(['role:admin'])->group(function () {
     // Stats Dashboard
     Route::get('/admin', function () {
-        $startStr = request('start_date');
-        $endStr = request('end_date');
-
-        if ($startStr) {
-            $startDate = \Illuminate\Support\Carbon::parse($startStr)->startOfDay();
-        } else {
-            $startDate = \Illuminate\Support\Carbon::now()->startOfMonth();
-        }
-
-        if ($endStr) {
-            $endDate = \Illuminate\Support\Carbon::parse($endStr)->endOfDay();
-        } else {
-            $endDate = \Illuminate\Support\Carbon::now()->endOfMonth();
-        }
+        $startDate = \Illuminate\Support\Carbon::parse(session('start_date'));
+        $endDate = \Illuminate\Support\Carbon::parse(session('end_date'));
 
         $suppliers = SupplierBankAccount::all();
         $products = Product::all();
@@ -344,10 +332,16 @@ Route::middleware(['role:admin'])->group(function () {
 
     // Catalog & Inventory Manager
     Route::get('/admin/inventory', function () {
+        $startDate = \Illuminate\Support\Carbon::parse(session('start_date'));
+        $endDate = \Illuminate\Support\Carbon::parse(session('end_date'));
+
         $products = Product::with('ingredients')->get();
         $locations = Location::all();
         $ingredients = Ingredient::all();
-        $transactions = InventoryTransaction::with('product', 'location')->orderBy('created_at', 'desc')->get();
+        $transactions = InventoryTransaction::with('product', 'location')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->get();
         
         $stockLevels = DB::table('inventory_transactions')
             ->select('product_id', DB::raw('SUM(quantity) as stock'))
@@ -485,7 +479,11 @@ Route::middleware(['role:admin'])->group(function () {
 
     // Order History View
     Route::get('/admin/orders', function () {
+        $startDate = \Illuminate\Support\Carbon::parse(session('start_date'));
+        $endDate = \Illuminate\Support\Carbon::parse(session('end_date'));
+
         $orders = Order::with('location', 'payments', 'items.product')
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at', 'desc')
             ->get();
         return view('orders', compact('orders'));

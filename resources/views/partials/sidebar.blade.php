@@ -33,6 +33,48 @@
                 </button>
             </div>
 
+            <!-- Date Filter Widget -->
+            <div x-data="{ preset: '{{ $datePreset ?? 'this_month' }}' }" 
+                 class="bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-2xl p-4.5 space-y-3 shadow-sm text-right">
+                <div class="flex items-center gap-2 pb-1 border-b border-slate-100 dark:border-slate-800">
+                    <span class="text-xs font-black text-slate-850 dark:text-slate-200">📅 تصفية الفترة الزمنية</span>
+                </div>
+                <form action="" method="GET" class="space-y-3">
+                    <!-- Preset Select -->
+                    <div>
+                        <select name="date_preset" x-model="preset" 
+                                class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-amber-500">
+                            <option value="today">📆 اليوم (Today)</option>
+                            <option value="yesterday">🗓️ أمس (Yesterday)</option>
+                            <option value="this_week">📅 هذا الأسبوع (This Week)</option>
+                            <option value="this_month">📊 هذا الشهر (This Month)</option>
+                            <option value="custom">⚙️ فترة مخصصة (Custom)</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Date Inputs -->
+                    <div x-show="preset === 'custom'" x-transition.duration.300ms class="space-y-2" style="display: none;">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 block">من تاريخ:</label>
+                            <input type="date" name="start_date" value="{{ isset($startDate) ? substr($startDate, 0, 10) : '' }}"
+                                   class="w-full bg-white dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-700 dark:text-slate-300 focus:outline-none focus:border-amber-500 text-center" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 block">إلى تاريخ:</label>
+                            <input type="date" name="end_date" value="{{ isset($endDate) ? substr($endDate, 0, 10) : '' }}"
+                                   class="w-full bg-white dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-700 dark:text-slate-300 focus:outline-none focus:border-amber-500 text-center" />
+                        </div>
+                    </div>
+
+                    <!-- Apply Button -->
+                    <button type="submit" 
+                            class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs py-2 rounded-xl transition-all shadow-md shadow-amber-500/10 hover:shadow-amber-500/20">
+                        تطبيق الفلترة ⚡
+                    </button>
+                </form>
+            </div>
+
+
             <!-- Navigation Links -->
             <nav class="space-y-1">
                 @if(auth()->check())
