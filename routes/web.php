@@ -99,22 +99,6 @@ Route::middleware(['role:cashier'])->group(function () {
         return view('pos', compact('products', 'locations', 'categories'));
     });
 
-    Route::post('/pos/orders/{order}/print', function (Order $order) {
-        $printService = new \App\Services\ThermalPrintService();
-        $ip = request('ip');
-
-        if ($ip) {
-            $success = $printService->printToNetwork($ip, $order);
-            return response()->json(['success' => $success]);
-        }
-
-        $bytes = $printService->generateReceiptBytes($order);
-        return response()->json([
-            'success' => true,
-            'base64' => base64_encode($bytes)
-        ]);
-    });
-
     Route::get('/api/active-tables', function () {
         $occupied = Order::whereIn('status', ['pending', 'cooking', 'ready'])
             ->where(function ($query) {
@@ -133,15 +117,6 @@ Route::middleware(['role:cashier'])->group(function () {
             ->values()
             ->toArray();
         return response()->json(['occupied' => $occupied]);
-    });
-
-    Route::post('/pos/orders/{order}/status', function (Order $order) {
-        request()->validate([
-            'status' => 'required|in:pending,cooking,ready,completed,cancelled'
-        ]);
-
-        $order->update(['status' => request('status')]);
-        return response()->json(['success' => true]);
     });
 
     // View Daily Orders (Today's only)
@@ -248,7 +223,10 @@ Route::middleware(['role:cashier'])->group(function () {
 
         return redirect()->back()->with('success', 'تم تعديل الفاتورة بنجاح وتحديث الجرد المرتبط بها!');
     });
+});
 
+// 2. Shared Cashier & Chef Routes (Active Orders Board, Print, Status Updates)
+Route::middleware(['role:cashier,chef'])->group(function () {
     // Active Orders Board View (HTML page – initial server-render only)
     Route::get('/admin/orders/active', function () {
         $orders = Order::with('items.product', 'location')
@@ -256,6 +234,31 @@ Route::middleware(['role:cashier'])->group(function () {
             ->orderBy('created_at', 'asc')
             ->get();
         return view('active_orders', compact('orders'));
+    });
+
+    Route::post('/pos/orders/{order}/status', function (Order $order) {
+        request()->validate([
+            'status' => 'required|in:pending,cooking,ready,completed,cancelled'
+        ]);
+
+        $order->update(['status' => request('status')]);
+        return response()->json(['success' => true]);
+    });
+
+    Route::post('/pos/orders/{order}/print', function (Order $order) {
+        $printService = new \App\Services\ThermalPrintService();
+        $ip = request('ip');
+
+        if ($ip) {
+            $success = $printService->printToNetwork($ip, $order);
+            return response()->json(['success' => $success]);
+        }
+
+        $bytes = $printService->generateReceiptBytes($order);
+        return response()->json([
+            'success' => true,
+            'base64' => base64_encode($bytes)
+        ]);
     });
 });
 
