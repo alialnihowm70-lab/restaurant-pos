@@ -5,6 +5,7 @@ use App\Models\Product;
 use App\Models\Location;
 use App\Models\Ingredient;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\SupplierBankAccount;
 use App\Models\InventoryTransaction;
 use App\Models\User;
@@ -88,6 +89,17 @@ Route::middleware(['auth'])->group(function () {
         $count = Order::whereIn('status', ['ready'])->count();
         return response()->json(['ready_count' => $count]);
     });
+
+    // Offline Syncing API endpoints
+    Route::get('/api/products.json', function () {
+        return response()->json(['products' => \App\Models\Product::all()]);
+    });
+
+    Route::get('/api/locations.json', function () {
+        return response()->json(['locations' => \App\Models\Location::all()]);
+    });
+
+    Route::post('/api/orders/sync', [\App\Http\Controllers\SyncController::class, 'push']);
 });
 
 // 1. Cashier POS Routes (Restricted to Cashier and Admin)

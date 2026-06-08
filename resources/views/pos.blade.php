@@ -849,6 +849,58 @@
                         });
                         setInterval(() => this.triggerAutoSync(), 30000);
 
+                        // Save to Electron offline cache if running in desktop app
+                        if (window.ElectronAPI) {
+                            window.ElectronAPI.saveCache({
+                                products: this.products,
+                                categories: this.categories,
+                                locations: this.locations
+                            }).then(res => {
+                                console.log('Successfully updated Electron offline cache:', res);
+                            }).catch(err => {
+                                console.error('Failed to update Electron offline cache:', err);
+                            });
+
+                            // Check and sync any queued offline orders from the Electron app session
+                            window.ElectronAPI.getQueuedOrders().then(async (queued) => {
+                                if (queued && queued.length > 0) {
+                                    console.log(`Found ${queued.length} queued offline orders. Starting sync...`);
+                                    this.syncing = true;
+                                    try {
+                                        const pushRes = await fetch('/api/orders/sync', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            },
+                                            body: JSON.stringify({
+                                                orders: queued.map(q => q.order),
+                                                order_items: queued.flatMap(q => q.items),
+                                                payments: queued.map(q => q.payment),
+                                                inventory_transactions: queued.flatMap(q => q.inventoryTxs || [])
+                                            })
+                                        });
+                                        const pushData = await pushRes.json();
+                                        if (pushData.success) {
+                                            await window.ElectronAPI.clearQueuedOrders();
+                                            this.addPosToast(`⚡ تم مزامنة ${queued.length} طلبات أوفلاين بنجاح!`, 'emerald');
+                                            this.playAudio('success');
+                                        } else {
+                                            this.addPosToast(`⚠️ فشل مزامنة الطلبات: ${pushData.message}`, 'rose');
+                                            this.playAudio('error');
+                                        }
+                                    } catch (err) {
+                                        console.error('Offline order sync failed:', err);
+                                        this.addPosToast('⚠️ فشلت المزامنة التلقائية للطلبات غير المتصلة', 'rose');
+                                        this.playAudio('error');
+                                    } finally {
+                                        this.syncing = false;
+                                        this.updatePendingSyncCount();
+                                    }
+                                }
+                            });
+                        }
+
                         // Poll for ready orders every 6s — notify cashier when kitchen finishes
                         const pollReady = () => {
                             fetch('/api/orders/ready-count.json')
