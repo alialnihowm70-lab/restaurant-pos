@@ -9,9 +9,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan optimize \
-    && php artisan storage:link 2>/dev/null || true
+RUN cp .env.example .env 2>/dev/null || true \
+    && composer install --no-dev --optimize-autoloader \
+    && php artisan key:generate --force 2>/dev/null || true
 
 EXPOSE 10000
 
