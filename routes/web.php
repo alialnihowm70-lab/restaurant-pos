@@ -28,6 +28,8 @@ Route::get('/debug', function () {
         'app_key' => substr(env('APP_KEY'), 0, 20) . '...',
         'env_file_exists' => file_exists(base_path('.env')),
         'env_file_contents' => file_exists(base_path('.env')) ? file_get_contents(base_path('.env')) : 'N/A',
+        'all_env_vars' => getenv(), // print all environment variables from system
+        'server_env' => $_SERVER,
     ]);
 });
 
