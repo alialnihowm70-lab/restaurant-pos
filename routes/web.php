@@ -31,6 +31,12 @@ Route::get('/debug', function () {
     ]);
 });
 
+Route::get('/db-columns', function () {
+    return response()->json(
+        DB::getSchemaBuilder()->getColumnListing('products')
+    );
+});
+
 // Public Customer Menu (no auth required - for QR code ordering)
 Route::get('/menu', [App\Http\Controllers\CustomerMenuController::class, 'menu']);
 
