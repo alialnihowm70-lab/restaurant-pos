@@ -9,8 +9,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-RUN touch .env && php artisan key:generate --force \
-    && composer install --no-dev --optimize-autoloader \
+RUN composer install --no-dev --optimize-autoloader \
+    && touch .env && php artisan key:generate --force \
     && npm install && npm run build
 
 EXPOSE 10000
