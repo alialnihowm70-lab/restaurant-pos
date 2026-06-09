@@ -1,8 +1,8 @@
-FROM php:8.2-cli
+FROM php:8.3-cli
 
 RUN apt-get update && apt-get install -y \
-    libsqlite3-dev zip unzip git curl \
-    && docker-php-ext-install pdo pdo_mysql pdo_sqlite bcmath
+    libsqlite3-dev zip unzip git curl libicu-dev \
+    && docker-php-ext-install pdo pdo_mysql pdo_sqlite bcmath intl
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
