@@ -10,7 +10,8 @@ WORKDIR /app
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader \
-    && printf "APP_DEBUG=true\nAPP_KEY=base64:OEuXqJeSz0sqlLlKqZUEt+Tr5Scxqcb2DpZ9iqmLL2w=\n" > .env \
+    && cp .env.example .env \
+    && php artisan key:generate --force \
     && npm install && npm run build
 
 EXPOSE 10000
