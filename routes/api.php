@@ -51,8 +51,14 @@ Route::get('/ingredients/low-stock', function () {
     return response()->json($lowStock);
 });
 
+// Customer Self-Ordering API (public, no auth)
+Route::post('/customer/orders', [App\Http\Controllers\CustomerMenuController::class, 'submitOrder']);
+
 // ── Desktop POS Sync API (no auth required - for local network desktop app) ──
 Route::prefix('desktop')->group(function () {
+    // Web order polling for desktop app
+    Route::get('/pending-web-orders', [App\Http\Controllers\CustomerMenuController::class, 'pendingOrders']);
+    Route::post('/claim-web-order', [App\Http\Controllers\CustomerMenuController::class, 'claimOrder']);
 
     // GET /api/desktop/logs - Temporary route to view Laravel logs on Render for debugging
     Route::get('/logs', function () {

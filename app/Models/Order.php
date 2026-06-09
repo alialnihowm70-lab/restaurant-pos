@@ -22,6 +22,10 @@ class Order extends Model
         'sync_status',
         'notes',
         'invoice_number',
+        'source',
+        'customer_name',
+        'order_type',
+        'table_number',
     ];
 
     protected $casts = [

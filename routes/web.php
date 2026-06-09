@@ -17,6 +17,9 @@ Route::get('/', function () {
     return redirect('/pos');
 });
 
+// Public Customer Menu (no auth required - for QR code ordering)
+Route::get('/menu', [App\Http\Controllers\CustomerMenuController::class, 'menu']);
+
 // Database Connection Test Route
 Route::get('/db-test', function () {
     try {

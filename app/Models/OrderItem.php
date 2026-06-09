@@ -10,7 +10,7 @@ class OrderItem extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['order_id', 'product_id', 'quantity', 'price'];
+    protected $fillable = ['order_id', 'product_id', 'product_name', 'quantity', 'price'];
 
     protected $casts = [
         'quantity' => 'integer',
