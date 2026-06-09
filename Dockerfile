@@ -1,7 +1,7 @@
 FROM php:8.3-cli
 
 RUN apt-get update && apt-get install -y \
-    libsqlite3-dev zip unzip git curl libicu-dev libpq-dev \
+    libsqlite3-dev zip unzip git curl libicu-dev libpq-dev nodejs npm \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql pdo_sqlite bcmath intl
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -11,6 +11,7 @@ COPY . .
 
 RUN cp .env.example .env 2>/dev/null || true \
     && composer install --no-dev --optimize-autoloader \
+    && npm install && npm run build \
     && php artisan key:generate --force 2>/dev/null || true
 
 EXPOSE 10000
