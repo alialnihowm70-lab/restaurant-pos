@@ -15,4 +15,4 @@ RUN cp .env.example .env 2>/dev/null || true \
 
 EXPOSE 10000
 
-CMD touch /app/database/database.sqlite && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000
