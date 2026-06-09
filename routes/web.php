@@ -17,6 +17,20 @@ Route::get('/', function () {
     return redirect('/pos');
 });
 
+// Debug route - shows env config
+Route::get('/debug', function () {
+    return response()->json([
+        'db_connection' => env('DB_CONNECTION'),
+        'db_host' => env('DB_HOST'),
+        'db_port' => env('DB_PORT'),
+        'db_database' => env('DB_DATABASE'),
+        'app_debug' => env('APP_DEBUG'),
+        'app_key' => substr(env('APP_KEY'), 0, 20) . '...',
+        'env_file_exists' => file_exists(base_path('.env')),
+        'env_file_contents' => file_exists(base_path('.env')) ? file_get_contents(base_path('.env')) : 'N/A',
+    ]);
+});
+
 // Public Customer Menu (no auth required - for QR code ordering)
 Route::get('/menu', [App\Http\Controllers\CustomerMenuController::class, 'menu']);
 

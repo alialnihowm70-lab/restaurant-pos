@@ -10,7 +10,7 @@ WORKDIR /app
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader \
-    && touch .env && php artisan key:generate --force \
+    && echo "APP_DEBUG=true" > .env && php artisan key:generate --force \
     && npm install && npm run build
 
 EXPOSE 10000
