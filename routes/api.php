@@ -54,6 +54,16 @@ Route::get('/ingredients/low-stock', function () {
 // ── Desktop POS Sync API (no auth required - for local network desktop app) ──
 Route::prefix('desktop')->group(function () {
 
+    // GET /api/desktop/logs - Temporary route to view Laravel logs on Render for debugging
+    Route::get('/logs', function () {
+        $logPath = storage_path('logs/laravel.log');
+        if (!file_exists($logPath)) {
+            return response('No log file found.', 200, ['Content-Type' => 'text/plain']);
+        }
+        $logs = file_get_contents($logPath);
+        return response(substr($logs, -20000), 200, ['Content-Type' => 'text/plain']);
+    });
+
     // GET /api/desktop/catalog - Pull all products & locations for desktop app
     Route::get('/catalog', function () {
         $products = \App\Models\Product::select('id', 'name', 'base_price', 'category', 'image_url', 'created_at', 'updated_at')
