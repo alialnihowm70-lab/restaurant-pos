@@ -56,6 +56,10 @@ Route::get('/db-test', function () {
         // Try a simple query
         $now = DB::select('SELECT NOW() as current_time');
         
+        // Check products count and names
+        $products = DB::select('SELECT count(*) as cnt FROM products');
+        $productsSample = DB::select('SELECT id, name, is_available FROM products LIMIT 5');
+        
         // Try creating a temporary table or insert/update to test write capability
         DB::beginTransaction();
         DB::statement('CREATE TEMPORARY TABLE test_write_table (id serial PRIMARY KEY, val varchar(50))');
@@ -69,6 +73,8 @@ Route::get('/db-test', function () {
             'database' => $dbName,
             'current_time' => $now[0]->current_time ?? null,
             'write_test' => 'successful',
+            'products_count' => $products[0]->cnt ?? 0,
+            'products_sample' => $productsSample,
             'records' => $testResult,
         ]);
     } catch (\Exception $e) {
