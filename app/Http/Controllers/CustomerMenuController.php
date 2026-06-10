@@ -14,7 +14,7 @@ class CustomerMenuController extends Controller
     public function menu()
     {
         $products = Product::select('id', 'name', 'base_price', 'category', 'image_url')
-            ->where('is_available', true)
+            ->whereRaw('is_available IS TRUE')
             ->orderBy('category')
             ->orderBy('name')
             ->get();
