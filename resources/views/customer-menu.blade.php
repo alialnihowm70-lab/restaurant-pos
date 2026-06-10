@@ -68,7 +68,7 @@
             <template x-for="(product, idx) in filteredProducts()" :key="product.id">
                 <div class="menu-card fade-up" :style="'animation-delay:' + (idx * 0.04) + 's'">
                     <div class="w-full aspect-square overflow-hidden bg-slate-50 relative" x-init="$el.addEventListener('click', () => addToCart(product))">
-                        <img :src="product.image_url || ''" :alt="product.name" class="w-full h-full object-cover" @error.once="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
+                        <img :src="product.image_url || ''" :alt="product.name" class="w-full h-full object-cover" x-on:error.once="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                         <div class="img-placeholder w-full h-full" style="display:none">🍔</div>
                         <div x-show="getItemQty(product.id) > 0" class="absolute top-2 left-2 bg-[#166534] text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center shadow-md shadow-green-900/20" x-text="getItemQty(product.id)"></div>
                     </div>

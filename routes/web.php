@@ -37,7 +37,7 @@ Route::get('/menu', [App\Http\Controllers\CustomerMenuController::class, 'menu']
 Route::get('/menu-test', function () {
     try {
         return (new App\Http\Controllers\CustomerMenuController())->menu();
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         return response()->json([
             'error' => $e->getMessage(),
             'file' => $e->getFile(),
