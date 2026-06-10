@@ -31,27 +31,8 @@ Route::get('/debug', function () {
     ]);
 });
 
-Route::get('/db-columns', function () {
-    return response()->json(
-        DB::getSchemaBuilder()->getColumnListing('products')
-    );
-});
-
 // Public Customer Menu (no auth required - for QR code ordering)
 Route::get('/menu', [App\Http\Controllers\CustomerMenuController::class, 'menu']);
-
-Route::get('/menu-test', function () {
-    try {
-        return (new App\Http\Controllers\CustomerMenuController())->menu();
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => explode("\n", $e->getTraceAsString()),
-        ]);
-    }
-});
 
 // Database Connection Test Route
 Route::get('/db-test', function () {
