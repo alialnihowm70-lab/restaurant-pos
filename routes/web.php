@@ -36,7 +36,7 @@ Route::get('/menu', [App\Http\Controllers\CustomerMenuController::class, 'menu']
 
 Route::get('/menu-test', function () {
     try {
-        return (new App\Http\Controllers\CustomerMenuController())->menu();
+        return (new App\Http\Controllers\CustomerMenuController())->menu()->render();
     } catch (\Throwable $e) {
         return response()->json([
             'error' => $e->getMessage(),
