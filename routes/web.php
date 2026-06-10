@@ -17,75 +17,9 @@ Route::get('/', function () {
     return redirect('/pos');
 });
 
-// Debug route - shows env config
-Route::get('/debug', function () {
-    return response()->json([
-        'db_connection' => env('DB_CONNECTION'),
-        'db_host' => env('DB_HOST'),
-        'db_port' => env('DB_PORT'),
-        'db_database' => env('DB_DATABASE'),
-        'app_debug' => env('APP_DEBUG'),
-        'app_key' => substr(env('APP_KEY'), 0, 20) . '...',
-        'env_file_exists' => file_exists(base_path('.env')),
-        'env_file_contents' => file_exists(base_path('.env')) ? file_get_contents(base_path('.env')) : 'N/A',
-    ]);
-});
-
 // Public Customer Menu (no auth required - for QR code ordering)
 Route::get('/menu', [App\Http\Controllers\CustomerMenuController::class, 'menu']);
 
-Route::get('/menu-test', function () {
-    try {
-        return (new App\Http\Controllers\CustomerMenuController())->menu()->render();
-    } catch (\Throwable $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => explode("\n", $e->getTraceAsString()),
-        ]);
-    }
-});
-
-// Database Connection Test Route
-Route::get('/db-test', function () {
-    try {
-        $dbName = DB::connection()->getDatabaseName();
-        $driver = DB::connection()->getDriverName();
-        
-        // Try a simple query
-        $now = DB::select('SELECT NOW() as current_time');
-        
-        // Check products count and names
-        $products = DB::select('SELECT count(*) as cnt FROM products');
-        $productsSample = DB::select('SELECT id, name, is_available FROM products LIMIT 5');
-        
-        // Try creating a temporary table or insert/update to test write capability
-        DB::beginTransaction();
-        DB::statement('CREATE TEMPORARY TABLE test_write_table (id serial PRIMARY KEY, val varchar(50))');
-        DB::insert('insert into test_write_table (val) values (?)', ['test_write']);
-        $testResult = DB::select('select * from test_write_table');
-        DB::rollBack();
-        
-        return response()->json([
-            'status' => 'success',
-            'driver' => $driver,
-            'database' => $dbName,
-            'current_time' => $now[0]->current_time ?? null,
-            'write_test' => 'successful',
-            'products_count' => $products[0]->cnt ?? 0,
-            'products_sample' => $productsSample,
-            'records' => $testResult,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'driver' => DB::connection()->getDriverName() ?? 'unknown',
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ], 500);
-    }
-});
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
