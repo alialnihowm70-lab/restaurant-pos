@@ -54,8 +54,8 @@ Route::get('/ingredients/low-stock', function () {
 // Customer Self-Ordering API (public, no auth)
 Route::post('/customer/orders', [App\Http\Controllers\CustomerMenuController::class, 'submitOrder']);
 
-// ── Desktop POS Sync API (no auth required - for local network desktop app) ──
-Route::prefix('desktop')->group(function () {
+// ── Desktop POS Sync API (secured via sync_token middleware) ──
+Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
     // Web order polling for desktop app
     Route::get('/pending-web-orders', [App\Http\Controllers\CustomerMenuController::class, 'pendingOrders']);
     Route::post('/claim-web-order', [App\Http\Controllers\CustomerMenuController::class, 'claimOrder']);
