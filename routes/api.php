@@ -236,7 +236,7 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
 
             foreach ($orders as $orderData) {
                 $locationId = $orderData['location_id'] ?? null;
-                if ($locationId && !\App\Models\Location::find($locationId)) {
+                if (!$locationId || !\App\Models\Location::find($locationId)) {
                     $locationId = \App\Models\Location::first()?->id;
                 }
 
@@ -300,7 +300,24 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
             }
 
             foreach ($transactions as $txData) {
-                if (empty($txData['product_id']) || empty($txData['location_id'])) {
+                // Acknowledge ingredient transactions since server doesn't track ingredient transactions directly
+                if (empty($txData['product_id']) && !empty($txData['ingredient_id'])) {
+                    if (!empty($txData['id'])) {
+                        $syncedTransactionIds[] = $txData['id'];
+                    }
+                    continue;
+                }
+
+                if (empty($txData['product_id'])) {
+                    continue;
+                }
+
+                $txLocationId = $txData['location_id'] ?? null;
+                if (!$txLocationId || !\App\Models\Location::find($txLocationId)) {
+                    $txLocationId = \App\Models\Location::first()?->id;
+                }
+
+                if (!$txLocationId) {
                     continue;
                 }
 
@@ -309,7 +326,7 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
                 $tx->id = $txData['id'] ?? $tx->id ?? (string)\Illuminate\Support\Str::uuid();
                 $tx->forceFill([
                     'product_id' => $txData['product_id'],
-                    'location_id' => $txData['location_id'],
+                    'location_id' => $txLocationId,
                     'quantity' => (float)($txData['quantity'] ?? 0),
                     'unit_cost' => (float)($txData['unit_cost'] ?? 0),
                     'source_id' => $txData['source_id'] ?? null,
