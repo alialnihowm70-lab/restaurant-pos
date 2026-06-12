@@ -152,12 +152,13 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
                     continue;
                 }
 
-                $location = !empty($locationData['id'])
-                    ? \App\Models\Location::withTrashed()->find($locationData['id'])
+                $locationId = $locationData['id'] ?? null;
+                $location = ($locationId && \Illuminate\Support\Str::isUuid($locationId))
+                    ? \App\Models\Location::withTrashed()->find($locationId)
                     : null;
                 $location ??= new \App\Models\Location();
-                if (!empty($locationData['id'])) {
-                    $location->id = $locationData['id'];
+                if ($locationId && \Illuminate\Support\Str::isUuid($locationId)) {
+                    $location->id = $locationId;
                 }
                 if (method_exists($location, 'restore') && $location->trashed()) {
                     $location->restore();
@@ -174,12 +175,13 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
                     continue;
                 }
 
-                $product = !empty($productData['id'])
-                    ? \App\Models\Product::withTrashed()->find($productData['id'])
+                $productId = $productData['id'] ?? null;
+                $product = ($productId && \Illuminate\Support\Str::isUuid($productId))
+                    ? \App\Models\Product::withTrashed()->find($productId)
                     : null;
                 $product ??= new \App\Models\Product();
-                if (!empty($productData['id'])) {
-                    $product->id = $productData['id'];
+                if ($productId && \Illuminate\Support\Str::isUuid($productId)) {
+                    $product->id = $productId;
                 }
                 if (method_exists($product, 'restore') && $product->trashed()) {
                     $product->restore();
@@ -199,12 +201,13 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
                     continue;
                 }
 
-                $ingredient = !empty($ingredientData['id'])
-                    ? \App\Models\Ingredient::withTrashed()->find($ingredientData['id'])
+                $ingredientId = $ingredientData['id'] ?? null;
+                $ingredient = ($ingredientId && \Illuminate\Support\Str::isUuid($ingredientId))
+                    ? \App\Models\Ingredient::withTrashed()->find($ingredientId)
                     : null;
                 $ingredient ??= new \App\Models\Ingredient();
-                if (!empty($ingredientData['id'])) {
-                    $ingredient->id = $ingredientData['id'];
+                if ($ingredientId && \Illuminate\Support\Str::isUuid($ingredientId)) {
+                    $ingredient->id = $ingredientId;
                 }
                 if (method_exists($ingredient, 'restore') && $ingredient->trashed()) {
                     $ingredient->restore();
@@ -219,7 +222,12 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
             }
 
             foreach ($recipes as $recipeData) {
-                if (empty($recipeData['product_id']) || empty($recipeData['ingredient_id'])) {
+                if (
+                    empty($recipeData['product_id']) || 
+                    empty($recipeData['ingredient_id']) ||
+                    !\Illuminate\Support\Str::isUuid($recipeData['product_id']) ||
+                    !\Illuminate\Support\Str::isUuid($recipeData['ingredient_id'])
+                ) {
                     continue;
                 }
 
@@ -236,7 +244,7 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
 
             foreach ($orders as $orderData) {
                 $locationId = $orderData['location_id'] ?? null;
-                if (!$locationId || !\App\Models\Location::find($locationId)) {
+                if (!$locationId || !\Illuminate\Support\Str::isUuid($locationId) || !\App\Models\Location::find($locationId)) {
                     $locationId = \App\Models\Location::first()?->id;
                 }
 
@@ -244,13 +252,16 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
                     throw new \RuntimeException('No branch location exists for desktop order sync.');
                 }
 
-                $order = !empty($orderData['id']) ? \App\Models\Order::withTrashed()->find($orderData['id']) : null;
+                $orderId = $orderData['id'] ?? null;
+                $order = ($orderId && \Illuminate\Support\Str::isUuid($orderId)) 
+                    ? \App\Models\Order::withTrashed()->find($orderId) 
+                    : null;
                 if (!$order && !empty($orderData['invoice_number'])) {
                     $order = \App\Models\Order::withTrashed()->where('invoice_number', $orderData['invoice_number'])->first();
                 }
                 $isNewOrder = !$order;
                 $order ??= new \App\Models\Order();
-                $order->id = $orderData['id'] ?? $order->id ?? (string)\Illuminate\Support\Str::uuid();
+                $order->id = ($orderId && \Illuminate\Support\Str::isUuid($orderId)) ? $orderId : ($order->id ?? (string)\Illuminate\Support\Str::uuid());
                 if (method_exists($order, 'restore') && $order->trashed()) {
                     $order->restore();
                 }
@@ -282,7 +293,10 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
 
                 $order->items()->delete();
                 foreach (($orderData['items'] ?? []) as $item) {
-                    $product = isset($item['product_id']) ? \App\Models\Product::find($item['product_id']) : null;
+                    $productId = $item['product_id'] ?? null;
+                    $product = ($productId && \Illuminate\Support\Str::isUuid($productId))
+                        ? \App\Models\Product::find($productId)
+                        : null;
                     if ($product) {
                         \App\Models\OrderItem::create([
                             'id'         => (string)\Illuminate\Support\Str::uuid(),
@@ -308,12 +322,16 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
                     continue;
                 }
 
-                if (empty($txData['product_id'])) {
+                if (empty($txData['product_id']) || !\Illuminate\Support\Str::isUuid($txData['product_id'])) {
+                    // Acknowledge non-UUID or empty product transactions so they don't block sync
+                    if (!empty($txData['id'])) {
+                        $syncedTransactionIds[] = $txData['id'];
+                    }
                     continue;
                 }
 
                 $txLocationId = $txData['location_id'] ?? null;
-                if (!$txLocationId || !\App\Models\Location::find($txLocationId)) {
+                if (!$txLocationId || !\Illuminate\Support\Str::isUuid($txLocationId) || !\App\Models\Location::find($txLocationId)) {
                     $txLocationId = \App\Models\Location::first()?->id;
                 }
 
@@ -321,16 +339,19 @@ Route::prefix('desktop')->middleware(['sync_token'])->group(function () {
                     continue;
                 }
 
-                $tx = !empty($txData['id']) ? \App\Models\InventoryTransaction::find($txData['id']) : null;
+                $txId = $txData['id'] ?? null;
+                $tx = ($txId && \Illuminate\Support\Str::isUuid($txId))
+                    ? \App\Models\InventoryTransaction::find($txId)
+                    : null;
                 $tx ??= new \App\Models\InventoryTransaction();
-                $tx->id = $txData['id'] ?? $tx->id ?? (string)\Illuminate\Support\Str::uuid();
+                $tx->id = ($txId && \Illuminate\Support\Str::isUuid($txId)) ? $txId : (string)\Illuminate\Support\Str::uuid();
                 $tx->forceFill([
                     'product_id' => $txData['product_id'],
                     'location_id' => $txLocationId,
                     'quantity' => (float)($txData['quantity'] ?? 0),
                     'unit_cost' => (float)($txData['unit_cost'] ?? 0),
-                    'source_id' => $txData['source_id'] ?? null,
-                    'order_id' => $txData['order_id'] ?? null,
+                    'source_id' => ($txData['source_id'] && \Illuminate\Support\Str::isUuid($txData['source_id'])) ? $txData['source_id'] : null,
+                    'order_id' => ($txData['order_id'] && \Illuminate\Support\Str::isUuid($txData['order_id'])) ? $txData['order_id'] : null,
                     'type' => $txData['type'] ?? ((float)($txData['quantity'] ?? 0) < 0 ? 'sale' : 'restock'),
                     'created_at' => $txData['created_at'] ?? $tx->created_at ?? now(),
                     'updated_at' => now(),
