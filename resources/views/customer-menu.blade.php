@@ -226,7 +226,7 @@
 
         <!-- Empty State -->
         <div x-show="filteredProducts().length === 0" class="text-center py-20 bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200/60 dark:border-zinc-850/60 p-8 shadow-sm">
-            <div class="w-16 h-16 bg-slate-50 dark:bg-zinc-850 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔍</div>
+            <div class="w-16 h-16 bg-slate-50 dark:bg-zinc-950 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔍</div>
             <h4 class="font-black text-slate-700 dark:text-zinc-300 text-sm">عذراً، لم نجد ما تبحث عنه</h4>
             <p class="text-xs text-slate-400 dark:text-zinc-500 mt-1">تأكد من كتابة الاسم بشكل صحيح أو تصفح الأقسام الأخرى.</p>
         </div>
@@ -240,11 +240,11 @@
          class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-slate-200/80 dark:border-zinc-850/80 px-4 py-4 pb-6 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
         <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div>
-                <span class="text-[10px] text-slate-400 dark:text-zinc-500 font-extrabold uppercase">إجمالي الطلب</span>
+                <span class="text-[10px] text-slate-400 dark:text-zinc-550 font-extrabold uppercase">إجمالي الطلب</span>
                 <p class="text-lg font-black text-emerald-700 dark:text-emerald-400" x-text="formatCurrency(cartTotal())"></p>
             </div>
-            <button @click="showCartSheet = true" class="flex-grow max-w-xs bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-black py-3.5 px-6 rounded-2xl text-xs tracking-wider transition-all btn-bounce shadow-lg shadow-emerald-700/10 flex items-center justify-center gap-2">
-                <span>عرض السلة وتأكيد الطلب</span>
+            <button @click="showCartSheet = true" class="flex-grow max-w-xs bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-650 dark:hover:bg-emerald-700 text-white font-black py-3.5 px-6 rounded-2xl text-xs tracking-wider transition-all btn-bounce shadow-lg shadow-emerald-700/10 flex items-center justify-center gap-2">
+                <span>عرض السلة</span>
                 <span class="bg-white/20 text-white text-[10px] px-2 py-0.5 rounded-full font-black" x-text="cartCount()"></span>
             </button>
         </div>
@@ -391,12 +391,23 @@
                         <div class="space-y-3">
                             <template x-for="(item, index) in cart" :key="item.product.id">
                                 <div class="bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-850 p-4 rounded-2xl space-y-3 shadow-inner">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h4 class="font-black text-xs md:text-sm text-slate-800 dark:text-white" x-text="item.product.name"></h4>
-                                            <span class="text-emerald-700 dark:text-emerald-400 font-extrabold text-xs block mt-1" x-text="formatCurrency(item.product.base_price)"></span>
+                                    <div class="flex gap-3">
+                                        <!-- Product Image -->
+                                        <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-850 flex-shrink-0 relative border border-slate-200/50 dark:border-zinc-800">
+                                            <img :src="item.product.image_url || ''" :alt="item.product.name" class="w-full h-full object-cover" x-on:error.once="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
+                                            <div class="img-placeholder w-full h-full text-xl flex items-center justify-center bg-slate-100 dark:bg-zinc-850" style="display:none">🍔</div>
                                         </div>
-                                        <span class="font-black text-sm text-slate-800 dark:text-white" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
+
+                                        <!-- Name, Price & Total -->
+                                        <div class="flex-grow flex flex-col justify-between py-0.5">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h4 class="font-black text-xs md:text-sm text-slate-800 dark:text-white" x-text="item.product.name"></h4>
+                                                    <span class="text-emerald-700 dark:text-emerald-400 font-extrabold text-xs block mt-1" x-text="formatCurrency(item.product.base_price)"></span>
+                                                </div>
+                                                <span class="font-black text-sm text-slate-800 dark:text-white" x-text="formatCurrency(item.product.base_price * item.quantity)"></span>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="flex items-center justify-between pt-2 border-t border-slate-200/50 dark:border-zinc-800/80">
@@ -419,65 +430,14 @@
                             </template>
                         </div>
                     </template>
-
-                    <!-- Checkout Form (Visible only if cart is not empty) -->
-                    <template x-if="cart.length > 0 && !orderSuccess">
-                        <div class="border-t border-slate-100 dark:border-zinc-850/80 pt-5 space-y-4">
-                            <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider border-r-4 border-r-emerald-500 pr-2">معلومات تأكيد الطلب</h4>
-                            
-                            <!-- Customer Name -->
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase block">اسم الزبون الموقر <span class="text-rose-500">*</span></label>
-                                <input type="text" x-model="customerName" placeholder="مثال: علي الوداني..." class="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800/80 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl px-4 py-3 text-xs text-slate-800 dark:text-zinc-200 focus:outline-none focus:text-right shadow-inner">
-                            </div>
-
-                            <!-- Order Type -->
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase block">نوع التقديم</label>
-                                <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-zinc-950 p-1 rounded-xl">
-                                    <button @click="orderType = 'table'" :class="orderType === 'table' ? 'bg-emerald-600 dark:bg-emerald-650 text-white font-black shadow-sm' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 font-bold'" class="py-2.5 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
-                                        <span>🍽️</span>
-                                        <span>على الطاولة</span>
-                                    </button>
-                                    <button @click="orderType = 'takeaway'; tableNumber = '';" :class="orderType === 'takeaway' ? 'bg-emerald-600 dark:bg-emerald-650 text-white font-black shadow-sm' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 font-bold'" class="py-2.5 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
-                                        <span>🥡</span>
-                                        <span>تيك أواي (خارجي)</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Table Number (if orderType === table) -->
-                            <div class="space-y-1.5" x-show="orderType === 'table'">
-                                <label class="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase block">رقم طاولة الطعام <span class="text-rose-500">*</span></label>
-                                <input type="number" min="1" max="100" x-model="tableNumber" placeholder="رقم الطاولة (مثال: 5)" class="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800/80 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl px-4 py-3 text-xs text-slate-800 dark:text-zinc-200 focus:outline-none focus:text-right shadow-inner">
-                            </div>
-
-                            <!-- Notes -->
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase block">ملاحظات خاصة بالمطبخ</label>
-                                <textarea x-model="notes" rows="2" placeholder="مثال: بدون بصل، زيادة جبنة، صوص جانبي..." class="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800/80 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl px-4 py-3 text-xs text-slate-800 dark:text-zinc-200 focus:outline-none focus:text-right shadow-inner resize-none"></textarea>
-                            </div>
-                        </div>
-                    </template>
                 </div>
 
                 <!-- Sticky Cart Footer -->
-                <div x-show="cart.length > 0 && !orderSuccess" class="p-5 border-t border-slate-100 dark:border-zinc-850/80 bg-slate-50 dark:bg-zinc-900/50 space-y-4">
+                <div x-show="cart.length > 0 && !orderSuccess" class="p-5 border-t border-slate-100 dark:border-zinc-850/80 bg-slate-50 dark:bg-zinc-900/50">
                     <div class="flex items-center justify-between text-sm">
                         <span class="font-extrabold text-slate-550 dark:text-zinc-400">القيمة الإجمالية للطلب</span>
                         <span class="text-xl font-black text-emerald-700 dark:text-emerald-400" x-text="formatCurrency(cartTotal())"></span>
                     </div>
-
-                    <button @click="submitOrder()" 
-                            :disabled="submitting || !customerName.trim() || (orderType === 'table' && !tableNumber)"
-                            class="w-full bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-650 dark:hover:bg-emerald-700 text-white font-black py-4 rounded-2xl text-xs transition-colors btn-bounce shadow-lg shadow-emerald-700/10 flex items-center justify-center gap-2 disabled:bg-slate-300 dark:disabled:bg-zinc-800 disabled:text-slate-550 dark:disabled:text-zinc-550 disabled:cursor-not-allowed disabled:shadow-none">
-                        <!-- Spinner when loading -->
-                        <svg x-show="submitting" class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span x-text="submitting ? 'جاري إرسال الطلب للمطبخ...' : 'تأكيد وإرسال الطلب الآن'"></span>
-                    </button>
                 </div>
             </div>
         </div>
