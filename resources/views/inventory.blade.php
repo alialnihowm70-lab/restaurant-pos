@@ -439,11 +439,10 @@
 
                         <!-- Product Image Choice -->
                         <div class="space-y-3 border-t border-slate-100 dark:border-slate-800 pt-3">
-                            <label class="text-xs text-slate-500 font-black block text-right">صورة الوجبة</label>
+                            <label class="text-xs text-slate-500 font-black block text-right">صورة الوجبة <span class="text-slate-400 font-normal">(اختياري)</span></label>
                             
                             <!-- File Upload -->
                             <div class="space-y-1.5 text-right">
-                                <span class="text-[10px] text-slate-400 font-bold block">رفع صورة من الجهاز:</span>
                                 <input type="file" name="image_file" id="add-image-file" accept="image/*"
                                        class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 focus:border-amber-500 rounded-2xl px-4 py-2 text-xs text-slate-800 focus:outline-none transition-all shadow-inner" />
                                 <!-- Preview -->
@@ -452,13 +451,6 @@
                                     <p id="add-compress-status" class="text-[10px] text-emerald-600 font-bold mt-1 text-center"></p>
                                 </div>
                                 <input type="hidden" id="add-compressed-image" name="compressed_image" />
-                            </div>
-                            
-                            <!-- URL Option -->
-                            <div class="space-y-1.5 text-right">
-                                <span class="text-[10px] text-slate-400 font-bold block">أو رابط صورة من الويب (اختياري):</span>
-                                <input type="url" name="image_url" placeholder="https://images.unsplash.com/..."
-                                       class="w-full bg-white border border-slate-200 focus:border-amber-500 rounded-2xl px-4 py-2.5 text-xs text-slate-855 focus:outline-none transition-all text-left shadow-sm" dir="ltr" />
                             </div>
                         </div>
 
@@ -856,7 +848,6 @@
                     
                     <!-- File Upload -->
                     <div class="space-y-1.5 text-right">
-                        <span class="text-[10px] text-slate-400 font-bold block">رفع صورة جديدة من الجهاز:</span>
                         <input type="file" name="image_file" id="edit-image-file" accept="image/*"
                                class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2 text-xs text-slate-800 focus:outline-none" />
                         <div id="edit-image-preview" class="hidden mt-2">
@@ -866,12 +857,8 @@
                         <input type="hidden" id="edit-compressed-image" name="compressed_image" />
                     </div>
                     
-                    <!-- URL Option -->
-                    <div class="space-y-1.5 text-right">
-                        <span class="text-[10px] text-slate-400 font-bold block">أو تعديل رابط الصورة:</span>
-                        <input type="url" name="image_url" :value="editingProduct?.image_url" placeholder="https://images.unsplash.com/..."
-                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2 text-xs text-slate-800 focus:outline-none text-left" dir="ltr" />
-                    </div>
+                    <!-- URL Option (hidden, keep value for backend) -->
+                    <input type="hidden" name="image_url" :value="editingProduct?.image_url" />
                 </div>
 
                 <div class="flex gap-3 pt-4">

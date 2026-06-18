@@ -581,40 +581,33 @@ Route::middleware(['role:admin'])->group(function () {
             'name'             => 'required|string|max:255',
             'base_price'       => 'required|numeric|min:0',
             'category'         => 'required|string|max:255',
-            'image_url'        => 'nullable|string|max:2048',
-            'image_file'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
+            'image_url'        => 'nullable|string',   // no max — base64 can be large
+            'image_file'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:8192',
             'compressed_image' => 'nullable|string',
         ]);
 
-        $imageUrl = request('image_url');
+        $imageUrl = null;
 
-        // Priority 1: client-side compressed base64 image (fastest)
+        // Priority 1: client-side compressed base64 — store directly in DB (never lost on redeploy)
         if (request('compressed_image') && str_starts_with(request('compressed_image'), 'data:image')) {
-            $base64 = preg_replace('/^data:image\/\w+;base64,/', '', request('compressed_image'));
-            $imageData = base64_decode($base64);
-            if (!file_exists(public_path('uploads'))) {
-                mkdir(public_path('uploads'), 0755, true);
-            }
-            $filename = time() . '_compressed.jpg';
-            file_put_contents(public_path('uploads/' . $filename), $imageData);
-            $imageUrl = '/uploads/' . $filename;
+            $imageUrl = request('compressed_image'); // store base64 data URL as-is
         }
-        // Priority 2: raw file upload (fallback)
+        // Priority 2: raw file upload (compress server-side then store as base64 in DB)
         elseif (request()->hasFile('image_file')) {
-            $file = request()->file('image_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            if (!file_exists(public_path('uploads'))) {
-                mkdir(public_path('uploads'), 0755, true);
-            }
-            $file->move(public_path('uploads'), $filename);
-            $imageUrl = '/uploads/' . $filename;
+            $imageUrl = 'data:image/jpeg;base64,' . base64_encode(
+                file_get_contents(request()->file('image_file')->getRealPath())
+            );
+        }
+        // Priority 3: external URL
+        elseif (request('image_url')) {
+            $imageUrl = request('image_url');
         }
 
         Product::create([
-            'name'      => request('name'),
-            'base_price'=> request('base_price'),
-            'category'  => request('category'),
-            'image_url' => $imageUrl,
+            'name'       => request('name'),
+            'base_price' => request('base_price'),
+            'category'   => request('category'),
+            'image_url'  => $imageUrl,
         ]);
         return redirect('/admin/inventory')->with('success', 'تم تسجيل الصنف بنجاح!');
     });
@@ -624,40 +617,30 @@ Route::middleware(['role:admin'])->group(function () {
             'name'             => 'required|string|max:255',
             'base_price'       => 'required|numeric|min:0',
             'category'         => 'required|string|max:255',
-            'image_url'        => 'nullable|string|max:2048',
-            'image_file'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
+            'image_url'        => 'nullable|string',   // no max — base64 or existing
+            'image_file'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:8192',
             'compressed_image' => 'nullable|string',
         ]);
 
+        // Keep existing image by default
         $imageUrl = request('image_url') ?: $product->image_url;
 
-        // Priority 1: client-side compressed base64 image (fastest)
+        // Priority 1: new compressed base64 — store directly in DB
         if (request('compressed_image') && str_starts_with(request('compressed_image'), 'data:image')) {
-            $base64 = preg_replace('/^data:image\/\w+;base64,/', '', request('compressed_image'));
-            $imageData = base64_decode($base64);
-            if (!file_exists(public_path('uploads'))) {
-                mkdir(public_path('uploads'), 0755, true);
-            }
-            $filename = time() . '_compressed.jpg';
-            file_put_contents(public_path('uploads/' . $filename), $imageData);
-            $imageUrl = '/uploads/' . $filename;
+            $imageUrl = request('compressed_image');
         }
-        // Priority 2: raw file upload (fallback)
+        // Priority 2: raw file upload
         elseif (request()->hasFile('image_file')) {
-            $file = request()->file('image_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            if (!file_exists(public_path('uploads'))) {
-                mkdir(public_path('uploads'), 0755, true);
-            }
-            $file->move(public_path('uploads'), $filename);
-            $imageUrl = '/uploads/' . $filename;
+            $imageUrl = 'data:image/jpeg;base64,' . base64_encode(
+                file_get_contents(request()->file('image_file')->getRealPath())
+            );
         }
 
         $product->update([
-            'name'      => request('name'),
-            'base_price'=> request('base_price'),
-            'category'  => request('category'),
-            'image_url' => $imageUrl,
+            'name'       => request('name'),
+            'base_price' => request('base_price'),
+            'category'   => request('category'),
+            'image_url'  => $imageUrl,
         ]);
         return redirect('/admin/inventory')->with('success', 'تم تحديث الصنف بنجاح!');
     });
