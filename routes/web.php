@@ -20,6 +20,11 @@ Route::get('/', function () {
 // Public Customer Menu (no auth required - for QR code ordering)
 Route::get('/menu', [App\Http\Controllers\CustomerMenuController::class, 'menu']);
 
+// Public QR Code page (permanent, for printing on tables)
+Route::get('/qr', function () {
+    return file_get_contents(public_path('qr.html'));
+});
+
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
