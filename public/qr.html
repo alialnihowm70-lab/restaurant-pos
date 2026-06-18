@@ -116,7 +116,7 @@
             <canvas id="qr-canvas"></canvas>
         </div>
 
-        <div class="url-badge" id="url-display">https://almadina-pos.onrender.com/menu</div>
+        <div class="url-badge" id="url-display">جاري توليد الرابط...</div>
 
         <button class="download-btn" onclick="downloadQR()">⬇️ تحميل QR Code</button>
 
@@ -130,7 +130,8 @@
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        const URL = 'https://almadina-pos.onrender.com/menu';
+        const URL = window.location.origin + '/menu';
+        document.getElementById('url-display').textContent = URL;
         const canvas = document.getElementById('qr-canvas');
         const size = 260;
 
