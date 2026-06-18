@@ -142,7 +142,7 @@
     </section>
 
     <!-- Sticky Sub-Bar (Search & Category Chips) -->
-    <section class="max-w-4xl mx-auto px-4 pt-4 sticky top-[67px] z-30 bg-slate-50/90 dark:bg-zinc-950/90 backdrop-blur-md pb-3 transition-colors duration-300">
+    <section class="max-w-4xl mx-auto px-4 pt-4 sticky top-[67px] z-30 bg-slate-50 dark:bg-zinc-950 pb-3 transition-colors duration-300">
         <div class="space-y-3">
             <!-- Interactive Search Bar -->
             <div class="relative">
@@ -166,7 +166,7 @@
                 <button @click="selectedCategory = 'all'" 
                         class="px-5 py-2.5 rounded-xl text-xs font-black transition-all flex-shrink-0 border shadow-sm btn-bounce"
                         :class="selectedCategory === 'all' 
-                            ? 'bg-emerald-850 border-emerald-850 text-white dark:bg-white dark:border-white dark:text-zinc-950 font-black shadow-lg shadow-emerald-800/10 dark:shadow-none' 
+                            ? 'bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-600 dark:border-emerald-600 dark:text-white font-black shadow-lg shadow-emerald-800/10' 
                             : 'bg-white border-slate-200/80 text-slate-600 hover:border-slate-300 dark:bg-zinc-900 dark:border-zinc-800/60 dark:text-zinc-400 dark:hover:text-zinc-200'">
                     الكل
                 </button>
@@ -174,7 +174,7 @@
                     <button @click="selectedCategory = cat" 
                             class="px-5 py-2.5 rounded-xl text-xs font-black transition-all flex-shrink-0 border shadow-sm btn-bounce"
                             :class="selectedCategory === cat 
-                                ? 'bg-emerald-850 border-emerald-850 text-white dark:bg-white dark:border-white dark:text-zinc-950 font-black shadow-lg shadow-emerald-800/10 dark:shadow-none' 
+                                ? 'bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-600 dark:border-emerald-600 dark:text-white font-black shadow-lg shadow-emerald-800/10' 
                                 : 'bg-white border-slate-200/80 text-slate-600 hover:border-slate-300 dark:bg-zinc-900 dark:border-zinc-800/60 dark:text-zinc-400 dark:hover:text-zinc-200'">
                         <span x-text="cat"></span>
                     </button>
@@ -192,7 +192,7 @@
                      class="premium-card bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-850/60 rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full shadow-[0_4px_12px_rgba(0,0,0,0.02)] relative group">
                     
                     <!-- Favorite Tag / Badge overlay -->
-                    <span class="absolute top-2.5 right-2.5 z-10 px-2 py-0.5 rounded-md bg-emerald-500/90 text-white text-[9px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm" x-text="product.category"></span>
+                    <span class="absolute top-2.5 right-2.5 z-10 px-2 py-0.5 rounded-md bg-emerald-600 dark:bg-emerald-700 text-white text-[9px] font-black uppercase tracking-wider shadow-sm" x-text="product.category"></span>
 
                     <!-- Product Image -->
                     <div class="w-full aspect-square overflow-hidden bg-slate-100 dark:bg-zinc-850 relative">
@@ -237,7 +237,7 @@
          x-transition:enter="transition ease-out duration-300 transform translate-y-10"
          x-transition:enter-end="transform translate-y-0"
          x-transition:leave="transition ease-in duration-200 transform translate-y-10"
-         class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-slate-200/80 dark:border-zinc-850/80 px-4 py-4 pb-6 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+         class="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-zinc-950 border-t border-slate-200/80 dark:border-zinc-850/80 px-4 py-4 pb-6 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
         <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div>
                 <span class="text-[10px] text-slate-400 dark:text-zinc-550 font-extrabold uppercase">إجمالي الطلب</span>
@@ -255,8 +255,8 @@
          class="fixed inset-0 z-50 overflow-y-auto" 
          style="display: none;" 
          x-transition>
-        <!-- Backdrop -->
-        <div class="fixed inset-0 bg-slate-950/70 dark:bg-slate-950/85 backdrop-blur-md" @click="closeDetail()"></div>
+         <!-- Backdrop -->
+         <div class="fixed inset-0 bg-slate-950/65 dark:bg-slate-950/80" @click="closeDetail()"></div>
 
         <!-- Modal Dialog Wrapper -->
         <div class="flex items-end sm:items-center justify-center min-h-screen p-0 sm:p-6 relative">
@@ -270,7 +270,7 @@
                  class="bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative z-10 text-right border border-slate-100 dark:border-zinc-800">
                 
                 <!-- Close Button -->
-                <button @click="closeDetail()" class="absolute top-4 left-4 z-20 w-8 h-8 rounded-full bg-slate-950/30 hover:bg-slate-950/50 text-white flex items-center justify-center backdrop-blur-md transition-transform hover:rotate-90 btn-bounce">
+                <button @click="closeDetail()" class="absolute top-4 left-4 z-20 w-8 h-8 rounded-full bg-slate-950/60 hover:bg-slate-950/85 text-white flex items-center justify-center transition-transform hover:rotate-90 btn-bounce">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -280,7 +280,7 @@
                 <div class="w-full aspect-[4/3] bg-slate-100 dark:bg-zinc-800 relative">
                     <img :src="selectedProduct?.image_url || ''" :alt="selectedProduct?.name" class="w-full h-full object-cover">
                     <!-- Category Badge -->
-                    <span class="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-emerald-600/90 text-white text-[10px] font-black backdrop-blur-sm shadow-sm" x-text="selectedProduct?.category"></span>
+                    <span class="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-black shadow-sm" x-text="selectedProduct?.category"></span>
                 </div>
 
                 <!-- Info Area -->
@@ -342,7 +342,7 @@
          style="display: none;" 
          x-transition>
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-slate-950/70 dark:bg-slate-950/85 backdrop-blur-md" @click="showCartSheet = false"></div>
+        <div class="fixed inset-0 bg-slate-950/65 dark:bg-slate-950/80" @click="showCartSheet = false"></div>
 
         <!-- Right Side Panel Overlay -->
         <div class="flex justify-end min-h-screen relative">

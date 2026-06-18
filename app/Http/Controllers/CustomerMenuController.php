@@ -15,9 +15,41 @@ class CustomerMenuController extends Controller
     {
         $products = Product::with('ingredients')
             ->whereRaw('is_available IS TRUE')
-            ->orderBy('category')
-            ->orderBy('name')
             ->get();
+
+        // Custom category ordering priority map
+        $priorityMap = [
+            'برجر' => 100,
+            'سندوتشات' => 90,
+            'سندويشات' => 90,
+            'ساندوتش' => 90,
+            'ساندوتشات' => 90,
+            'سندوتش' => 90,
+            'وجبات' => 80,
+            'بيتزا' => 70,
+            'مقبلات' => 50,
+            'بطاطا' => 40,
+            'بطاطس' => 40,
+            'مشروبات' => 20,
+            'عصائر' => 20,
+            'بارد' => 20,
+            'ساخن' => 19,
+            'حلو' => 15,
+            'حلويات' => 15,
+            'اضافات' => 10,
+            'إضافات' => 10,
+        ];
+
+        // Sort products by category priority, then by product name
+        $products = $products->sort(function ($a, $b) use ($priorityMap) {
+            $pA = $priorityMap[trim($a->category)] ?? 50;
+            $pB = $priorityMap[trim($b->category)] ?? 50;
+
+            if ($pA === $pB) {
+                return strcmp($a->name, $b->name);
+            }
+            return $pB <=> $pA; // Highest priority first
+        })->values();
 
         $categories = $products->pluck('category')->unique()->filter()->values();
 
