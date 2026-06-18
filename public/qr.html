@@ -120,7 +120,9 @@
 
         <button class="download-btn" onclick="downloadQR()">⬇️ تحميل QR Code</button>
 
-        <p class="footer-note">يمكن طباعة هذا الكود ووضعه على الطاولات</p>
+        <p class="mobile-tip" style="font-size: 11px; color: #f59e0b; margin-top: 10px; font-weight: bold; display: none;" id="mobile-hint">💡 للهاتف: اضغط مطولاً على الرمز أعلاه لحفظ الصورة مباشرة</p>
+
+        <p class="footer-note" style="margin-top: 20px;">يمكن طباعة هذا الكود ووضعه على الطاولات</p>
     </div>
 
     <!-- QR Code library (pure JS, no external dependencies needed for generation) -->
@@ -158,6 +160,11 @@
             } else {
                 alert('الرجاء الانتظار حتى يتم تحميل الكود.');
             }
+        }
+
+        // Show helper hint for mobile users
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            document.getElementById('mobile-hint').style.display = 'block';
         }
     </script>
 </body>
