@@ -424,6 +424,12 @@
                                    class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-855 focus:outline-none transition-all text-right shadow-sm" />
                         </div>
 
+                        <div class="space-y-1.5 text-right">
+                            <label class="text-xs text-slate-500 font-bold">وصف الصنف <span class="text-slate-400 font-normal">(اختياري)</span></label>
+                            <textarea name="description" rows="2" placeholder="مثال: عجينة طازجة مع صلصة الطماطم والجبن الموزاريلا..."
+                                     class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-855 focus:outline-none transition-all text-right shadow-sm resize-none"></textarea>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1.5 text-right">
                                 <label class="text-xs text-slate-500 font-bold">سعر البيع (د.ل)</label>
@@ -832,6 +838,12 @@
                 <div class="space-y-1.5 text-right">
                     <label class="text-xs text-slate-500 font-bold">اسم الصنف</label>
                     <input type="text" name="name" :value="editingProduct?.name" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
+                </div>
+                <div class="space-y-1.5 text-right">
+                    <label class="text-xs text-slate-500 font-bold">وصف الصنف <span class="text-slate-400 font-normal">(اختياري)</span></label>
+                    <textarea name="description" rows="2" :value="editingProduct?.description"
+                              placeholder="مثال: عجينة طازجة مع صلصة الطماطم..."
+                              class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none text-right resize-none"></textarea>
                 </div>
                 <div class="space-y-1.5 text-right">
                     <label class="text-xs text-slate-500 font-bold">التصنيف</label>

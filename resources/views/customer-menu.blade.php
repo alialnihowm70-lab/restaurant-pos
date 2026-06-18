@@ -534,9 +534,12 @@
                     }, 200);
                 },
 
-                // Localized Arabic description accessor
+                // Localized Arabic description accessor — uses real DB description first
                 getProductDescription(product) {
                     if (!product) return '';
+                    if (product.description && product.description.trim() !== '') {
+                        return product.description;
+                    }
                     return arabicDescriptions[product.name] || 'طبق مميز يحضر بعناية من أفضل المكونات الطازجة والتوابل الخاصة ليقدم لكم تجربة مذاق فريدة ولذيذة.';
                 },
 

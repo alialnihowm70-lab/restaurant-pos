@@ -586,33 +586,29 @@ Route::middleware(['role:admin'])->group(function () {
             'name'             => 'required|string|max:255',
             'base_price'       => 'required|numeric|min:0',
             'category'         => 'required|string|max:255',
-            'image_url'        => 'nullable|string',   // no max — base64 can be large
+            'description'      => 'nullable|string',
+            'image_url'        => 'nullable|string',
             'image_file'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:8192',
             'compressed_image' => 'nullable|string',
         ]);
 
         $imageUrl = null;
-
-        // Priority 1: client-side compressed base64 — store directly in DB (never lost on redeploy)
         if (request('compressed_image') && str_starts_with(request('compressed_image'), 'data:image')) {
-            $imageUrl = request('compressed_image'); // store base64 data URL as-is
-        }
-        // Priority 2: raw file upload (compress server-side then store as base64 in DB)
-        elseif (request()->hasFile('image_file')) {
+            $imageUrl = request('compressed_image');
+        } elseif (request()->hasFile('image_file')) {
             $imageUrl = 'data:image/jpeg;base64,' . base64_encode(
                 file_get_contents(request()->file('image_file')->getRealPath())
             );
-        }
-        // Priority 3: external URL
-        elseif (request('image_url')) {
+        } elseif (request('image_url')) {
             $imageUrl = request('image_url');
         }
 
         Product::create([
-            'name'       => request('name'),
-            'base_price' => request('base_price'),
-            'category'   => request('category'),
-            'image_url'  => $imageUrl,
+            'name'        => request('name'),
+            'base_price'  => request('base_price'),
+            'category'    => request('category'),
+            'description' => request('description'),
+            'image_url'   => $imageUrl,
         ]);
         return redirect('/admin/inventory')->with('success', 'تم تسجيل الصنف بنجاح!');
     });
@@ -622,30 +618,27 @@ Route::middleware(['role:admin'])->group(function () {
             'name'             => 'required|string|max:255',
             'base_price'       => 'required|numeric|min:0',
             'category'         => 'required|string|max:255',
-            'image_url'        => 'nullable|string',   // no max — base64 or existing
+            'description'      => 'nullable|string',
+            'image_url'        => 'nullable|string',
             'image_file'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:8192',
             'compressed_image' => 'nullable|string',
         ]);
 
-        // Keep existing image by default
         $imageUrl = request('image_url') ?: $product->image_url;
-
-        // Priority 1: new compressed base64 — store directly in DB
         if (request('compressed_image') && str_starts_with(request('compressed_image'), 'data:image')) {
             $imageUrl = request('compressed_image');
-        }
-        // Priority 2: raw file upload
-        elseif (request()->hasFile('image_file')) {
+        } elseif (request()->hasFile('image_file')) {
             $imageUrl = 'data:image/jpeg;base64,' . base64_encode(
                 file_get_contents(request()->file('image_file')->getRealPath())
             );
         }
 
         $product->update([
-            'name'       => request('name'),
-            'base_price' => request('base_price'),
-            'category'   => request('category'),
-            'image_url'  => $imageUrl,
+            'name'        => request('name'),
+            'base_price'  => request('base_price'),
+            'category'    => request('category'),
+            'description' => request('description'),
+            'image_url'   => $imageUrl,
         ]);
         return redirect('/admin/inventory')->with('success', 'تم تحديث الصنف بنجاح!');
     });

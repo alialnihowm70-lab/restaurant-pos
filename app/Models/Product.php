@@ -12,7 +12,7 @@ class Product extends Model
 {
     use HasUuids, SoftDeletes;
 
-    protected $fillable = ['name', 'base_price', 'category', 'image_url', 'is_available'];
+    protected $fillable = ['name', 'base_price', 'category', 'description', 'image_url', 'is_available'];
 
     protected $casts = [
         'base_price' => 'decimal:2',
