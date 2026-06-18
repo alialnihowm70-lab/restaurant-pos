@@ -416,7 +416,7 @@
                         <span class="text-[10px] text-slate-450 font-bold block mt-1">تسجيل وجبة جديدة لعرضها على الكاشير بالمنظومة</span>
                     </div>
 
-                    <form action="/admin/products" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <form action="/admin/products" method="POST" enctype="multipart/form-data" class="space-y-4" id="add-product-form">
                         @csrf
                         <div class="space-y-1.5 text-right">
                             <label class="text-xs text-slate-500 font-bold">اسم الوجبة / الصنف</label>
@@ -444,8 +444,14 @@
                             <!-- File Upload -->
                             <div class="space-y-1.5 text-right">
                                 <span class="text-[10px] text-slate-400 font-bold block">رفع صورة من الجهاز:</span>
-                                <input type="file" name="image_file" accept="image/*"
+                                <input type="file" name="image_file" id="add-image-file" accept="image/*"
                                        class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 focus:border-amber-500 rounded-2xl px-4 py-2 text-xs text-slate-800 focus:outline-none transition-all shadow-inner" />
+                                <!-- Preview -->
+                                <div id="add-image-preview" class="hidden mt-2">
+                                    <img id="add-preview-img" src="" alt="معاينة" class="w-full h-32 object-cover rounded-xl border border-slate-200" />
+                                    <p id="add-compress-status" class="text-[10px] text-emerald-600 font-bold mt-1 text-center"></p>
+                                </div>
+                                <input type="hidden" id="add-compressed-image" name="compressed_image" />
                             </div>
                             
                             <!-- URL Option -->
@@ -456,8 +462,9 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black py-4 rounded-2xl shadow-lg shadow-orange-550/15 transition-all text-xs tracking-wider">
-                            حفظ وتسجيل الصنف بالمنظومة
+                        <button type="submit" id="add-submit-btn" class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black py-4 rounded-2xl shadow-lg shadow-orange-550/15 transition-all text-xs tracking-wider flex items-center justify-center gap-2">
+                            <span id="add-btn-text">حفظ وتسجيل الصنف بالمنظومة</span>
+                            <svg id="add-btn-spinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
                         </button>
                     </form>
                 </div>
@@ -850,8 +857,13 @@
                     <!-- File Upload -->
                     <div class="space-y-1.5 text-right">
                         <span class="text-[10px] text-slate-400 font-bold block">رفع صورة جديدة من الجهاز:</span>
-                        <input type="file" name="image_file" accept="image/*"
+                        <input type="file" name="image_file" id="edit-image-file" accept="image/*"
                                class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2 text-xs text-slate-800 focus:outline-none" />
+                        <div id="edit-image-preview" class="hidden mt-2">
+                            <img id="edit-preview-img" src="" alt="معاينة" class="w-full h-28 object-cover rounded-xl border border-slate-200" />
+                            <p id="edit-compress-status" class="text-[10px] text-emerald-600 font-bold mt-1 text-center"></p>
+                        </div>
+                        <input type="hidden" id="edit-compressed-image" name="compressed_image" />
                     </div>
                     
                     <!-- URL Option -->
@@ -921,5 +933,75 @@
             </form>
         </div>
     </div>
+<script>
+// ─── Image Compression Helper ───────────────────────────────────────────────
+function compressImage(file, maxSize, quality, callback) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            let w = img.width, h = img.height;
+            if (w > maxSize || h > maxSize) {
+                if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+                else       { w = Math.round(w * maxSize / h); h = maxSize; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            const compressed = canvas.toDataURL('image/jpeg', quality);
+            const origKB  = Math.round(file.size / 1024);
+            const newKB   = Math.round((compressed.length * 3 / 4) / 1024);
+            callback(compressed, origKB, newKB);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ─── Add Product Form ────────────────────────────────────────────────────────
+const addFileInput = document.getElementById('add-image-file');
+if (addFileInput) {
+    addFileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        compressImage(file, 800, 0.75, function(dataUrl, origKB, newKB) {
+            document.getElementById('add-compressed-image').value = dataUrl;
+            document.getElementById('add-preview-img').src = dataUrl;
+            document.getElementById('add-image-preview').classList.remove('hidden');
+            document.getElementById('add-compress-status').textContent =
+                '✅ الصورة جاهزة: ' + origKB + 'KB → ' + newKB + 'KB';
+        });
+    });
+
+    document.getElementById('add-product-form').addEventListener('submit', function() {
+        const btn  = document.getElementById('add-submit-btn');
+        const txt  = document.getElementById('add-btn-text');
+        const spin = document.getElementById('add-btn-spinner');
+        btn.disabled = true;
+        txt.textContent = 'جاري الحفظ...';
+        spin.classList.remove('hidden');
+        // disable the file input so the compressed hidden field is used
+        addFileInput.disabled = true;
+    });
+}
+
+// ─── Edit Product Form ───────────────────────────────────────────────────────
+const editFileInput = document.getElementById('edit-image-file');
+if (editFileInput) {
+    editFileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        compressImage(file, 800, 0.75, function(dataUrl, origKB, newKB) {
+            document.getElementById('edit-compressed-image').value = dataUrl;
+            document.getElementById('edit-preview-img').src = dataUrl;
+            document.getElementById('edit-image-preview').classList.remove('hidden');
+            document.getElementById('edit-compress-status').textContent =
+                '✅ الصورة جاهزة: ' + origKB + 'KB → ' + newKB + 'KB';
+        });
+        // disable file input to avoid sending raw file
+        editFileInput.addEventListener('submit', function() { editFileInput.disabled = true; }, { once: true });
+    });
+}
+</script>
 </body>
 </html>
