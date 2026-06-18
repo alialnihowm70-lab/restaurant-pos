@@ -63,7 +63,7 @@
     editingLocation: null,
     selectedReconcileLocation: '{{ $locations->first()?->id }}',
     locationStocks: {{ json_encode($locationStocks) }},
-    products: {{ json_encode($products->map(fn($p) => ['id' => $p->id, 'name' => $p->name, 'category' => $p->category, 'base_price' => (float)$p->base_price])) }},
+    products: {{ json_encode($products->map(fn($p) => ['id' => $p->id, 'name' => $p->name, 'category' => $p->category, 'base_price' => (float)$p->base_price, 'image_url' => $p->image_url])) }},
     counts: {},
     getSystemStock(productId) {
         if (!this.selectedReconcileLocation) return 0;
@@ -416,32 +416,44 @@
                         <span class="text-[10px] text-slate-450 font-bold block mt-1">تسجيل وجبة جديدة لعرضها على الكاشير بالمنظومة</span>
                     </div>
 
-                    <form action="/admin/products" method="POST" class="space-y-4">
+                    <form action="/admin/products" method="POST" enctype="multipart/form-data" class="space-y-4">
                         @csrf
                         <div class="space-y-1.5 text-right">
-                            <label class="text-xs text-slate-500 font-bold">اسم الوجبة الصنف</label>
+                            <label class="text-xs text-slate-500 font-bold">اسم الوجبة / الصنف</label>
                             <input type="text" name="name" required placeholder="مثال: بيتزا مارغريتا عائلية"
-                                   class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-850 focus:outline-none transition-all text-right shadow-sm" />
+                                   class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-855 focus:outline-none transition-all text-right shadow-sm" />
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1.5 text-right">
                                 <label class="text-xs text-slate-500 font-bold">سعر البيع (د.ل)</label>
                                 <input type="number" step="0.01" name="base_price" required placeholder="24.00"
-                                       class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-850 focus:outline-none transition-all text-right shadow-sm" />
+                                       class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-855 focus:outline-none transition-all text-right shadow-sm" />
                             </div>
                             <div class="space-y-1.5 text-right">
                                 <label class="text-xs text-slate-500 font-bold">الفئة</label>
                                 <input type="text" name="category" required placeholder="مثال: بيتزا أو برجر"
-                                       class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-850 focus:outline-none transition-all text-right shadow-sm" />
+                                       class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-855 focus:outline-none transition-all text-right shadow-sm" />
                             </div>
                         </div>
 
-                        <!-- Product Image URL -->
-                        <div class="space-y-1.5 text-right">
-                            <label class="text-xs text-slate-500 font-bold">رابط صورة الوجبة (اختياري)</label>
-                            <input type="url" name="image_url" placeholder="https://images.unsplash.com/..."
-                                   class="w-full bg-white border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 rounded-2xl px-4 py-3 text-xs text-slate-850 focus:outline-none transition-all text-left shadow-sm" dir="ltr" />
+                        <!-- Product Image Choice -->
+                        <div class="space-y-3 border-t border-slate-100 dark:border-slate-800 pt-3">
+                            <label class="text-xs text-slate-500 font-black block text-right">صورة الوجبة</label>
+                            
+                            <!-- File Upload -->
+                            <div class="space-y-1.5 text-right">
+                                <span class="text-[10px] text-slate-400 font-bold block">رفع صورة من الجهاز:</span>
+                                <input type="file" name="image_file" accept="image/*"
+                                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 focus:border-amber-500 rounded-2xl px-4 py-2 text-xs text-slate-800 focus:outline-none transition-all shadow-inner" />
+                            </div>
+                            
+                            <!-- URL Option -->
+                            <div class="space-y-1.5 text-right">
+                                <span class="text-[10px] text-slate-400 font-bold block">أو رابط صورة من الويب (اختياري):</span>
+                                <input type="url" name="image_url" placeholder="https://images.unsplash.com/..."
+                                       class="w-full bg-white border border-slate-200 focus:border-amber-500 rounded-2xl px-4 py-2.5 text-xs text-slate-855 focus:outline-none transition-all text-left shadow-sm" dir="ltr" />
+                            </div>
                         </div>
 
                         <button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black py-4 rounded-2xl shadow-lg shadow-orange-550/15 transition-all text-xs tracking-wider">
@@ -816,7 +828,7 @@
         <div @click.away="editingProduct = null"
              class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
             <h3 class="text-lg font-black text-slate-800 dark:text-white mb-4">تعديل الصنف</h3>
-            <form :action="'/admin/products/' + editingProduct?.id + '/update'" method="POST" class="space-y-4">
+            <form :action="'/admin/products/' + editingProduct?.id + '/update'" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="space-y-1.5 text-right">
                     <label class="text-xs text-slate-500 font-bold">اسم الصنف</label>
@@ -824,17 +836,32 @@
                 </div>
                 <div class="space-y-1.5 text-right">
                     <label class="text-xs text-slate-500 font-bold">التصنيف</label>
-                    <select name="category" :value="editingProduct?.category" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none">
-                        <option value="main">وجبات رئيسية</option>
-                        <option value="appetizers">مقبلات</option>
-                        <option value="drinks">مشروبات</option>
-                        <option value="desserts">حلويات</option>
-                    </select>
+                    <input type="text" name="category" :value="editingProduct?.category" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none text-right" />
                 </div>
                 <div class="space-y-1.5 text-right">
                     <label class="text-xs text-slate-500 font-bold">السعر الأساسي</label>
                     <input type="number" step="0.25" name="base_price" :value="editingProduct?.base_price" required class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none" />
                 </div>
+                
+                <!-- Product Image Choice -->
+                <div class="space-y-3 border-t border-slate-200 dark:border-slate-800 pt-3">
+                    <label class="text-xs text-slate-500 font-black block text-right">صورة الوجبة</label>
+                    
+                    <!-- File Upload -->
+                    <div class="space-y-1.5 text-right">
+                        <span class="text-[10px] text-slate-400 font-bold block">رفع صورة جديدة من الجهاز:</span>
+                        <input type="file" name="image_file" accept="image/*"
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2 text-xs text-slate-800 focus:outline-none" />
+                    </div>
+                    
+                    <!-- URL Option -->
+                    <div class="space-y-1.5 text-right">
+                        <span class="text-[10px] text-slate-400 font-bold block">أو تعديل رابط الصورة:</span>
+                        <input type="url" name="image_url" :value="editingProduct?.image_url" placeholder="https://images.unsplash.com/..."
+                               class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2 text-xs text-slate-800 focus:outline-none text-left" dir="ltr" />
+                    </div>
+                </div>
+
                 <div class="flex gap-3 pt-4">
                     <button type="submit" class="w-2/3 bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl transition-all">حفظ التعديلات</button>
                     <button type="button" @click="editingProduct = null" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black py-3 rounded-xl transition-all">إلغاء</button>

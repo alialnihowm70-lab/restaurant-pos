@@ -581,10 +581,27 @@ Route::middleware(['role:admin'])->group(function () {
             'name' => 'required|string|max:255',
             'base_price' => 'required|numeric|min:0',
             'category' => 'required|string|max:255',
-            'image_url' => 'nullable|url|max:2048',
+            'image_url' => 'nullable|string|max:2048',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
         ]);
 
-        Product::create(request()->only('name', 'base_price', 'category', 'image_url'));
+        $imageUrl = request('image_url');
+        if (request()->hasFile('image_file')) {
+            $file = request()->file('image_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            if (!file_exists(public_path('uploads'))) {
+                mkdir(public_path('uploads'), 0755, true);
+            }
+            $file->move(public_path('uploads'), $filename);
+            $imageUrl = '/uploads/' . $filename;
+        }
+
+        Product::create([
+            'name' => request('name'),
+            'base_price' => request('base_price'),
+            'category' => request('category'),
+            'image_url' => $imageUrl,
+        ]);
         return redirect('/admin/inventory')->with('success', 'Menu product registered successfully.');
     });
 
@@ -593,10 +610,27 @@ Route::middleware(['role:admin'])->group(function () {
             'name' => 'required|string|max:255',
             'base_price' => 'required|numeric|min:0',
             'category' => 'required|string|max:255',
-            'image_url' => 'nullable|url|max:2048',
+            'image_url' => 'nullable|string|max:2048',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
         ]);
 
-        $product->update(request()->only('name', 'base_price', 'category', 'image_url'));
+        $imageUrl = request('image_url');
+        if (request()->hasFile('image_file')) {
+            $file = request()->file('image_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            if (!file_exists(public_path('uploads'))) {
+                mkdir(public_path('uploads'), 0755, true);
+            }
+            $file->move(public_path('uploads'), $filename);
+            $imageUrl = '/uploads/' . $filename;
+        }
+
+        $product->update([
+            'name' => request('name'),
+            'base_price' => request('base_price'),
+            'category' => request('category'),
+            'image_url' => $imageUrl,
+        ]);
         return redirect('/admin/inventory')->with('success', 'Menu product updated successfully.');
     });
 
