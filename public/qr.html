@@ -113,7 +113,7 @@
         <p class="scan-text">📱 امسح بكاميرا هاتفك للطلب مباشرة</p>
 
         <div class="qr-container">
-            <canvas id="qr-canvas"></canvas>
+            <div id="qrcode" style="display: flex; justify-content: center; align-items: center; min-width: 260px; min-height: 260px; margin: 0 auto;"></div>
         </div>
 
         <div class="url-badge" id="url-display">جاري توليد الرابط...</div>
@@ -132,10 +132,9 @@
     <script>
         const URL = window.location.origin + '/menu';
         document.getElementById('url-display').textContent = URL;
-        const canvas = document.getElementById('qr-canvas');
         const size = 260;
 
-        const qr = new QRCode(document.createElement('div'), {
+        const qr = new QRCode(document.getElementById('qrcode'), {
             text: URL,
             width: size,
             height: size,
@@ -144,27 +143,21 @@
             correctLevel: QRCode.CorrectLevel.H
         });
 
-        // Wait for QR to render then copy to our canvas
-        setTimeout(() => {
-            const qrImg = qr._el.querySelector('img') || qr._el.querySelector('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = size;
-            canvas.height = size;
-
-            if (qrImg.tagName === 'CANVAS') {
-                ctx.drawImage(qrImg, 0, 0);
-            } else {
-                const img = new Image();
-                img.onload = () => ctx.drawImage(img, 0, 0);
-                img.src = qrImg.src;
-            }
-        }, 100);
-
         function downloadQR() {
+            const qrImg = document.querySelector('#qrcode img');
+            const qrCanvas = document.querySelector('#qrcode canvas');
             const link = document.createElement('a');
             link.download = 'almadina-menu-qr.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            
+            if (qrImg && qrImg.src) {
+                link.href = qrImg.src;
+                link.click();
+            } else if (qrCanvas) {
+                link.href = qrCanvas.toDataURL('image/png');
+                link.click();
+            } else {
+                alert('الرجاء الانتظار حتى يتم تحميل الكود.');
+            }
         }
     </script>
 </body>
