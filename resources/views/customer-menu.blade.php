@@ -549,8 +549,11 @@
                     pdfContainer.style.fontFamily = "'Cairo', sans-serif";
                     pdfContainer.style.width = '800px';
                     pdfContainer.style.position = 'absolute';
-                    pdfContainer.style.left = '-9999px';
+                    pdfContainer.style.left = '0';
                     pdfContainer.style.top = '0';
+                    pdfContainer.style.zIndex = '-9999';
+                    pdfContainer.style.color = '#1e293b';
+                    pdfContainer.style.backgroundColor = '#ffffff';
 
                     // 1. Header of the PDF Menu
                     let htmlContent = `
@@ -564,7 +567,7 @@
                                     <span class="text-3xl font-black text-white font-playfair">B</span>
                                 </div>
                                 <div class="text-right">
-                                    <h1 class="text-2xl font-black text-slate-900 font-playfair tracking-wide">Bello Smash</h1>
+                                    <h1 class="text-2xl font-black text-slate-900 font-playfair tracking-wide" style="color: #0f172a;">Bello Smash</h1>
                                     <p class="text-xs text-emerald-600 font-bold uppercase tracking-wider -mt-0.5">Burger &amp; More</p>
                                 </div>
                             </div>
@@ -575,9 +578,9 @@
                         </div>
 
                         <!-- Welcome Box -->
-                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-6 mb-8 text-center" style="text-align: center;">
-                            <h2 class="text-lg font-black text-emerald-800">قائمة الطعام الإلكترونية</h2>
-                            <p class="text-xs text-slate-500 mt-1 font-medium">أصنافنا محضرة طازجة يومياً وبأجود المكونات. بالهناء والشفاء!</p>
+                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-6 mb-8 text-center" style="text-align: center; background-color: #f8fafc; border-color: #f1f5f9;">
+                            <h2 class="text-lg font-black text-emerald-800" style="color: #064e3b;">قائمة الطعام الإلكترونية</h2>
+                            <p class="text-xs text-slate-500 mt-1 font-medium" style="color: #64748b;">أصنافنا محضرة طازجة يومياً وبأجود المكونات. بالهناء والشفاء!</p>
                         </div>
                     `;
 
@@ -590,15 +593,15 @@
                         if (catProducts.length === 0) return;
 
                         htmlContent += `
-                            <div class="mb-10 page-break-avoid">
+                            <div class="mb-10 page-break-avoid" style="page-break-inside: avoid; break-inside: avoid;">
                                 <!-- Category Title -->
-                                <div class="flex items-center gap-3 border-b-2 border-emerald-600/20 pb-2 mb-6">
-                                    <span class="text-sm font-black text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl">${category}</span>
+                                <div class="flex items-center gap-3 border-b-2 border-emerald-600/20 pb-2 mb-6" style="border-bottom-color: rgba(16, 185, 129, 0.2);">
+                                    <span class="text-sm font-black text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl" style="color: #064e3b; background-color: #ecfdf5;">${category}</span>
                                     <div class="flex-grow h-0.5 bg-gradient-to-r from-emerald-600/20 to-transparent"></div>
                                 </div>
                                 
                                 <!-- Category Products Grid -->
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;">
                         `;
 
                         catProducts.forEach(product => {
@@ -608,24 +611,24 @@
 
                             htmlContent += `
                                 <!-- Product Card -->
-                                <div class="bg-white border border-slate-100 rounded-2xl p-3 flex flex-col justify-between shadow-[0_2px_8px_rgba(0,0,0,0.01)] min-h-[140px] page-break-avoid">
-                                    <div class="flex gap-3">
+                                <div class="bg-white border border-slate-100 rounded-2xl p-3 flex flex-col justify-between shadow-[0_2px_8px_rgba(0,0,0,0.01)] min-h-[140px] page-break-avoid" style="background-color: #ffffff; border-color: #f1f5f9; border-radius: 1rem; page-break-inside: avoid; break-inside: avoid; display: flex; flex-direction: column; justify-content: space-between; padding: 0.75rem;">
+                                    <div class="flex gap-3" style="display: flex; gap: 0.75rem;">
                                         <!-- Product Image -->
-                                        <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 flex-shrink-0 border border-slate-100 relative">
-                                            ${imgSrc ? `<img src="${imgSrc}" class="w-full h-full object-cover">` : '<div class="w-full h-full text-2xl flex items-center justify-center bg-slate-50">🍔</div>'}
+                                        <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 flex-shrink-0 border border-slate-100 relative" style="width: 4rem; height: 4rem; border-radius: 0.75rem; overflow: hidden; background-color: #f8fafc; border-color: #f1f5f9; flex-shrink: 0;">
+                                            ${imgSrc ? `<img src="${imgSrc}" style="width: 100%; height: 100%; object-fit: cover;">` : '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background-color: #f8fafc;">🍔</div>'}
                                         </div>
                                         
                                         <!-- Name & Desc -->
-                                        <div class="flex-grow text-right">
-                                            <h4 class="font-black text-xs text-slate-900 leading-tight mb-1">${product.name}</h4>
-                                            <p class="text-[9px] text-slate-400 line-clamp-3 leading-normal font-medium">${desc}</p>
+                                        <div class="flex-grow text-right" style="flex-grow: 1; text-align: right;">
+                                            <h4 class="font-black text-xs text-slate-900 leading-tight mb-1" style="color: #0f172a; font-weight: 900; margin-bottom: 0.25rem;">${product.name}</h4>
+                                            <p class="text-[9px] text-slate-400 line-clamp-3 leading-normal font-medium" style="color: #94a3b8; font-size: 9px; line-height: 1.25;">${desc}</p>
                                         </div>
                                     </div>
                                     
                                     <!-- Price -->
-                                    <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-50">
-                                        <span class="text-[8px] text-slate-400 font-bold">السعر</span>
-                                        <span class="font-extrabold text-xs text-emerald-700">${price}</span>
+                                    <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-50" style="display: flex; justify-content: space-between; align-items: center; border-top-color: #f8fafc; margin-top: 0.75rem; padding-top: 0.5rem;">
+                                        <span class="text-[8px] text-slate-400 font-bold" style="color: #94a3b8; font-size: 8px;">السعر</span>
+                                        <span class="font-extrabold text-xs text-emerald-700" style="color: #047857; font-weight: 800;">${price}</span>
                                     </div>
                                 </div>
                             `;
@@ -639,8 +642,8 @@
 
                     // Add Footer Note
                     htmlContent += `
-                        <div class="text-center pt-8 border-t border-slate-100 mt-10" style="text-align: center;">
-                            <p class="text-[10px] text-slate-400 font-extrabold">🍽️ شكراً لزيارتكم مطعم Bello Smash</p>
+                        <div class="text-center pt-8 border-t border-slate-100 mt-10" style="text-align: center; border-top-color: #f1f5f9; margin-top: 2.5rem; padding-top: 2rem;">
+                            <p class="text-[10px] text-slate-400 font-extrabold" style="color: #94a3b8;">🍽️ شكراً لزيارتكم مطعم Bello Smash</p>
                         </div>
                     `;
 
@@ -656,6 +659,33 @@
                         }
                     `;
                     pdfContainer.appendChild(style);
+
+                    // Helper to wait for images
+                    const waitForImages = async () => {
+                        const images = pdfContainer.getElementsByTagName('img');
+                        const promises = [];
+                        for (let img of images) {
+                            if (!img.complete) {
+                                promises.push(new Promise(resolve => {
+                                    img.onload = resolve;
+                                    img.onerror = resolve;
+                                }));
+                            }
+                        }
+                        await Promise.all(promises);
+                    };
+
+                    // Wait for fonts and images to load completely before capturing
+                    try {
+                        if (document.fonts) {
+                            await document.fonts.ready;
+                        }
+                        await waitForImages();
+                        // Give layout a brief moment to reflow/paint
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    } catch (e) {
+                        console.warn('Pre-loading fonts/images warning:', e);
+                    }
 
                     // PDF options
                     const opt = {
