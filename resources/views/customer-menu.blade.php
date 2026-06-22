@@ -32,6 +32,8 @@
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;550;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- html2pdf.js for dynamic PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -103,6 +105,13 @@
 
             <!-- Utility Controls (Theme Toggle & Cart Button) -->
             <div class="flex items-center gap-2">
+                <!-- PDF Download Button -->
+                <button @click="downloadPDF()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors btn-bounce" aria-label="تحميل المنيو PDF" title="تحميل المنيو كملف PDF">
+                    <svg class="w-5 h-5 text-slate-650 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                </button>
+
                 <!-- Theme Toggle Button -->
                 <button @click="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors btn-bounce" aria-label="تغيير المظهر">
                     <!-- Sun Icon (shows in Dark Mode) -->
@@ -133,10 +142,20 @@
             <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-700/20 dark:bg-zinc-800/30 rounded-full blur-2xl"></div>
             <div class="absolute -left-10 -top-10 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl"></div>
             
-            <div class="relative z-10 max-w-lg">
-                <span class="px-3 py-1 rounded-full bg-emerald-700/50 dark:bg-emerald-950/50 text-[10px] font-black tracking-wider text-emerald-200 border border-emerald-600/30">أهلاً بك في مطعم بيلو سماش</span>
-                <h2 class="text-2xl font-black text-white mt-3 leading-tight">اختر وجبتك المفضلة وعش تجربة طعم لا تُنسى</h2>
-                <p class="text-xs text-emerald-100/80 dark:text-zinc-400 mt-2 font-medium leading-relaxed">تصفح قائمتنا اللذيذة واطلب مباشرة من طاولة الطعام ليوصلك طلبك ساخناً وطازجاً.</p>
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="max-w-lg">
+                    <span class="px-3 py-1 rounded-full bg-emerald-700/50 dark:bg-emerald-950/50 text-[10px] font-black tracking-wider text-emerald-200 border border-emerald-600/30">أهلاً بك في مطعم بيلو سماش</span>
+                    <h2 class="text-2xl font-black text-white mt-3 leading-tight">اختر وجبتك المفضلة وعش تجربة طعم لا تُنسى</h2>
+                    <p class="text-xs text-emerald-100/80 dark:text-zinc-400 mt-2 font-medium leading-relaxed">تصفح قائمتنا اللذيذة واطلب مباشرة من طاولة الطعام ليوصلك طلبك ساخناً وطازجاً.</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <button @click="downloadPDF()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-slate-900 font-black text-xs px-5 py-3.5 rounded-2xl flex items-center justify-center gap-2 btn-bounce shadow-lg shadow-amber-500/20">
+                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        <span>تحميل المنيو PDF</span>
+                    </button>
+                </div>
             </div>
         </div>
     </section>
@@ -508,6 +527,158 @@
                         this.theme = 'dark';
                     } else {
                         this.theme = 'light';
+                    }
+
+                    // Check if auto-download is requested via query param download=pdf
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('download') === 'pdf') {
+                        setTimeout(() => {
+                            this.downloadPDF();
+                        }, 1200);
+                    }
+                },
+
+                async downloadPDF() {
+                    this.showToast('جاري تجهيز ملف PDF للتحميل...', 'success');
+
+                    // Create a temporary container for PDF rendering
+                    const pdfContainer = document.createElement('div');
+                    pdfContainer.id = 'pdf-render-container';
+                    pdfContainer.dir = 'rtl';
+                    pdfContainer.className = 'bg-white text-slate-800 p-8 text-right';
+                    pdfContainer.style.fontFamily = "'Cairo', sans-serif";
+                    pdfContainer.style.width = '800px';
+                    pdfContainer.style.position = 'absolute';
+                    pdfContainer.style.left = '-9999px';
+                    pdfContainer.style.top = '0';
+
+                    // 1. Header of the PDF Menu
+                    let htmlContent = `
+                        <!-- Top Accent Line -->
+                        <div class="h-2 w-full bg-gradient-to-r from-emerald-600 via-amber-500 to-emerald-700 rounded-t-lg mb-6"></div>
+                        
+                        <!-- Header -->
+                        <div class="flex items-center justify-between border-b-2 border-slate-100 pb-6 mb-8">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-800 to-emerald-600 flex items-center justify-center shadow-lg">
+                                    <span class="text-3xl font-black text-white font-playfair">B</span>
+                                </div>
+                                <div class="text-right">
+                                    <h1 class="text-2xl font-black text-slate-900 font-playfair tracking-wide">Bello Smash</h1>
+                                    <p class="text-xs text-emerald-600 font-bold uppercase tracking-wider -mt-0.5">Burger &amp; More</p>
+                                </div>
+                            </div>
+                            <div class="text-left" style="text-align: left;">
+                                <p class="text-[10px] text-slate-400 font-extrabold uppercase">قائمة الطعام المميزة</p>
+                                <p class="text-xs text-slate-600 font-bold mt-1">${new Date().toLocaleDateString('ar-LY', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            </div>
+                        </div>
+
+                        <!-- Welcome Box -->
+                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-6 mb-8 text-center" style="text-align: center;">
+                            <h2 class="text-lg font-black text-emerald-800">قائمة الطعام الإلكترونية</h2>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">أصنافنا محضرة طازجة يومياً وبأجود المكونات. بالهناء والشفاء!</p>
+                        </div>
+                    `;
+
+                    // 2. Loop through categories and products
+                    const categoriesList = this.categories;
+                    const allProducts = this.products;
+
+                    categoriesList.forEach(category => {
+                        const catProducts = allProducts.filter(p => p.category === category);
+                        if (catProducts.length === 0) return;
+
+                        htmlContent += `
+                            <div class="mb-10 page-break-avoid">
+                                <!-- Category Title -->
+                                <div class="flex items-center gap-3 border-b-2 border-emerald-600/20 pb-2 mb-6">
+                                    <span class="text-sm font-black text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl">${category}</span>
+                                    <div class="flex-grow h-0.5 bg-gradient-to-r from-emerald-600/20 to-transparent"></div>
+                                </div>
+                                
+                                <!-- Category Products Grid -->
+                                <div class="grid grid-cols-2 gap-4">
+                        `;
+
+                        catProducts.forEach(product => {
+                            const desc = this.getProductDescription(product);
+                            const price = this.formatCurrency(product.base_price);
+                            const imgSrc = product.image_url || '';
+
+                            htmlContent += `
+                                <!-- Product Card -->
+                                <div class="bg-white border border-slate-100 rounded-2xl p-3 flex flex-col justify-between shadow-[0_2px_8px_rgba(0,0,0,0.01)] min-h-[140px] page-break-avoid">
+                                    <div class="flex gap-3">
+                                        <!-- Product Image -->
+                                        <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 flex-shrink-0 border border-slate-100 relative">
+                                            ${imgSrc ? `<img src="${imgSrc}" class="w-full h-full object-cover">` : '<div class="w-full h-full text-2xl flex items-center justify-center bg-slate-50">🍔</div>'}
+                                        </div>
+                                        
+                                        <!-- Name & Desc -->
+                                        <div class="flex-grow text-right">
+                                            <h4 class="font-black text-xs text-slate-900 leading-tight mb-1">${product.name}</h4>
+                                            <p class="text-[9px] text-slate-400 line-clamp-3 leading-normal font-medium">${desc}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Price -->
+                                    <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-50">
+                                        <span class="text-[8px] text-slate-400 font-bold">السعر</span>
+                                        <span class="font-extrabold text-xs text-emerald-700">${price}</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        htmlContent += `
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    // Add Footer Note
+                    htmlContent += `
+                        <div class="text-center pt-8 border-t border-slate-100 mt-10" style="text-align: center;">
+                            <p class="text-[10px] text-slate-400 font-extrabold">🍽️ شكراً لزيارتكم مطعم Bello Smash</p>
+                        </div>
+                    `;
+
+                    pdfContainer.innerHTML = htmlContent;
+                    document.body.appendChild(pdfContainer);
+
+                    // Styling rule for page breaks
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        .page-break-avoid {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                    `;
+                    pdfContainer.appendChild(style);
+
+                    // PDF options
+                    const opt = {
+                        margin:       [0.4, 0.4, 0.4, 0.4], // [top, left, bottom, right] in inches
+                        filename:     'Bello-Smash-Menu.pdf',
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { 
+                            scale: 2, 
+                            useCORS: true, 
+                            letterRendering: true,
+                            logging: false
+                        },
+                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    try {
+                        await html2pdf().set(opt).from(pdfContainer).save();
+                        this.showToast('تم تحميل المنيو بنجاح!', 'success');
+                    } catch (e) {
+                        console.error(e);
+                        this.showToast('حدث خطأ أثناء تحميل الملف. يرجى المحاولة لاحقاً.', 'warning');
+                    } finally {
+                        document.body.removeChild(pdfContainer);
                     }
                 },
 
