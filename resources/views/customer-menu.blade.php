@@ -541,17 +541,22 @@
                 async downloadPDF() {
                     this.showToast('جاري تجهيز ملف PDF للتحميل...', 'success');
 
-                    // Create a temporary container for PDF rendering
+                    // Create a fixed wrapper to hide the container on the screen
+                    const pdfWrapper = document.createElement('div');
+                    pdfWrapper.id = 'pdf-render-wrapper';
+                    pdfWrapper.style.position = 'fixed';
+                    pdfWrapper.style.left = '0';
+                    pdfWrapper.style.top = '0';
+                    pdfWrapper.style.zIndex = '-9999';
+                    pdfWrapper.style.pointerEvents = 'none';
+
+                    // Create the actual container for PDF rendering
                     const pdfContainer = document.createElement('div');
                     pdfContainer.id = 'pdf-render-container';
                     pdfContainer.dir = 'rtl';
                     pdfContainer.className = 'bg-white text-slate-800 p-8 text-right';
                     pdfContainer.style.fontFamily = "'Cairo', sans-serif";
                     pdfContainer.style.width = '800px';
-                    pdfContainer.style.position = 'absolute';
-                    pdfContainer.style.left = '0';
-                    pdfContainer.style.top = '0';
-                    pdfContainer.style.zIndex = '-9999';
                     pdfContainer.style.color = '#1e293b';
                     pdfContainer.style.backgroundColor = '#ffffff';
 
@@ -648,7 +653,8 @@
                     `;
 
                     pdfContainer.innerHTML = htmlContent;
-                    document.body.appendChild(pdfContainer);
+                    pdfWrapper.appendChild(pdfContainer);
+                    document.body.appendChild(pdfWrapper);
 
                     // Styling rule for page breaks
                     const style = document.createElement('style');
@@ -682,7 +688,7 @@
                         }
                         await waitForImages();
                         // Give layout a brief moment to reflow/paint
-                        await new Promise(resolve => setTimeout(resolve, 300));
+                        await new Promise(resolve => setTimeout(resolve, 400));
                     } catch (e) {
                         console.warn('Pre-loading fonts/images warning:', e);
                     }
@@ -696,19 +702,22 @@
                             scale: 2, 
                             useCORS: true, 
                             letterRendering: true,
-                            logging: false
+                            logging: false,
+                            scrollX: 0,
+                            scrollY: 0
                         },
                         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
                     };
 
                     try {
+                        // We target pdfContainer (which has default relative flow layout)
                         await html2pdf().set(opt).from(pdfContainer).save();
                         this.showToast('تم تحميل المنيو بنجاح!', 'success');
                     } catch (e) {
                         console.error(e);
                         this.showToast('حدث خطأ أثناء تحميل الملف. يرجى المحاولة لاحقاً.', 'warning');
                     } finally {
-                        document.body.removeChild(pdfContainer);
+                        document.body.removeChild(pdfWrapper);
                     }
                 },
 
