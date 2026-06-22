@@ -544,6 +544,7 @@
                     // Create a fixed wrapper to hide the container on the screen
                     const pdfWrapper = document.createElement('div');
                     pdfWrapper.id = 'pdf-render-wrapper';
+                    pdfWrapper.dir = 'ltr'; // Set wrapper to LTR to fix html2canvas RTL alignment offset bug
                     pdfWrapper.style.position = 'fixed';
                     pdfWrapper.style.left = '0';
                     pdfWrapper.style.top = '0';
@@ -554,9 +555,9 @@
                     const pdfContainer = document.createElement('div');
                     pdfContainer.id = 'pdf-render-container';
                     pdfContainer.dir = 'rtl';
-                    pdfContainer.className = 'bg-white text-slate-800 p-8 text-right';
+                    pdfContainer.className = 'bg-white text-slate-800 p-6 text-right';
                     pdfContainer.style.fontFamily = "'Cairo', sans-serif";
-                    pdfContainer.style.width = '800px';
+                    pdfContainer.style.width = '720px'; // 720px equals exactly 7.5 inches at 96dpi, fitting A4 perfectly
                     pdfContainer.style.color = '#1e293b';
                     pdfContainer.style.backgroundColor = '#ffffff';
 
@@ -695,7 +696,7 @@
 
                     // PDF options
                     const opt = {
-                        margin:       [0.4, 0.4, 0.4, 0.4], // [top, left, bottom, right] in inches
+                        margin:       [0.4, 0.38, 0.4, 0.38], // top, left, bottom, right in inches
                         filename:     'Bello-Smash-Menu.pdf',
                         image:        { type: 'jpeg', quality: 0.98 },
                         html2canvas:  { 
