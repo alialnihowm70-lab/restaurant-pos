@@ -608,115 +608,280 @@
                     pdfContainer.dir = 'rtl';
                     pdfContainer.className = 'bg-white text-slate-800 text-right';
                     pdfContainer.style.fontFamily = "'Cairo', sans-serif";
-                    pdfContainer.style.width = '750px'; // 750px for A4 portrait with 3-column grid
+                    pdfContainer.style.width = '794px'; // Exactly A4 width at 96 DPI
 
-                    // 1. Header of the PDF Menu
+                    // Custom category ordering priority map
+                    const priorityMap = {
+                        'برجر': 100,
+                        'سندوتشات': 90,
+                        'سندويشات': 90,
+                        'ساندوتش': 90,
+                        'ساندوتشات': 90,
+                        'سندوتش': 90,
+                        'وجبات': 80,
+                        'بيتزا': 70,
+                        'مقبلات': 50,
+                        'بطاطا': 40,
+                        'بطاطس': 40,
+                        'مشروبات': 20,
+                        'عصائر': 20,
+                        'بارد': 20,
+                        'ساخن': 19,
+                        'حلو': 15,
+                        'حلويات': 15,
+                        'اضافات': 10,
+                        'إضافات': 10
+                    };
+
+                    const categoriesList = [...this.categories].sort((a, b) => {
+                        const pA = priorityMap[a.trim()] ?? 50;
+                        const pB = priorityMap[b.trim()] ?? 50;
+                        if (pA === pB) return a.localeCompare(b);
+                        return pB - pA;
+                    });
+
+                    const allProducts = this.products;
+
+                    // Dynamically calculate and distribute categories and products into explicit A4 pages
+                    const maxPageHeight = 980; // max height per page including padding
+                    const titleBlockHeight = 40;
+                    const rowHeight = 340; // card height 320px + gap 20px
+                    const headerHeight = 222;
+
+                    let pages = [];
+                    let currentPage = {
+                        isFirst: true,
+                        height: headerHeight, // Page 1 starts with header
+                        blocks: [{ type: 'header' }]
+                    };
+
+                    categoriesList.forEach(category => {
+                        const catProducts = allProducts.filter(p => p.category === category);
+                        if (catProducts.length === 0) return;
+
+                        // Check if title block fits in current page
+                        if (currentPage.height + titleBlockHeight > maxPageHeight) {
+                            pages.push(currentPage);
+                            currentPage = {
+                                isFirst: false,
+                                height: 0,
+                                blocks: []
+                            };
+                        }
+
+                        currentPage.blocks.push({
+                            type: 'title',
+                            category: category
+                        });
+                        currentPage.height += titleBlockHeight;
+
+                        // Group products in rows of 2
+                        const rows = [];
+                        for (let i = 0; i < catProducts.length; i += 2) {
+                            rows.push(catProducts.slice(i, i + 2));
+                        }
+
+                        rows.forEach(rowProducts => {
+                            if (currentPage.height + rowHeight > maxPageHeight) {
+                                pages.push(currentPage);
+                                currentPage = {
+                                    isFirst: false,
+                                    height: 0,
+                                    blocks: []
+                                };
+                                
+                                // Repeat category title as continuation
+                                currentPage.blocks.push({
+                                    type: 'title',
+                                    category: `${category} (تابع)`
+                                });
+                                currentPage.height += titleBlockHeight;
+                            }
+
+                            currentPage.blocks.push({
+                                type: 'row',
+                                products: rowProducts
+                            });
+                            currentPage.height += rowHeight;
+                        });
+                    });
+
+                    if (currentPage.blocks.length > 0) {
+                        pages.push(currentPage);
+                    }
+
+                    // 1. Styling of the PDF Menu
                     let htmlContent = `
                         <style>
                             @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap');
                             * { box-sizing: border-box; margin: 0; padding: 0; }
-                            .pdf-menu-body {
-                                font-family: 'Cairo', sans-serif;
-                                background-color: #f8f7f4;
-                                color: #1e293b;
-                                padding: 24px;
-                            }
-                            .pdf-header {
-                                background: linear-gradient(135deg, #14532d 0%, #064e3b 50%, #14532d 100%);
-                                color: white;
-                                border-radius: 20px;
-                                padding: 24px 20px;
-                                text-align: center;
-                                margin-bottom: 24px;
-                                border-bottom: 5px solid #f59e0b;
+                            
+                            .pdf-page {
+                                width: 794px;
+                                height: 1122px;
+                                padding: 35px 35px 50px 35px;
+                                background-color: #f8fafc;
                                 position: relative;
-                                overflow: hidden;
+                                box-sizing: border-box;
+                                page-break-after: always;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: flex-start;
+                                direction: rtl !important;
+                                text-align: right !important;
+                                font-family: 'Cairo', sans-serif;
                             }
-                            .pdf-brand {
-                                font-family: 'Playfair Display', serif;
-                                font-size: 34px;
-                                font-weight: 900;
-                                color: #ffffff;
-                                letter-spacing: -1px;
+                            .pdf-page:last-child {
+                                page-break-after: avoid !important;
+                                break-after: avoid !important;
                             }
-                            .pdf-brand span { color: #fbbf24; }
-                            .pdf-subtitle {
-                                font-size: 11px;
-                                color: #6ee7b7;
-                                font-weight: 700;
-                                text-transform: uppercase;
-                                margin-top: 4px;
-                                letter-spacing: 2px;
+                            
+                            /* Premium Top Accent Line */
+                            .pdf-top-accent {
+                                height: 4px;
+                                width: 100%;
+                                background: linear-gradient(to right, #047857, #fbbf24, #047857);
+                                margin-bottom: 15px;
+                                border-radius: 2px;
                             }
-                            .pdf-welcome {
-                                font-size: 11px;
-                                color: #d1fae5;
-                                margin-top: 8px;
-                                font-weight: 500;
-                                line-height: 1.5;
-                            }
-                            .category-section {
-                                margin-bottom: 24px;
-                            }
-                            .category-title {
-                                font-size: 17px;
-                                font-weight: 900;
-                                color: #14532d;
-                                border-bottom: 3px solid #fbbf24;
-                                padding-bottom: 6px;
-                                margin-bottom: 16px;
-                                text-align: right;
+
+                            /* Brand Header */
+                            .pdf-brand-header {
                                 display: flex;
                                 align-items: center;
-                                justify-content: flex-end;
-                                gap: 6px;
+                                justify-content: flex-start;
+                                gap: 12px;
+                                width: 100%;
+                                margin-bottom: 15px;
+                                direction: rtl !important;
+                                text-align: right !important;
                             }
-                            .category-dot {
-                                width: 8px;
-                                height: 8px;
+                            .pdf-logo {
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 12px;
+                                background: linear-gradient(to bottom right, #064e3b, #15803d);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-family: 'Playfair Display', serif;
+                                font-size: 20px;
+                                font-weight: 900;
+                                box-shadow: 0 4px 10px rgba(6, 78, 59, 0.2);
+                            }
+                            .pdf-brand-text {
+                                display: flex;
+                                flex-direction: column;
+                                text-align: right !important;
+                            }
+                            .pdf-brand-name {
+                                font-family: 'Playfair Display', serif;
+                                font-size: 16px;
+                                font-weight: 900;
+                                color: #0f172a;
+                                line-height: 1.1;
+                            }
+                            .pdf-brand-sub {
+                                font-size: 9px;
+                                text-transform: uppercase;
+                                font-weight: 800;
+                                color: #16a34a;
+                                letter-spacing: 1.5px;
+                                margin-top: 2px;
+                            }
+                            
+                            /* Hero Welcome Banner */
+                            .pdf-hero-banner {
+                                background: linear-gradient(135deg, #022c22 0%, #064e3b 60%, #0f766e 100%);
+                                border-radius: 24px;
+                                padding: 20px 24px;
+                                width: 100%;
+                                box-sizing: border-box;
+                                margin-bottom: 20px;
+                                text-align: right !important;
+                                direction: rtl !important;
+                            }
+                            .pdf-hero-title {
+                                font-size: 20px;
+                                font-weight: 900;
+                                color: #ffffff;
+                                line-height: 1.25;
+                            }
+                            .pdf-hero-sub {
+                                font-size: 11px;
+                                color: #a7f3d0;
+                                font-weight: 500;
+                                margin-top: 6px;
+                                line-height: 1.4;
+                            }
+                            
+                            /* Category Title */
+                            .pdf-category-title {
+                                font-size: 16px;
+                                font-weight: 900;
+                                color: #1e293b;
+                                padding-bottom: 6px;
+                                margin-top: 5px;
+                                margin-bottom: 12px;
+                                text-align: right !important;
+                                direction: rtl !important;
+                                display: flex;
+                                align-items: center;
+                                justify-content: flex-start;
+                                gap: 8px;
+                                width: 100%;
+                                height: 30px;
+                                box-sizing: border-box;
+                            }
+                            .pdf-category-dot {
+                                width: 6px;
+                                height: 6px;
                                 border-radius: 50%;
                                 background: #fbbf24;
                                 display: inline-block;
                                 flex-shrink: 0;
                             }
-                            .grid-layout {
-                                display: block;
-                                font-size: 0;
-                                margin-right: -10px;
-                                margin-left: -10px;
-                                text-align: right;
-                            }
-                            .product-card {
-                                background: white;
-                                border: 1.5px solid #eaeaea;
-                                border-radius: 20px;
-                                overflow: hidden;
-                                display: inline-block;
-                                vertical-align: top;
-                                width: calc(50% - 20px);
-                                height: 260px;
-                                margin: 10px;
-                                text-align: right;
-                                font-size: 14px; /* reset font size */
-                                position: relative; /* target context for badge and absolute footer */
-                                page-break-inside: avoid !important;
-                                break-inside: avoid !important;
-                                box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-                            }
-                            .product-image-wrapper {
+                            
+                            /* Grid Row */
+                            .pdf-grid-row {
+                                display: flex;
+                                gap: 20px;
                                 width: 100%;
-                                height: 140px;
+                                height: 320px;
+                                margin-bottom: 20px;
+                                box-sizing: border-box;
+                                direction: rtl !important;
+                            }
+                            
+                            /* Product Card exactly matching Web menu cards */
+                            .pdf-card {
+                                background: white;
+                                border: 1px solid #f1f5f9;
+                                border-radius: 20px;
+                                width: calc(50% - 10px);
+                                height: 320px;
+                                box-sizing: border-box;
+                                display: flex;
+                                flex-direction: column;
+                                overflow: hidden;
+                                box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+                                text-align: right !important;
+                                direction: rtl !important;
+                                position: relative;
+                            }
+                            
+                            .pdf-card-image-wrapper {
+                                width: 100%;
+                                height: 180px;
                                 background-size: cover;
                                 background-position: center center;
                                 background-repeat: no-repeat;
-                                background-color: #f1f5f9;
+                                background-color: #f8fafc;
                                 position: relative;
-                                display: block;
                             }
-                            .product-image {
-                                display: none; /* hidden — we use background-image instead */
-                            }
-                            .product-image-placeholder {
+                            
+                            .pdf-card-image-placeholder {
                                 width: 100%;
                                 height: 100%;
                                 display: flex;
@@ -725,219 +890,226 @@
                                 font-size: 2.5rem;
                                 background: linear-gradient(135deg, #f0fdf4, #f8fafc);
                             }
-                            .category-badge {
-                                position: absolute;
-                                top: 8px;
-                                right: 8px;
-                                background: #15803d;
+                            
+                            .pdf-category-badge {
+                                absolute: absolute;
+                                top: 10px;
+                                right: 10px;
+                                background: #16a34a;
                                 color: white;
-                                font-size: 9px;
+                                font-size: 8px;
                                 font-weight: 900;
-                                padding: 3px 8px;
+                                padding: 3px 7px;
                                 border-radius: 6px;
                                 text-transform: uppercase;
-                                letter-spacing: 0.5px;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                             }
-                            .product-body {
-                                padding: 10px 12px;
-                                height: 120px; /* 260px - 140px */
-                                position: relative; /* context for absolute footer */
-                                display: block;
-                                text-align: right;
+                            
+                            .pdf-card-body {
+                                padding: 12px 14px;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: space-between;
+                                flex-grow: 1;
+                                height: 140px;
+                                box-sizing: border-box;
+                                text-align: right !important;
+                                direction: rtl !important;
                             }
-                            .product-name {
-                                font-size: 13px;
+                            
+                            .pdf-card-name {
+                                font-size: 13.5px;
                                 font-weight: 900;
                                 color: #0f172a;
                                 line-height: 1.25;
-                                margin-bottom: 4px;
-                                display: block;
+                                margin-bottom: 2px;
+                                text-align: right !important;
+                                direction: rtl !important;
                             }
-                            .product-desc {
-                                font-size: 9.5px;
+                            
+                            .pdf-card-desc {
+                                font-size: 10px;
                                 color: #64748b;
                                 line-height: 1.4;
                                 font-weight: 500;
                                 overflow: hidden;
                                 display: -webkit-box;
-                                -webkit-line-clamp: 3;
+                                -webkit-line-clamp: 2;
                                 -webkit-box-orient: vertical;
-                                height: 40px; /* fixed height for 3 lines of description */
+                                height: 28px;
                                 margin-bottom: 8px;
+                                text-align: right !important;
+                                direction: rtl !important;
                             }
-                            .product-footer {
-                                position: absolute;
-                                bottom: 10px;
-                                left: 12px;
-                                right: 12px;
-                                padding-top: 5px;
-                                border-top: 1.5px solid #f1f5f9;
-                                display: block;
+                            
+                            .pdf-card-footer {
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                border-top: 1px solid #f1f5f9;
+                                padding-top: 8px;
+                                margin-top: auto;
+                                direction: rtl !important;
                             }
-                            .price-tag {
-                                font-size: 13.5px;
-                                font-weight: 900;
-                                color: #15803d;
-                                display: inline-block;
-                                vertical-align: middle;
-                                text-align: left;
-                                width: 49%;
+                            
+                            .pdf-price-container {
+                                display: flex;
+                                flex-direction: column;
+                                text-align: right;
                             }
-                            .label-price {
-                                font-size: 9px;
+                            
+                            .pdf-card-price-label {
+                                font-size: 8px;
                                 color: #94a3b8;
                                 font-weight: 700;
-                                letter-spacing: 0.5px;
                                 text-transform: uppercase;
-                                display: inline-block;
-                                vertical-align: middle;
-                                text-align: right;
-                                width: 49%;
+                                margin-bottom: 1px;
                             }
-                            .pdf-footer {
+                            
+                            .pdf-card-price {
+                                font-size: 14px;
+                                font-weight: 900;
+                                color: #15803d;
+                            }
+                            
+                            /* Green Add button mimicking the web button */
+                            .pdf-add-btn {
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 9px;
+                                background-color: #16a34a;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-size: 16px;
+                                font-weight: bold;
+                                box-shadow: 0 4px 10px rgba(22,163,74,0.15);
+                            }
+                            
+                            .pdf-page-footer {
+                                position: absolute;
+                                bottom: 20px;
+                                left: 35px;
+                                right: 35px;
                                 text-align: center;
-                                padding-top: 22px;
-                                border-top: 2px solid #e2e8f0;
-                                margin-top: 32px;
-                                font-size: 12px;
+                                border-top: 1px solid #e2e8f0;
+                                padding-top: 10px;
+                                font-size: 10px;
                                 color: #94a3b8;
                                 font-weight: 700;
                             }
                         </style>
-                        <div class="pdf-menu-body">
-                            <!-- Header -->
-                            <div class="pdf-header">
-                                <div class="pdf-brand">Bello <span>Smash</span></div>
-                                <div class="pdf-subtitle">Burger &amp; More</div>
-                                <div class="pdf-welcome">قائمة الطعام الإلكترونية — أصنافنا محضرة طازجة يومياً بأجود المكونات</div>
-                            </div>
                     `;
 
-                    // 2. Loop through categories and products
-                    const categoriesList = this.categories;
-                    const allProducts = this.products;
+                    pages.forEach((page, pageIdx) => {
+                        htmlContent += `<div class="pdf-page">`;
 
-                    categoriesList.forEach(category => {
-                        const catProducts = allProducts.filter(p => p.category === category);
-                        if (catProducts.length === 0) return;
-
-                        htmlContent += `
-                            <div class="category-section">
-                                <!-- Category Title -->
-                                <div class="category-title">
-                                    <span>${category}</span>
-                                    <span class="category-dot"></span>
-                                </div>
-                                
-                                <!-- Category Products Grid -->
-                                <div class="grid-layout">
-                        `;
-
-                        catProducts.forEach(product => {
-                            const desc = this.getProductDescription(product);
-                            const price = this.formatCurrency(product.base_price);
-                            const imgSrc = product.image_url || '';
-
-                            htmlContent += `
-                                <!-- Product Card -->
-                                <div class="product-card">
-                                    <!-- Image as background-image (html2canvas supports cover correctly) -->
-                                    <div class="product-image-wrapper" ${imgSrc ? `style="background-image: url('${imgSrc}');"` : ''}>
-                                        ${!imgSrc ? `<div class="product-image-placeholder">🍔</div>` : ''}
-                                        <div class="category-badge">${product.category}</div>
-                                    </div>
-                                    
-                                    <!-- Card Body -->
-                                    <div class="product-body">
-                                        <h4 class="product-name">${product.name}</h4>
-                                        <p class="product-desc">${desc}</p>
-                                        <!-- Price Footer -->
-                                        <div class="product-footer">
-                                            <span class="label-price">السعر</span>
-                                            <span class="price-tag">${price}</span>
+                        page.blocks.forEach(block => {
+                            if (block.type === 'header') {
+                                htmlContent += `
+                                    <div class="pdf-top-accent"></div>
+                                    <div class="pdf-brand-header">
+                                        <div class="pdf-logo">B</div>
+                                        <div class="pdf-brand-text">
+                                            <div class="pdf-brand-name">Bello Smash</div>
+                                            <div class="pdf-brand-sub">Burger &amp; More</div>
                                         </div>
                                     </div>
-                                </div>
-                            `;
+                                    <div class="pdf-hero-banner">
+                                        <div class="pdf-hero-title">اختر وجبتك المفضلة وعش تجربة طعم لا تُنسى</div>
+                                        <div class="pdf-hero-sub">قائمة الطعام الإلكترونية — أصنافنا محضرة طازجة يومياً بأجود المكونات</div>
+                                    </div>
+                                `;
+                            } else if (block.type === 'title') {
+                                htmlContent += `
+                                    <div class="pdf-category-title">
+                                        <span class="pdf-category-dot"></span>
+                                        <span>${block.category}</span>
+                                    </div>
+                                `;
+                            } else if (block.type === 'row') {
+                                htmlContent += `<div class="pdf-grid-row">`;
+
+                                block.products.forEach(product => {
+                                    const desc = this.getProductDescription(product);
+                                    const price = this.formatCurrency(product.base_price);
+                                    const imgSrc = product.image_url || '';
+
+                                    htmlContent += `
+                                        <div class="pdf-card">
+                                            <div class="pdf-card-image-wrapper" ${imgSrc ? `style="background-image: url('${imgSrc}');"` : ''}>
+                                                ${!imgSrc ? `<div class="pdf-card-image-placeholder">🍔</div>` : ''}
+                                                <div class="pdf-category-badge">${product.category}</div>
+                                            </div>
+                                            <div class="pdf-card-body">
+                                                <h4 class="pdf-card-name">${product.name}</h4>
+                                                <p class="pdf-card-desc">${desc}</p>
+                                                <div class="pdf-card-footer">
+                                                    <div class="pdf-price-container">
+                                                        <span class="pdf-card-price-label">السعر</span>
+                                                        <span class="pdf-card-price">${price}</span>
+                                                    </div>
+                                                    <div class="pdf-add-btn">+</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+
+                                // Add a spacer card if there is only 1 product in the row
+                                if (block.products.length === 1) {
+                                    htmlContent += `<div class="pdf-card" style="visibility: hidden; border: none; box-shadow: none;"></div>`;
+                                }
+
+                                htmlContent += `</div>`;
+                            }
                         });
 
-
                         htmlContent += `
-                                </div>
+                            <div class="pdf-page-footer">
+                                صفحة ${pageIdx + 1} من ${pages.length} | شكراً لزيارتكم مطعم Bello Smash
                             </div>
                         `;
-                    });
 
-                    // Add Footer Note
-                    htmlContent += `
-                            <div class="pdf-footer">
-                                🍽️ شكراً لزيارتكم مطعم Bello Smash
-                            </div>
-                        </div>
-                    `;
+                        htmlContent += `</div>`;
+                    });
 
                     pdfContainer.innerHTML = htmlContent;
                     pdfWrapper.appendChild(pdfContainer);
                     document.body.appendChild(pdfWrapper);
-
-                    // Styling rule for page breaks
-                    const style = document.createElement('style');
-                    style.innerHTML = `
-                        .page-break-avoid {
-                            page-break-inside: avoid !important;
-                            break-inside: avoid !important;
-                        }
-                    `;
-                    pdfContainer.appendChild(style);
-
-                    // Helper to wait for images
-                    const waitForImages = async () => {
-                        const images = pdfContainer.getElementsByTagName('img');
-                        const promises = [];
-                        for (let img of images) {
-                            if (!img.complete) {
-                                promises.push(new Promise(resolve => {
-                                    img.onload = resolve;
-                                    img.onerror = resolve;
-                                }));
-                            }
-                        }
-                        await Promise.all(promises);
-                    };
 
                     // Wait for fonts and images to load completely before capturing
                     try {
                         if (document.fonts) {
                             await document.fonts.ready;
                         }
-                        await waitForImages();
                         // Give layout enough time to reflow/paint and all images to fully decode
                         await new Promise(resolve => setTimeout(resolve, 1200));
                     } catch (e) {
-                        console.warn('Pre-loading fonts/images warning:', e);
+                        console.warn('Pre-loading fonts warning:', e);
                     }
 
                     // PDF options
                     const opt = {
-                        margin:       [0.25, 0.25, 0.25, 0.25], // top, left, bottom, right in inches
+                        margin:       0, // Zero margin to support edge-to-edge styling
                         filename:     'Bello-Smash-Menu.pdf',
-                        pagebreak:    { mode: ['css', 'legacy'], avoid: '.product-card' },
-                        image:        { type: 'jpeg', quality: 1.0 }, // Max JPEG quality
+                        pagebreak:    { mode: 'css' }, // Split exactly on page-break-after/before rules
+                        image:        { type: 'jpeg', quality: 1.0 },
                         html2canvas:  { 
-                            scale: 3, // 3x for high-definition sharpness without memory overflow
+                            scale: 3, // High sharpness
                             useCORS: true,
-                            allowTaint: true, // fallback for cross-origin images
+                            allowTaint: true,
                             letterRendering: true,
                             logging: false,
                             scrollX: 0,
                             scrollY: 0,
-                            imageTimeout: 15000 // give images 15s to load
+                            imageTimeout: 15000
                         },
                         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
                     };
 
                     try {
-                        // We target pdfContainer (which has default relative flow layout)
                         await html2pdf().set(opt).from(pdfContainer).save();
                         this.showToast('تم تحميل المنيو بنجاح!', 'success');
                     } catch (e) {
