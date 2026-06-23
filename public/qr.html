@@ -135,16 +135,11 @@
     <div class="card">
         <div class="logo-area">
             <div class="restaurant-name">🍽️ منيو بيلو سماش</div>
-            <div class="restaurant-sub">امسح الكود للاطلاع على القائمة أو تحميلها</div>
-        </div>
-        
-        <div class="toggle-container">
-            <button class="toggle-btn active" id="btn-web" onclick="switchQR('web')">📱 المنيو التفاعلي والطلب</button>
-            <button class="toggle-btn" id="btn-pdf" onclick="switchQR('pdf')">📥 تحميل المنيو PDF مباشرة</button>
+            <div class="restaurant-sub">امسح الكود لفتح المنيو التفاعلي وتحميل الـ PDF تلقائياً</div>
         </div>
 
         <div class="divider"></div>
-        <p class="scan-text" id="scan-hint">📱 امسح بكاميرا هاتفك للطلب مباشرة</p>
+        <p class="scan-text" id="scan-hint">📱 امسح بكاميرا هاتفك لفتح المنيو التفاعلي وتحميل الملف مباشرة</p>
 
         <div class="qr-container">
             <div id="qrcode" style="display: flex; justify-content: center; align-items: center; min-width: 260px; min-height: 260px; margin: 0 auto;"></div>
@@ -152,20 +147,17 @@
 
         <div class="url-badge" id="url-display">جاري توليد الرابط...</div>
 
-        <button class="download-btn" onclick="downloadQR()">⬇️ تحميل QR Code</button>
+        <button class="download-btn" onclick="downloadQR()">⬇️ تحميل QR Code للطباعة</button>
 
         <p class="mobile-tip" style="font-size: 11px; color: #f59e0b; margin-top: 10px; font-weight: bold; display: none;" id="mobile-hint">💡 للهاتف: اضغط مطولاً على الرمز أعلاه لحفظ الصورة مباشرة</p>
 
-        <p class="footer-note" style="margin-top: 20px;">يمكن طباعة هذا الكود ووضعه على الطاولات</p>
+        <p class="footer-note" style="margin-top: 20px;">اطبع هذا الكود وضعه على الطاولات للزبائن</p>
     </div>
 
     <!-- QR Code library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        const webURL = window.location.origin + '/menu';
-        const pdfURL = window.location.origin + '/menu?download=pdf';
-        
-        let currentMode = 'web';
+        const qrURL = window.location.origin + '/menu?download=pdf';
         let qr = null;
         const size = 260;
 
@@ -185,35 +177,14 @@
             document.getElementById('url-display').textContent = url;
         }
 
-        // Initialize with web menu URL
-        generateQR(webURL);
-
-        function switchQR(mode) {
-            if (currentMode === mode) return;
-            currentMode = mode;
-
-            const btnWeb = document.getElementById('btn-web');
-            const btnPdf = document.getElementById('btn-pdf');
-            const scanHint = document.getElementById('scan-hint');
-
-            if (mode === 'web') {
-                btnWeb.classList.add('active');
-                btnPdf.classList.remove('active');
-                scanHint.textContent = '📱 امسح بكاميرا هاتفك للطلب مباشرة';
-                generateQR(webURL);
-            } else {
-                btnWeb.classList.remove('active');
-                btnPdf.classList.add('active');
-                scanHint.textContent = '📥 امسح بكاميرا هاتفك لتحميل المنيو كملف PDF مباشرة';
-                generateQR(pdfURL);
-            }
-        }
+        // Initialize with combined QR URL
+        generateQR(qrURL);
 
         function downloadQR() {
             const qrImg = document.querySelector('#qrcode img');
             const qrCanvas = document.querySelector('#qrcode canvas');
             const link = document.createElement('a');
-            link.download = currentMode === 'web' ? 'bellosmash-menu-qr.png' : 'bellosmash-pdf-menu-qr.png';
+            link.download = 'bellosmash-menu-qr.png';
             
             if (qrImg && qrImg.src) {
                 link.href = qrImg.src;
