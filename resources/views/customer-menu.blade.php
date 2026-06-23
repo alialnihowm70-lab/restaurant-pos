@@ -903,6 +903,7 @@
                     const opt = {
                         margin:       [0.35, 0.35, 0.35, 0.35], // top, left, bottom, right in inches
                         filename:     'Bello-Smash-Menu.pdf',
+                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
                         image:        { type: 'jpeg', quality: 1.0 }, // Max JPEG quality
                         html2canvas:  { 
                             scale: 3, // 3x for high-definition sharpness without memory overflow
