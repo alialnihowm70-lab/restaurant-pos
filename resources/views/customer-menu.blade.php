@@ -680,19 +680,26 @@
                                 flex-shrink: 0;
                             }
                             .grid-layout {
-                                display: grid;
-                                grid-template-columns: repeat(2, minmax(0, 1fr));
-                                gap: 20px;
+                                display: block;
+                                font-size: 0;
+                                margin-right: -10px;
+                                margin-left: -10px;
+                                text-align: right;
                             }
                             .product-card {
                                 background: white;
                                 border: 1.5px solid #eaeaea;
                                 border-radius: 20px;
                                 overflow: hidden;
-                                display: flex;
-                                flex-direction: column;
-                                page-break-inside: avoid;
-                                break-inside: avoid;
+                                display: inline-block;
+                                vertical-align: top;
+                                width: 337px;
+                                height: 390px;
+                                margin: 10px;
+                                text-align: right;
+                                font-size: 14px; /* reset font size */
+                                page-break-inside: avoid !important;
+                                break-inside: avoid !important;
                                 box-shadow: 0 4px 20px rgba(0,0,0,0.07);
                             }
                             .product-image-wrapper {
@@ -732,7 +739,7 @@
                             }
                             .product-body {
                                 padding: 16px;
-                                flex-grow: 1;
+                                height: 160px; /* 390px - 230px */
                                 display: flex;
                                 flex-direction: column;
                                 text-align: right;
@@ -903,7 +910,7 @@
                     const opt = {
                         margin:       [0.35, 0.35, 0.35, 0.35], // top, left, bottom, right in inches
                         filename:     'Bello-Smash-Menu.pdf',
-                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
+                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: '.product-card' },
                         image:        { type: 'jpeg', quality: 1.0 }, // Max JPEG quality
                         html2canvas:  { 
                             scale: 3, // 3x for high-definition sharpness without memory overflow
