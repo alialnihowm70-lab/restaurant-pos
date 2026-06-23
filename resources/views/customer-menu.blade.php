@@ -191,16 +191,7 @@
                         </span>
                         <h2 class="text-2xl md:text-3xl font-black text-white leading-tight">اختر وجبتك المفضلة<br><span class="text-amber-400">وعش تجربة طعم لا تُنسى</span></h2>
                         <p class="text-sm text-emerald-100/70 mt-2.5 font-medium leading-relaxed max-w-md">تصفح قائمتنا اللذيذة واطلب مباشرة — طلبك يصلك ساخناً وطازجاً.</p>
-                    </div>
-                    <div class="flex-shrink-0 flex flex-col gap-2">
-                        <button @click="downloadPDF()"
-                            class="flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-emerald-950 font-black text-sm px-6 py-3.5 rounded-2xl btn-bounce shadow-xl shadow-amber-500/20 transition-all">
-                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            تحميل المنيو PDF
-                        </button>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -594,10 +585,9 @@
                     const pdfWrapper = document.createElement('div');
                     pdfWrapper.id = 'pdf-render-wrapper';
                     pdfWrapper.dir = 'ltr'; // Set wrapper to LTR to fix html2canvas RTL alignment offset bug
-                    pdfWrapper.style.position = 'fixed';
-                    pdfWrapper.style.left = '0';
-                    pdfWrapper.style.top = '0';
-                    pdfWrapper.style.zIndex = '-9999';
+                    pdfWrapper.style.position = 'absolute';
+                    pdfWrapper.style.left = '-9999px';
+                    pdfWrapper.style.top = '-9999px';
                     pdfWrapper.style.pointerEvents = 'none';
 
                     // Create the actual container for PDF rendering
