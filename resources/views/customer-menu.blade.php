@@ -257,10 +257,10 @@
                      class="premium-card bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden cursor-pointer flex flex-col shadow-[0_2px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.25)] border border-slate-100/80 dark:border-zinc-800/60 relative group">
 
                     <!-- Product Image Container -->
-                    <div class="card-img-box bg-white">
+                    <div class="card-img-box">
                         <img :src="product.image_url || ''"
                              :alt="product.name"
-                             class="card-img w-full h-full object-contain bg-white"
+                             class="card-img w-full h-full object-cover"
                              x-on:error.once="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                         <!-- Fallback -->
                         <div class="absolute inset-0 bg-slate-100 dark:bg-zinc-800 text-4xl flex items-center justify-center" style="display:none">🍔</div>
@@ -759,7 +759,37 @@
                                 height: 40px;
                                 border-radius: 12px;
                                 background: linear-gradient(to bottom right, #064e3b, #15803d);
-                                   /* Hero Welcome Banner */
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-family: 'Playfair Display', serif;
+                                font-size: 20px;
+                                font-weight: 900;
+                                box-shadow: 0 4px 10px rgba(6, 78, 59, 0.2);
+                            }
+                            .pdf-brand-text {
+                                display: flex;
+                                flex-direction: column;
+                                text-align: right !important;
+                            }
+                            .pdf-brand-name {
+                                font-family: 'Playfair Display', serif;
+                                font-size: 16px;
+                                font-weight: 900;
+                                color: #0f172a;
+                                line-height: 1.1;
+                            }
+                            .pdf-brand-sub {
+                                font-size: 9px;
+                                text-transform: uppercase;
+                                font-weight: 800;
+                                color: #16a34a;
+                                letter-spacing: 1.5px;
+                                margin-top: 2px;
+                            }
+                            
+                            /* Hero Welcome Banner */
                             .pdf-hero-banner {
                                 background: linear-gradient(135deg, #022c22 0%, #064e3b 60%, #0f766e 100%);
                                 border-radius: 20px;
@@ -842,10 +872,10 @@
                             .pdf-card-image-wrapper {
                                 width: 100%;
                                 height: 130px;
-                                background-size: contain;
+                                background-size: cover;
                                 background-position: center center;
                                 background-repeat: no-repeat;
-                                background-color: #ffffff;
+                                background-color: #f8fafc;
                                 position: relative;
                                 border-bottom: 1px solid #f1f5f9;
                             }
