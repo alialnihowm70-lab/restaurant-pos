@@ -557,151 +557,182 @@
                     pdfContainer.dir = 'rtl';
                     pdfContainer.className = 'bg-white text-slate-800 text-right';
                     pdfContainer.style.fontFamily = "'Cairo', sans-serif";
-                    pdfContainer.style.width = '720px'; // 720px equals exactly 7.5 inches at 96dpi, fitting A4 perfectly
+                    pdfContainer.style.width = '750px'; // 750px for A4 portrait with 3-column grid
 
                     // 1. Header of the PDF Menu
                     let htmlContent = `
                         <style>
+                            @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap');
+                            * { box-sizing: border-box; margin: 0; padding: 0; }
                             .pdf-menu-body {
                                 font-family: 'Cairo', sans-serif;
-                                background-color: #faf9f6; /* Premium warm cream background */
+                                background-color: #f8f7f4;
                                 color: #1e293b;
-                                padding: 30px;
-                                border-radius: 20px;
+                                padding: 28px;
                             }
                             .pdf-header {
-                                background: linear-gradient(135deg, #14532d 0%, #064e3b 100%);
+                                background: linear-gradient(135deg, #14532d 0%, #064e3b 50%, #14532d 100%);
                                 color: white;
-                                border-radius: 20px;
-                                padding: 35px;
+                                border-radius: 24px;
+                                padding: 40px 35px;
                                 text-align: center;
-                                margin-bottom: 35px;
-                                border-bottom: 5px solid #f59e0b;
+                                margin-bottom: 32px;
+                                border-bottom: 6px solid #f59e0b;
+                                position: relative;
+                                overflow: hidden;
                             }
                             .pdf-brand {
                                 font-family: 'Playfair Display', serif;
-                                font-size: 38px;
+                                font-size: 44px;
                                 font-weight: 900;
                                 color: #ffffff;
-                                text-align: center;
+                                letter-spacing: -1px;
                             }
-                            .pdf-brand span {
-                                color: #f59e0b;
-                            }
+                            .pdf-brand span { color: #fbbf24; }
                             .pdf-subtitle {
-                                font-size: 15px;
-                                color: #a7f3d0;
+                                font-size: 13px;
+                                color: #6ee7b7;
                                 font-weight: 700;
                                 text-transform: uppercase;
-                                margin-top: 5px;
-                                letter-spacing: 1px;
-                                text-align: center;
+                                margin-top: 6px;
+                                letter-spacing: 3px;
                             }
                             .pdf-welcome {
                                 font-size: 12px;
-                                color: #e2e8f0;
-                                margin-top: 10px;
+                                color: #d1fae5;
+                                margin-top: 12px;
                                 font-weight: 500;
-                                text-align: center;
+                                line-height: 1.6;
                             }
                             .category-section {
-                                margin-bottom: 35px;
-                                page-break-inside: avoid;
-                                break-inside: avoid;
+                                margin-bottom: 32px;
                             }
                             .category-title {
-                                font-size: 20px;
+                                font-size: 19px;
                                 font-weight: 900;
                                 color: #14532d;
-                                border-bottom: 3px solid #f59e0b;
+                                border-bottom: 3px solid #fbbf24;
                                 padding-bottom: 8px;
-                                margin-bottom: 22px;
+                                margin-bottom: 20px;
                                 text-align: right;
+                                display: flex;
+                                align-items: center;
+                                justify-content: flex-end;
+                                gap: 8px;
+                            }
+                            .category-dot {
+                                width: 10px;
+                                height: 10px;
+                                border-radius: 50%;
+                                background: #fbbf24;
+                                display: inline-block;
+                                flex-shrink: 0;
                             }
                             .grid-layout {
                                 display: grid;
-                                grid-template-columns: repeat(2, minmax(0, 1fr));
-                                gap: 20px;
+                                grid-template-columns: repeat(3, minmax(0, 1fr));
+                                gap: 16px;
                             }
                             .product-card {
                                 background: white;
-                                border: 1.5px solid #e2e8f0;
+                                border: 1.5px solid #e8e8e5;
                                 border-radius: 18px;
-                                padding: 15px;
+                                overflow: hidden;
                                 display: flex;
                                 flex-direction: column;
-                                justify-content: space-between;
-                                min-height: 165px;
                                 page-break-inside: avoid;
                                 break-inside: avoid;
-                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
-                                text-align: right;
+                                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
                             }
-                            .product-details {
-                                display: flex;
-                                gap: 15px;
-                            }
-                            .product-image-container {
-                                width: 95px;
-                                height: 95px;
-                                border-radius: 14px;
+                            .product-image-wrapper {
+                                width: 100%;
+                                padding-top: 100%; /* 1:1 square ratio — works in html2canvas */
+                                position: relative;
                                 overflow: hidden;
-                                border: 2.5px solid #f59e0b;
-                                flex-shrink: 0;
-                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+                                background: #f1f5f9;
                             }
                             .product-image {
+                                position: absolute;
+                                top: 0; left: 0;
                                 width: 100%;
                                 height: 100%;
                                 object-fit: cover;
+                                display: block;
                             }
-                            .product-info {
+                            .product-image-placeholder {
+                                position: absolute;
+                                top: 0; left: 0;
+                                width: 100%;
+                                height: 100%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 2.5rem;
+                                background: linear-gradient(135deg, #f0fdf4, #f8fafc);
+                            }
+                            .category-badge {
+                                position: absolute;
+                                top: 8px;
+                                right: 8px;
+                                background: #15803d;
+                                color: white;
+                                font-size: 9px;
+                                font-weight: 900;
+                                padding: 3px 8px;
+                                border-radius: 6px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                            }
+                            .product-body {
+                                padding: 12px;
                                 flex-grow: 1;
+                                display: flex;
+                                flex-direction: column;
                                 text-align: right;
                             }
                             .product-name {
-                                font-size: 14px;
+                                font-size: 13px;
                                 font-weight: 900;
                                 color: #0f172a;
-                                margin-bottom: 4px;
-                                line-height: 1.35;
-                                text-align: right;
+                                line-height: 1.3;
+                                margin-bottom: 5px;
                             }
                             .product-desc {
-                                font-size: 11px;
+                                font-size: 10px;
                                 color: #64748b;
-                                line-height: 1.45;
+                                line-height: 1.5;
                                 font-weight: 500;
-                                text-align: right;
-                                display: -webkit-box;
-                                -webkit-line-clamp: 3;
-                                -webkit-box-orient: vertical;
                                 overflow: hidden;
+                                display: -webkit-box;
+                                -webkit-line-clamp: 2;
+                                -webkit-box-orient: vertical;
+                                flex-grow: 1;
+                                margin-bottom: 10px;
                             }
                             .product-footer {
                                 display: flex;
                                 justify-content: space-between;
                                 align-items: center;
-                                margin-top: 12px;
-                                padding-top: 10px;
+                                padding-top: 8px;
                                 border-top: 1.5px solid #f1f5f9;
+                                margin-top: auto;
                             }
                             .price-tag {
-                                font-size: 14px;
+                                font-size: 15px;
                                 font-weight: 900;
                                 color: #15803d;
                             }
                             .label-price {
-                                font-size: 10px;
+                                font-size: 9px;
                                 color: #94a3b8;
                                 font-weight: 700;
                             }
                             .pdf-footer {
                                 text-align: center;
-                                padding-top: 20px;
-                                border-top: 1px solid #e2e8f0;
-                                margin-top: 30px;
-                                font-size: 11px;
+                                padding-top: 22px;
+                                border-top: 2px solid #e2e8f0;
+                                margin-top: 32px;
+                                font-size: 12px;
                                 color: #94a3b8;
                                 font-weight: 700;
                             }
@@ -711,7 +742,7 @@
                             <div class="pdf-header">
                                 <div class="pdf-brand">Bello <span>Smash</span></div>
                                 <div class="pdf-subtitle">Burger &amp; More</div>
-                                <div class="pdf-welcome">قائمة الطعام الإلكترونية - أصنافنا محضرة طازجة يومياً وبأجود المكونات</div>
+                                <div class="pdf-welcome">قائمة الطعام الإلكترونية — أصنافنا محضرة طازجة يومياً بأجود المكونات</div>
                             </div>
                     `;
 
@@ -728,6 +759,7 @@
                                 <!-- Category Title -->
                                 <div class="category-title">
                                     <span>${category}</span>
+                                    <span class="category-dot"></span>
                                 </div>
                                 
                                 <!-- Category Products Grid -->
@@ -742,27 +774,29 @@
                             htmlContent += `
                                 <!-- Product Card -->
                                 <div class="product-card">
-                                    <div class="product-details">
-                                        <!-- Product Image -->
-                                        <div class="product-image-container">
-                                            ${imgSrc ? `<img src="${imgSrc}" class="product-image">` : '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; background-color:#f8fafc;">🍔</div>'}
-                                        </div>
-                                        
-                                        <!-- Name & Desc -->
-                                        <div class="product-info">
-                                            <h4 class="product-name">${product.name}</h4>
-                                            <p class="product-desc">${desc}</p>
-                                        </div>
+                                    <!-- Large Top Image (matches live menu card) -->
+                                    <div class="product-image-wrapper">
+                                        ${imgSrc 
+                                            ? `<img src="${imgSrc}" class="product-image" crossorigin="anonymous">`
+                                            : `<div class="product-image-placeholder">🍔</div>`
+                                        }
+                                        <div class="category-badge">${product.category}</div>
                                     </div>
                                     
-                                    <!-- Price -->
-                                    <div class="product-footer">
-                                        <span class="label-price">السعر</span>
-                                        <span class="price-tag">${price}</span>
+                                    <!-- Card Body -->
+                                    <div class="product-body">
+                                        <h4 class="product-name">${product.name}</h4>
+                                        <p class="product-desc">${desc}</p>
+                                        <!-- Price Footer -->
+                                        <div class="product-footer">
+                                            <span class="label-price">السعر</span>
+                                            <span class="price-tag">${price}</span>
+                                        </div>
                                     </div>
                                 </div>
                             `;
                         });
+
 
                         htmlContent += `
                                 </div>
@@ -813,24 +847,26 @@
                             await document.fonts.ready;
                         }
                         await waitForImages();
-                        // Give layout a brief moment to reflow/paint
-                        await new Promise(resolve => setTimeout(resolve, 400));
+                        // Give layout enough time to reflow/paint and all images to fully decode
+                        await new Promise(resolve => setTimeout(resolve, 1200));
                     } catch (e) {
                         console.warn('Pre-loading fonts/images warning:', e);
                     }
 
                     // PDF options
                     const opt = {
-                        margin:       [0.4, 0.38, 0.4, 0.38], // top, left, bottom, right in inches
+                        margin:       [0.35, 0.35, 0.35, 0.35], // top, left, bottom, right in inches
                         filename:     'Bello-Smash-Menu.pdf',
                         image:        { type: 'jpeg', quality: 1.0 }, // Max JPEG quality
                         html2canvas:  { 
-                            scale: 4, // Increased scale to 4x for extreme ultra-high-definition sharpness
-                            useCORS: true, 
+                            scale: 3, // 3x for high-definition sharpness without memory overflow
+                            useCORS: true,
+                            allowTaint: true, // fallback for cross-origin images
                             letterRendering: true,
                             logging: false,
                             scrollX: 0,
-                            scrollY: 0
+                            scrollY: 0,
+                            imageTimeout: 15000 // give images 15s to load
                         },
                         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
                     };
