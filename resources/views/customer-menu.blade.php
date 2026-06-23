@@ -257,17 +257,15 @@
                      class="premium-card bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden cursor-pointer flex flex-col shadow-[0_2px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.25)] border border-slate-100/80 dark:border-zinc-800/60 relative group">
 
                     <!-- Product Image Container -->
-                    <div class="card-img-box">
+                    <div class="card-img-box bg-white">
                         <img :src="product.image_url || ''"
                              :alt="product.name"
-                             class="card-img w-full h-full object-cover"
+                             class="card-img w-full h-full object-contain bg-white"
                              x-on:error.once="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                         <!-- Fallback -->
                         <div class="absolute inset-0 bg-slate-100 dark:bg-zinc-800 text-4xl flex items-center justify-center" style="display:none">🍔</div>
                         <!-- Image gradient overlay -->
                         <div class="img-gradient absolute inset-0 pointer-events-none"></div>
-                        <!-- Category Badge -->
-                        <span class="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider shadow-lg" x-text="product.category"></span>
                     </div>
 
                     <!-- Card Body -->
@@ -643,10 +641,10 @@
                     const allProducts = this.products;
 
                     // Dynamically calculate and distribute categories and products into explicit A4 pages
-                    const maxPageHeight = 980; // max height per page including padding
-                    const titleBlockHeight = 40;
-                    const rowHeight = 340; // card height 320px + gap 20px
-                    const headerHeight = 222;
+                    const maxPageHeight = 1000; // max height per page including padding
+                    const titleBlockHeight = 35;
+                    const rowHeight = 255; // card height 240px + gap 15px
+                    const headerHeight = 170;
 
                     let pages = [];
                     let currentPage = {
@@ -761,44 +759,14 @@
                                 height: 40px;
                                 border-radius: 12px;
                                 background: linear-gradient(to bottom right, #064e3b, #15803d);
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                color: white;
-                                font-family: 'Playfair Display', serif;
-                                font-size: 20px;
-                                font-weight: 900;
-                                box-shadow: 0 4px 10px rgba(6, 78, 59, 0.2);
-                            }
-                            .pdf-brand-text {
-                                display: flex;
-                                flex-direction: column;
-                                text-align: right !important;
-                            }
-                            .pdf-brand-name {
-                                font-family: 'Playfair Display', serif;
-                                font-size: 16px;
-                                font-weight: 900;
-                                color: #0f172a;
-                                line-height: 1.1;
-                            }
-                            .pdf-brand-sub {
-                                font-size: 9px;
-                                text-transform: uppercase;
-                                font-weight: 800;
-                                color: #16a34a;
-                                letter-spacing: 1.5px;
-                                margin-top: 2px;
-                            }
-                            
-                            /* Hero Welcome Banner */
+                                   /* Hero Welcome Banner */
                             .pdf-hero-banner {
                                 background: linear-gradient(135deg, #022c22 0%, #064e3b 60%, #0f766e 100%);
-                                border-radius: 24px;
-                                padding: 20px 24px;
+                                border-radius: 20px;
+                                padding: 12px 20px;
                                 width: 100%;
                                 box-sizing: border-box;
-                                margin-bottom: 20px;
+                                margin-bottom: 15px;
                                 text-align: right !important;
                                 direction: rtl !important;
                             }
@@ -846,10 +814,10 @@
                             /* Grid Row */
                             .pdf-grid-row {
                                 display: flex;
-                                gap: 20px;
+                                gap: 15px;
                                 width: 100%;
-                                height: 320px;
-                                margin-bottom: 20px;
+                                height: 240px;
+                                margin-bottom: 15px;
                                 box-sizing: border-box;
                                 direction: rtl !important;
                             }
@@ -859,13 +827,13 @@
                                 background: white;
                                 border: 1px solid #f1f5f9;
                                 border-radius: 20px;
-                                width: calc(50% - 10px);
-                                height: 320px;
+                                width: calc(50% - 7.5px);
+                                height: 240px;
                                 box-sizing: border-box;
                                 display: flex;
                                 flex-direction: column;
                                 overflow: hidden;
-                                box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.02);
                                 text-align: right !important;
                                 direction: rtl !important;
                                 position: relative;
@@ -873,12 +841,13 @@
                             
                             .pdf-card-image-wrapper {
                                 width: 100%;
-                                height: 180px;
-                                background-size: cover;
+                                height: 130px;
+                                background-size: contain;
                                 background-position: center center;
                                 background-repeat: no-repeat;
-                                background-color: #f8fafc;
+                                background-color: #ffffff;
                                 position: relative;
+                                border-bottom: 1px solid #f1f5f9;
                             }
                             
                             .pdf-card-image-placeholder {
@@ -891,34 +860,20 @@
                                 background: linear-gradient(135deg, #f0fdf4, #f8fafc);
                             }
                             
-                            .pdf-category-badge {
-                                absolute: absolute;
-                                top: 10px;
-                                right: 10px;
-                                background: #16a34a;
-                                color: white;
-                                font-size: 8px;
-                                font-weight: 900;
-                                padding: 3px 7px;
-                                border-radius: 6px;
-                                text-transform: uppercase;
-                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                            }
-                            
                             .pdf-card-body {
-                                padding: 12px 14px;
+                                padding: 10px 12px;
                                 display: flex;
                                 flex-direction: column;
                                 justify-content: space-between;
                                 flex-grow: 1;
-                                height: 140px;
+                                height: 110px;
                                 box-sizing: border-box;
                                 text-align: right !important;
                                 direction: rtl !important;
                             }
                             
                             .pdf-card-name {
-                                font-size: 13.5px;
+                                font-size: 13px;
                                 font-weight: 900;
                                 color: #0f172a;
                                 line-height: 1.25;
@@ -928,7 +883,7 @@
                             }
                             
                             .pdf-card-desc {
-                                font-size: 10px;
+                                font-size: 9.5px;
                                 color: #64748b;
                                 line-height: 1.4;
                                 font-weight: 500;
@@ -947,7 +902,7 @@
                                 justify-content: space-between;
                                 align-items: center;
                                 border-top: 1px solid #f1f5f9;
-                                padding-top: 8px;
+                                padding-top: 6px;
                                 margin-top: auto;
                                 direction: rtl !important;
                             }
@@ -967,22 +922,22 @@
                             }
                             
                             .pdf-card-price {
-                                font-size: 14px;
+                                font-size: 13.5px;
                                 font-weight: 900;
                                 color: #15803d;
                             }
                             
                             /* Green Add button mimicking the web button */
                             .pdf-add-btn {
-                                width: 30px;
-                                height: 30px;
-                                border-radius: 9px;
+                                width: 28px;
+                                height: 28px;
+                                border-radius: 8px;
                                 background-color: #16a34a;
                                 display: flex;
                                 align-items: center;
                                 justify-content: center;
                                 color: white;
-                                font-size: 16px;
+                                font-size: 14px;
                                 font-weight: bold;
                                 box-shadow: 0 4px 10px rgba(22,163,74,0.15);
                             }
@@ -1001,10 +956,10 @@
                             }
                         </style>
                     `;
-
+ 
                     pages.forEach((page, pageIdx) => {
                         htmlContent += `<div class="pdf-page">`;
-
+ 
                         page.blocks.forEach(block => {
                             if (block.type === 'header') {
                                 htmlContent += `
@@ -1030,17 +985,16 @@
                                 `;
                             } else if (block.type === 'row') {
                                 htmlContent += `<div class="pdf-grid-row">`;
-
+ 
                                 block.products.forEach(product => {
                                     const desc = this.getProductDescription(product);
                                     const price = this.formatCurrency(product.base_price);
                                     const imgSrc = product.image_url || '';
-
+ 
                                     htmlContent += `
                                         <div class="pdf-card">
                                             <div class="pdf-card-image-wrapper" ${imgSrc ? `style="background-image: url('${imgSrc}');"` : ''}>
                                                 ${!imgSrc ? `<div class="pdf-card-image-placeholder">🍔</div>` : ''}
-                                                <div class="pdf-category-badge">${product.category}</div>
                                             </div>
                                             <div class="pdf-card-body">
                                                 <h4 class="pdf-card-name">${product.name}</h4>
