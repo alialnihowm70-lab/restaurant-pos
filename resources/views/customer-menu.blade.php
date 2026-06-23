@@ -35,45 +35,71 @@
     <!-- html2pdf.js for dynamic PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-        }
-        body {
-            font-family: 'Cairo', sans-serif;
-        }
-        /* Custom Scrollbar for dynamic category chips */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Premium Card Hover Effects */
+        * { -webkit-tap-highlight-color: transparent; outline: none; }
+        body { font-family: 'Cairo', sans-serif; }
+
+        /* Scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Premium Card */
         .premium-card {
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
         }
         .premium-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.08);
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.1);
         }
         .dark .premium-card:hover {
-            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.45);
         }
-        /* Smooth scale bounce for buttons */
-        .btn-bounce {
-            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* Image zoom on hover */
+        .card-img { transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
+        .premium-card:hover .card-img { transform: scale(1.07); }
+
+        /* Gradient overlay on card image */
+        .img-gradient {
+            background: linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 55%);
         }
-        .btn-bounce:active {
-            transform: scale(0.95);
+
+        /* Bounce button */
+        .btn-bounce { transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-bounce:active { transform: scale(0.93); }
+
+        /* Shimmer skeleton loading */
+        @keyframes shimmer {
+            0% { background-position: -700px 0; }
+            100% { background-position: 700px 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 700px 100%;
+            animation: shimmer 1.4s infinite linear;
+        }
+        .dark .shimmer {
+            background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+            background-size: 700px 100%;
+        }
+
+        /* Add-to-cart pulse */
+        @keyframes cartPop {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .cart-pop { animation: cartPop 0.3s ease; }
+
+        /* Category chip active indicator */
+        .cat-active {
+            box-shadow: 0 4px 14px -4px rgba(21,128,61,0.45);
         }
     </style>
 </head>
 <body x-data="menuApp()" x-init="initMenu()" :class="{ 'dark': theme === 'dark' }" class="bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 min-h-screen transition-colors duration-300">
 
-    <!-- Glowing Top Accent Line -->
-    <div class="h-1.5 w-full bg-gradient-to-r from-emerald-600 via-amber-500 to-emerald-700"></div>
+    <!-- Premium Top Accent Line -->
+    <div class="h-1 w-full bg-gradient-to-r from-emerald-700 via-amber-400 to-emerald-700"></div>
 
     <!-- Floating Toast Message -->
     <div class="fixed top-6 right-6 z-[9999] pointer-events-none space-y-2 max-w-[320px]">
@@ -90,90 +116,103 @@
     </div>
 
     <!-- Header & Navigation Bar -->
-    <header class="sticky top-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-zinc-900/60 transition-colors duration-300">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-2xl border-b border-slate-200/50 dark:border-zinc-800/50 transition-colors duration-300 shadow-sm">
+        <div class="max-w-5xl mx-auto px-5 py-3.5 flex items-center justify-between">
             <!-- Brand Logo / Title -->
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-800 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-800/10">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-900 via-emerald-700 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/20">
                     <span class="text-xl font-black text-white font-playfair">B</span>
                 </div>
                 <div>
-                    <h1 class="text-lg font-black text-slate-900 dark:text-white leading-tight font-playfair tracking-wide">Bello Smash</h1>
-                    <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider -mt-0.5">Burger &amp; More</p>
+                    <h1 class="text-[17px] font-black text-slate-900 dark:text-white leading-none font-playfair tracking-wide">Bello Smash</h1>
+                    <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold uppercase tracking-[0.15em] mt-0.5">Burger &amp; More</p>
                 </div>
             </div>
 
-            <!-- Utility Controls (Theme Toggle & Cart Button) -->
+            <!-- Utility Controls -->
             <div class="flex items-center gap-2">
-                <!-- PDF Download Button -->
-                <button @click="downloadPDF()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors btn-bounce" aria-label="تحميل المنيو PDF" title="تحميل المنيو كملف PDF">
-                    <svg class="w-5 h-5 text-slate-650 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <!-- PDF Download -->
+                <button @click="downloadPDF()" title="تحميل المنيو PDF"
+                    class="group flex items-center gap-1.5 h-9 px-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/40 hover:bg-amber-500 dark:hover:bg-amber-500 transition-all btn-bounce">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                     </svg>
+                    <span class="text-[11px] font-black text-amber-700 dark:text-amber-400 group-hover:text-white transition-colors hidden sm:block">PDF</span>
                 </button>
 
-                <!-- Theme Toggle Button -->
-                <button @click="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors btn-bounce" aria-label="تغيير المظهر">
-                    <!-- Sun Icon (shows in Dark Mode) -->
-                    <svg x-show="theme === 'dark'" class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <!-- Theme Toggle -->
+                <button @click="toggleTheme()" aria-label="تغيير المظهر"
+                    class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-zinc-800/80 hover:bg-slate-200 dark:hover:bg-zinc-700 flex items-center justify-center transition-colors btn-bounce">
+                    <svg x-show="theme === 'dark'" class="w-4.5 h-4.5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
                     </svg>
-                    <!-- Moon Icon (shows in Light Mode) -->
-                    <svg x-show="theme === 'light'" class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg x-show="theme === 'light'" class="w-4.5 h-4.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                     </svg>
                 </button>
 
-                <!-- Floating Cart Trigger (Only displays if cart is not empty) -->
-                <button @click="showCartSheet = true" class="relative w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-center transition-colors btn-bounce">
-                    <svg class="w-5 h-5 text-emerald-700 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <!-- Cart Button -->
+                <button @click="showCartSheet = true"
+                    class="relative w-9 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center transition-colors btn-bounce shadow-md shadow-emerald-700/20">
+                    <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                     </svg>
-                    <span x-show="cartCount() > 0" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 shadow-md animate-pulse" x-text="cartCount()"></span>
+                    <span x-show="cartCount() > 0"
+                        class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 shadow" x-text="cartCount()"></span>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Hero / Welcome Banner -->
-    <section class="max-w-4xl mx-auto px-4 pt-6 pb-2">
-        <div class="bg-gradient-to-r from-emerald-900 to-emerald-800 dark:from-zinc-900 dark:to-zinc-900/60 rounded-3xl p-6 shadow-xl relative overflow-hidden">
-            <!-- Decorative Light Circles -->
-            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-700/20 dark:bg-zinc-800/30 rounded-full blur-2xl"></div>
-            <div class="absolute -left-10 -top-10 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl"></div>
-            
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div class="max-w-lg">
-                    <span class="px-3 py-1 rounded-full bg-emerald-700/50 dark:bg-emerald-950/50 text-[10px] font-black tracking-wider text-emerald-200 border border-emerald-600/30">أهلاً بك في مطعم بيلو سماش</span>
-                    <h2 class="text-2xl font-black text-white mt-3 leading-tight">اختر وجبتك المفضلة وعش تجربة طعم لا تُنسى</h2>
-                    <p class="text-xs text-emerald-100/80 dark:text-zinc-400 mt-2 font-medium leading-relaxed">تصفح قائمتنا اللذيذة واطلب مباشرة من طاولة الطعام ليوصلك طلبك ساخناً وطازجاً.</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <button @click="downloadPDF()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-slate-900 font-black text-xs px-5 py-3.5 rounded-2xl flex items-center justify-center gap-2 btn-bounce shadow-lg shadow-amber-500/20">
-                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                        </svg>
-                        <span>تحميل المنيو PDF</span>
-                    </button>
+    <section class="max-w-5xl mx-auto px-5 pt-6 pb-3">
+        <div class="relative rounded-[28px] overflow-hidden shadow-2xl">
+            <!-- Background -->
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800"></div>
+            <!-- Decorative orbs -->
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl"></div>
+            <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-amber-500/15 rounded-full blur-3xl"></div>
+            <!-- Grid pattern -->
+            <div class="absolute inset-0 opacity-[0.04]" style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 24px 24px;"></div>
+
+            <div class="relative z-10 p-6 md:p-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-[11px] font-black tracking-wider text-emerald-200 border border-white/10 mb-3">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                            مفتوح الآن · أهلاً بك في بيلو سماش
+                        </span>
+                        <h2 class="text-2xl md:text-3xl font-black text-white leading-tight">اختر وجبتك المفضلة<br><span class="text-amber-400">وعش تجربة طعم لا تُنسى</span></h2>
+                        <p class="text-sm text-emerald-100/70 mt-2.5 font-medium leading-relaxed max-w-md">تصفح قائمتنا اللذيذة واطلب مباشرة — طلبك يصلك ساخناً وطازجاً.</p>
+                    </div>
+                    <div class="flex-shrink-0 flex flex-col gap-2">
+                        <button @click="downloadPDF()"
+                            class="flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-emerald-950 font-black text-sm px-6 py-3.5 rounded-2xl btn-bounce shadow-xl shadow-amber-500/20 transition-all">
+                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            تحميل المنيو PDF
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Sticky Sub-Bar (Search & Category Chips) -->
-    <section class="max-w-4xl mx-auto px-4 pt-4 sticky top-[67px] z-30 bg-slate-50 dark:bg-zinc-950 pb-3 transition-colors duration-300">
+    <section class="max-w-5xl mx-auto px-5 pt-4 sticky top-[61px] z-30 bg-slate-50 dark:bg-zinc-950 pb-3 transition-colors duration-300">
         <div class="space-y-3">
-            <!-- Interactive Search Bar -->
+            <!-- Search Bar -->
             <div class="relative">
-                <input type="text" x-model="searchQuery" placeholder="ابحث عن وجبتك المفضلة..." class="w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800/80 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl px-11 py-3 text-sm text-slate-800 dark:text-zinc-200 focus:outline-none placeholder-slate-400 dark:placeholder-zinc-600 transition-all shadow-sm">
-                <!-- Search Icon -->
+                <input type="text" x-model="searchQuery" placeholder="ابحث عن وجبتك المفضلة..."
+                    class="w-full bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl pr-12 pl-10 py-3 text-sm text-slate-800 dark:text-zinc-200 focus:outline-none placeholder-slate-400 dark:placeholder-zinc-600 transition-all shadow-sm">
                 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                    <svg class="w-5 h-5 text-slate-400 dark:text-zinc-650" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg class="w-4.5 h-4.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
-                <!-- Clear Button -->
-                <button x-show="searchQuery.length > 0" @click="searchQuery = ''" class="absolute inset-y-0 left-4 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300">
+                <button x-show="searchQuery.length > 0" @click="searchQuery = ''"
+                    class="absolute inset-y-0 left-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -182,19 +221,19 @@
 
             <!-- Categories Scroller -->
             <div class="flex gap-2 overflow-x-auto pb-1 hide-scrollbar" x-show="categories.length > 0">
-                <button @click="selectedCategory = 'all'" 
-                        class="px-5 py-2.5 rounded-xl text-xs font-black transition-all flex-shrink-0 border shadow-sm btn-bounce"
-                        :class="selectedCategory === 'all' 
-                            ? 'bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-600 dark:border-emerald-600 dark:text-white font-black shadow-lg shadow-emerald-800/10' 
-                            : 'bg-white border-slate-200/80 text-slate-600 hover:border-slate-300 dark:bg-zinc-900 dark:border-zinc-800/60 dark:text-zinc-400 dark:hover:text-zinc-200'">
-                    الكل
+                <button @click="selectedCategory = 'all'"
+                    class="px-5 py-2.5 rounded-xl text-xs font-black transition-all flex-shrink-0 border btn-bounce"
+                    :class="selectedCategory === 'all'
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-md cat-active'
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-400 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600'">
+                    ✦ الكل
                 </button>
                 <template x-for="cat in categories" :key="cat">
-                    <button @click="selectedCategory = cat" 
-                            class="px-5 py-2.5 rounded-xl text-xs font-black transition-all flex-shrink-0 border shadow-sm btn-bounce"
-                            :class="selectedCategory === cat 
-                                ? 'bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-600 dark:border-emerald-600 dark:text-white font-black shadow-lg shadow-emerald-800/10' 
-                                : 'bg-white border-slate-200/80 text-slate-600 hover:border-slate-300 dark:bg-zinc-900 dark:border-zinc-800/60 dark:text-zinc-400 dark:hover:text-zinc-200'">
+                    <button @click="selectedCategory = cat"
+                        class="px-5 py-2.5 rounded-xl text-xs font-black transition-all flex-shrink-0 border btn-bounce"
+                        :class="selectedCategory === cat
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-md cat-active'
+                            : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-400 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600'">
                         <span x-text="cat"></span>
                     </button>
                 </template>
@@ -203,36 +242,41 @@
     </section>
 
     <!-- Products Cards Grid -->
-    <main class="max-w-4xl mx-auto px-4 pb-28 pt-2">
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4" x-show="filteredProducts().length > 0">
+    <main class="max-w-5xl mx-auto px-5 pb-32 pt-3">
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4" x-show="filteredProducts().length > 0">
             <template x-for="(product, idx) in filteredProducts()" :key="product.id">
                 <!-- Product Card -->
-                <div @click="openDetail(product)" 
-                     class="premium-card bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-850/60 rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full shadow-[0_4px_12px_rgba(0,0,0,0.02)] relative group">
-                    
-                    <!-- Favorite Tag / Badge overlay -->
-                    <span class="absolute top-2.5 right-2.5 z-10 px-2 py-0.5 rounded-md bg-emerald-600 dark:bg-emerald-700 text-white text-[9px] font-black uppercase tracking-wider shadow-sm" x-text="product.category"></span>
+                <div @click="openDetail(product)"
+                     class="premium-card bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden cursor-pointer flex flex-col shadow-[0_2px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.25)] border border-slate-100/80 dark:border-zinc-800/60 relative group">
 
-                    <!-- Product Image -->
-                    <div class="w-full aspect-square overflow-hidden bg-slate-100 dark:bg-zinc-850 relative">
-                        <img :src="product.image_url || ''" :alt="product.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" x-on:error.once="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
-                        <!-- Fallback Image Placeholder -->
-                        <div class="img-placeholder w-full h-full text-4xl flex items-center justify-center" style="display:none">🍔</div>
+                    <!-- Product Image Container -->
+                    <div class="relative w-full overflow-hidden" style="padding-top: 100%;">
+                        <img :src="product.image_url || ''"
+                             :alt="product.name"
+                             class="card-img absolute inset-0 w-full h-full object-cover"
+                             x-on:error.once="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
+                        <!-- Fallback -->
+                        <div class="absolute inset-0 bg-slate-100 dark:bg-zinc-800 text-4xl flex items-center justify-center" style="display:none">🍔</div>
+                        <!-- Image gradient overlay -->
+                        <div class="img-gradient absolute inset-0 pointer-events-none"></div>
+                        <!-- Category Badge -->
+                        <span class="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider shadow-lg" x-text="product.category"></span>
                     </div>
 
-                    <!-- Card Details -->
-                    <div class="p-3.5 flex flex-col justify-between flex-grow">
-                        <div>
-                            <h3 class="font-black text-sm md:text-base text-slate-900 dark:text-white leading-tight mb-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors" x-text="product.name"></h3>
-                            <!-- Short static preview text -->
-                            <p class="text-[10px] text-slate-400 dark:text-zinc-500 line-clamp-1 leading-relaxed mb-3" x-text="getProductDescription(product)"></p>
-                        </div>
-                        
-                        <!-- Price and Add button -->
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-850/60 mt-auto">
-                            <span class="font-extrabold text-sm md:text-base text-emerald-700 dark:text-emerald-400" x-text="formatCurrency(product.base_price)"></span>
-                            <!-- Direct Add to Cart Button -->
-                            <button @click.stop="addToCart(product)" class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-emerald-700 dark:text-emerald-400 hover:text-white flex items-center justify-center transition-colors btn-bounce shadow-sm" aria-label="إضافة للطلب">
+                    <!-- Card Body -->
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-black text-[14px] leading-snug text-slate-900 dark:text-white mb-1.5 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors" x-text="product.name"></h3>
+                        <p class="text-[11px] text-slate-400 dark:text-zinc-500 leading-relaxed line-clamp-2 mb-3 flex-grow" x-text="getProductDescription(product)"></p>
+
+                        <!-- Price + Add -->
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-zinc-800">
+                            <div>
+                                <p class="text-[9px] text-slate-400 dark:text-zinc-600 font-bold uppercase tracking-wider mb-0.5">السعر</p>
+                                <span class="font-black text-base text-emerald-700 dark:text-emerald-400" x-text="formatCurrency(product.base_price)"></span>
+                            </div>
+                            <button @click.stop="addToCart(product)"
+                                class="w-9 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center btn-bounce shadow-md shadow-emerald-700/20 transition-colors"
+                                aria-label="إضافة للطلب">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
                                 </svg>
@@ -244,10 +288,10 @@
         </div>
 
         <!-- Empty State -->
-        <div x-show="filteredProducts().length === 0" class="text-center py-20 bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200/60 dark:border-zinc-850/60 p-8 shadow-sm">
-            <div class="w-16 h-16 bg-slate-50 dark:bg-zinc-950 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔍</div>
-            <h4 class="font-black text-slate-700 dark:text-zinc-300 text-sm">عذراً، لم نجد ما تبحث عنه</h4>
-            <p class="text-xs text-slate-400 dark:text-zinc-500 mt-1">تأكد من كتابة الاسم بشكل صحيح أو تصفح الأقسام الأخرى.</p>
+        <div x-show="filteredProducts().length === 0" class="text-center py-24 bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 p-10 shadow-sm">
+            <div class="text-5xl mb-4">🔍</div>
+            <h4 class="font-black text-slate-700 dark:text-zinc-300 text-base">لم نجد ما تبحث عنه</h4>
+            <p class="text-xs text-slate-400 dark:text-zinc-500 mt-2">تأكد من كتابة الاسم بشكل صحيح أو تصفح الأقسام الأخرى.</p>
         </div>
     </main>
 
@@ -630,19 +674,19 @@
                             }
                             .grid-layout {
                                 display: grid;
-                                grid-template-columns: repeat(3, minmax(0, 1fr));
-                                gap: 16px;
+                                grid-template-columns: repeat(2, minmax(0, 1fr));
+                                gap: 20px;
                             }
                             .product-card {
                                 background: white;
-                                border: 1.5px solid #e8e8e5;
-                                border-radius: 18px;
+                                border: 1.5px solid #eaeaea;
+                                border-radius: 20px;
                                 overflow: hidden;
                                 display: flex;
                                 flex-direction: column;
                                 page-break-inside: avoid;
                                 break-inside: avoid;
-                                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+                                box-shadow: 0 4px 20px rgba(0,0,0,0.07);
                             }
                             .product-image-wrapper {
                                 width: 100%;
@@ -684,30 +728,30 @@
                                 letter-spacing: 0.5px;
                             }
                             .product-body {
-                                padding: 12px;
+                                padding: 16px;
                                 flex-grow: 1;
                                 display: flex;
                                 flex-direction: column;
                                 text-align: right;
                             }
                             .product-name {
-                                font-size: 13px;
+                                font-size: 15px;
                                 font-weight: 900;
                                 color: #0f172a;
                                 line-height: 1.3;
-                                margin-bottom: 5px;
+                                margin-bottom: 6px;
                             }
                             .product-desc {
-                                font-size: 10px;
+                                font-size: 11px;
                                 color: #64748b;
-                                line-height: 1.5;
+                                line-height: 1.55;
                                 font-weight: 500;
                                 overflow: hidden;
                                 display: -webkit-box;
-                                -webkit-line-clamp: 2;
+                                -webkit-line-clamp: 3;
                                 -webkit-box-orient: vertical;
                                 flex-grow: 1;
-                                margin-bottom: 10px;
+                                margin-bottom: 12px;
                             }
                             .product-footer {
                                 display: flex;
@@ -718,14 +762,16 @@
                                 margin-top: auto;
                             }
                             .price-tag {
-                                font-size: 15px;
+                                font-size: 17px;
                                 font-weight: 900;
                                 color: #15803d;
                             }
                             .label-price {
-                                font-size: 9px;
+                                font-size: 10px;
                                 color: #94a3b8;
                                 font-weight: 700;
+                                letter-spacing: 0.5px;
+                                text-transform: uppercase;
                             }
                             .pdf-footer {
                                 text-align: center;
