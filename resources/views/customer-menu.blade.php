@@ -698,6 +698,7 @@
                                 margin: 10px;
                                 text-align: right;
                                 font-size: 14px; /* reset font size */
+                                position: relative; /* target context for badge and absolute footer */
                                 page-break-inside: avoid !important;
                                 break-inside: avoid !important;
                                 box-shadow: 0 4px 20px rgba(0,0,0,0.07);
@@ -740,8 +741,8 @@
                             .product-body {
                                 padding: 16px;
                                 height: 160px; /* 390px - 230px */
-                                display: flex;
-                                flex-direction: column;
+                                position: relative; /* context for absolute footer */
+                                display: block;
                                 text-align: right;
                             }
                             .product-name {
@@ -750,6 +751,7 @@
                                 color: #0f172a;
                                 line-height: 1.3;
                                 margin-bottom: 6px;
+                                display: block;
                             }
                             .product-desc {
                                 font-size: 11px;
@@ -760,21 +762,26 @@
                                 display: -webkit-box;
                                 -webkit-line-clamp: 3;
                                 -webkit-box-orient: vertical;
-                                flex-grow: 1;
+                                height: 50px; /* fixed height for 3 lines of description */
                                 margin-bottom: 12px;
                             }
                             .product-footer {
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
+                                position: absolute;
+                                bottom: 16px;
+                                left: 16px;
+                                right: 16px;
                                 padding-top: 8px;
                                 border-top: 1.5px solid #f1f5f9;
-                                margin-top: auto;
+                                display: block;
                             }
                             .price-tag {
                                 font-size: 17px;
                                 font-weight: 900;
                                 color: #15803d;
+                                display: inline-block;
+                                vertical-align: middle;
+                                text-align: left;
+                                width: 49%;
                             }
                             .label-price {
                                 font-size: 10px;
@@ -782,6 +789,10 @@
                                 font-weight: 700;
                                 letter-spacing: 0.5px;
                                 text-transform: uppercase;
+                                display: inline-block;
+                                vertical-align: middle;
+                                text-align: right;
+                                width: 49%;
                             }
                             .pdf-footer {
                                 text-align: center;
@@ -910,7 +921,7 @@
                     const opt = {
                         margin:       [0.35, 0.35, 0.35, 0.35], // top, left, bottom, right in inches
                         filename:     'Bello-Smash-Menu.pdf',
-                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: '.product-card' },
+                        pagebreak:    { mode: ['css', 'legacy'], avoid: '.product-card' },
                         image:        { type: 'jpeg', quality: 1.0 }, // Max JPEG quality
                         html2canvas:  { 
                             scale: 3, // 3x for high-definition sharpness without memory overflow
