@@ -872,10 +872,10 @@
                             .pdf-card-image-wrapper {
                                 width: 100%;
                                 height: 130px;
-                                background-size: cover;
+                                background-size: contain;
                                 background-position: center center;
                                 background-repeat: no-repeat;
-                                background-color: #f8fafc;
+                                background-color: #ffffff;
                                 position: relative;
                                 border-bottom: 1px solid #f1f5f9;
                             }
