@@ -619,61 +619,61 @@
                                 font-family: 'Cairo', sans-serif;
                                 background-color: #f8f7f4;
                                 color: #1e293b;
-                                padding: 28px;
+                                padding: 24px;
                             }
                             .pdf-header {
                                 background: linear-gradient(135deg, #14532d 0%, #064e3b 50%, #14532d 100%);
                                 color: white;
-                                border-radius: 24px;
-                                padding: 40px 35px;
+                                border-radius: 20px;
+                                padding: 24px 20px;
                                 text-align: center;
-                                margin-bottom: 32px;
-                                border-bottom: 6px solid #f59e0b;
+                                margin-bottom: 24px;
+                                border-bottom: 5px solid #f59e0b;
                                 position: relative;
                                 overflow: hidden;
                             }
                             .pdf-brand {
                                 font-family: 'Playfair Display', serif;
-                                font-size: 44px;
+                                font-size: 34px;
                                 font-weight: 900;
                                 color: #ffffff;
                                 letter-spacing: -1px;
                             }
                             .pdf-brand span { color: #fbbf24; }
                             .pdf-subtitle {
-                                font-size: 13px;
+                                font-size: 11px;
                                 color: #6ee7b7;
                                 font-weight: 700;
                                 text-transform: uppercase;
-                                margin-top: 6px;
-                                letter-spacing: 3px;
+                                margin-top: 4px;
+                                letter-spacing: 2px;
                             }
                             .pdf-welcome {
-                                font-size: 12px;
+                                font-size: 11px;
                                 color: #d1fae5;
-                                margin-top: 12px;
+                                margin-top: 8px;
                                 font-weight: 500;
-                                line-height: 1.6;
+                                line-height: 1.5;
                             }
                             .category-section {
-                                margin-bottom: 32px;
+                                margin-bottom: 24px;
                             }
                             .category-title {
-                                font-size: 19px;
+                                font-size: 17px;
                                 font-weight: 900;
                                 color: #14532d;
                                 border-bottom: 3px solid #fbbf24;
-                                padding-bottom: 8px;
-                                margin-bottom: 20px;
+                                padding-bottom: 6px;
+                                margin-bottom: 16px;
                                 text-align: right;
                                 display: flex;
                                 align-items: center;
                                 justify-content: flex-end;
-                                gap: 8px;
+                                gap: 6px;
                             }
                             .category-dot {
-                                width: 10px;
-                                height: 10px;
+                                width: 8px;
+                                height: 8px;
                                 border-radius: 50%;
                                 background: #fbbf24;
                                 display: inline-block;
@@ -693,8 +693,8 @@
                                 overflow: hidden;
                                 display: inline-block;
                                 vertical-align: top;
-                                width: 337px;
-                                height: 390px;
+                                width: calc(50% - 20px);
+                                height: 260px;
                                 margin: 10px;
                                 text-align: right;
                                 font-size: 14px; /* reset font size */
@@ -705,7 +705,7 @@
                             }
                             .product-image-wrapper {
                                 width: 100%;
-                                height: 230px;
+                                height: 140px;
                                 background-size: cover;
                                 background-position: center center;
                                 background-repeat: no-repeat;
@@ -739,43 +739,43 @@
                                 letter-spacing: 0.5px;
                             }
                             .product-body {
-                                padding: 16px;
-                                height: 160px; /* 390px - 230px */
+                                padding: 10px 12px;
+                                height: 120px; /* 260px - 140px */
                                 position: relative; /* context for absolute footer */
                                 display: block;
                                 text-align: right;
                             }
                             .product-name {
-                                font-size: 15px;
+                                font-size: 13px;
                                 font-weight: 900;
                                 color: #0f172a;
-                                line-height: 1.3;
-                                margin-bottom: 6px;
+                                line-height: 1.25;
+                                margin-bottom: 4px;
                                 display: block;
                             }
                             .product-desc {
-                                font-size: 11px;
+                                font-size: 9.5px;
                                 color: #64748b;
-                                line-height: 1.55;
+                                line-height: 1.4;
                                 font-weight: 500;
                                 overflow: hidden;
                                 display: -webkit-box;
                                 -webkit-line-clamp: 3;
                                 -webkit-box-orient: vertical;
-                                height: 50px; /* fixed height for 3 lines of description */
-                                margin-bottom: 12px;
+                                height: 40px; /* fixed height for 3 lines of description */
+                                margin-bottom: 8px;
                             }
                             .product-footer {
                                 position: absolute;
-                                bottom: 16px;
-                                left: 16px;
-                                right: 16px;
-                                padding-top: 8px;
+                                bottom: 10px;
+                                left: 12px;
+                                right: 12px;
+                                padding-top: 5px;
                                 border-top: 1.5px solid #f1f5f9;
                                 display: block;
                             }
                             .price-tag {
-                                font-size: 17px;
+                                font-size: 13.5px;
                                 font-weight: 900;
                                 color: #15803d;
                                 display: inline-block;
@@ -784,7 +784,7 @@
                                 width: 49%;
                             }
                             .label-price {
-                                font-size: 10px;
+                                font-size: 9px;
                                 color: #94a3b8;
                                 font-weight: 700;
                                 letter-spacing: 0.5px;
@@ -919,7 +919,7 @@
 
                     // PDF options
                     const opt = {
-                        margin:       [0.35, 0.35, 0.35, 0.35], // top, left, bottom, right in inches
+                        margin:       [0.25, 0.25, 0.25, 0.25], // top, left, bottom, right in inches
                         filename:     'Bello-Smash-Menu.pdf',
                         pagebreak:    { mode: ['css', 'legacy'], avoid: '.product-card' },
                         image:        { type: 'jpeg', quality: 1.0 }, // Max JPEG quality
