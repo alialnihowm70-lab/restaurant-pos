@@ -566,21 +566,21 @@
                                 font-family: 'Cairo', sans-serif;
                                 background-color: #faf9f6; /* Premium warm cream background */
                                 color: #1e293b;
-                                padding: 25px;
+                                padding: 30px;
                                 border-radius: 20px;
                             }
                             .pdf-header {
                                 background: linear-gradient(135deg, #14532d 0%, #064e3b 100%);
                                 color: white;
                                 border-radius: 20px;
-                                padding: 30px;
+                                padding: 35px;
                                 text-align: center;
-                                margin-bottom: 30px;
+                                margin-bottom: 35px;
                                 border-bottom: 5px solid #f59e0b;
                             }
                             .pdf-brand {
                                 font-family: 'Playfair Display', serif;
-                                font-size: 32px;
+                                font-size: 38px;
                                 font-weight: 900;
                                 color: #ffffff;
                                 text-align: center;
@@ -589,7 +589,7 @@
                                 color: #f59e0b;
                             }
                             .pdf-subtitle {
-                                font-size: 13px;
+                                font-size: 15px;
                                 color: #a7f3d0;
                                 font-weight: 700;
                                 text-transform: uppercase;
@@ -598,40 +598,40 @@
                                 text-align: center;
                             }
                             .pdf-welcome {
-                                font-size: 11px;
+                                font-size: 12px;
                                 color: #e2e8f0;
                                 margin-top: 10px;
                                 font-weight: 500;
                                 text-align: center;
                             }
                             .category-section {
-                                margin-bottom: 30px;
+                                margin-bottom: 35px;
                                 page-break-inside: avoid;
                                 break-inside: avoid;
                             }
                             .category-title {
-                                font-size: 16px;
+                                font-size: 20px;
                                 font-weight: 900;
                                 color: #14532d;
-                                border-bottom: 2px solid #f59e0b;
-                                padding-bottom: 6px;
-                                margin-bottom: 18px;
+                                border-bottom: 3px solid #f59e0b;
+                                padding-bottom: 8px;
+                                margin-bottom: 22px;
                                 text-align: right;
                             }
                             .grid-layout {
                                 display: grid;
                                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                                gap: 15px;
+                                gap: 20px;
                             }
                             .product-card {
                                 background: white;
-                                border: 1px solid #e2e8f0;
-                                border-radius: 16px;
-                                padding: 12px;
+                                border: 1.5px solid #e2e8f0;
+                                border-radius: 18px;
+                                padding: 15px;
                                 display: flex;
                                 flex-direction: column;
                                 justify-content: space-between;
-                                min-height: 140px;
+                                min-height: 165px;
                                 page-break-inside: avoid;
                                 break-inside: avoid;
                                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
@@ -639,15 +639,16 @@
                             }
                             .product-details {
                                 display: flex;
-                                gap: 12px;
+                                gap: 15px;
                             }
                             .product-image-container {
-                                width: 64px;
-                                height: 64px;
-                                border-radius: 12px;
+                                width: 95px;
+                                height: 95px;
+                                border-radius: 14px;
                                 overflow: hidden;
-                                border: 2px solid #f59e0b;
+                                border: 2.5px solid #f59e0b;
                                 flex-shrink: 0;
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
                             }
                             .product-image {
                                 width: 100%;
@@ -659,17 +660,17 @@
                                 text-align: right;
                             }
                             .product-name {
-                                font-size: 12px;
+                                font-size: 14px;
                                 font-weight: 900;
                                 color: #0f172a;
-                                margin-bottom: 2px;
-                                line-height: 1.3;
+                                margin-bottom: 4px;
+                                line-height: 1.35;
                                 text-align: right;
                             }
                             .product-desc {
-                                font-size: 9px;
+                                font-size: 11px;
                                 color: #64748b;
-                                line-height: 1.35;
+                                line-height: 1.45;
                                 font-weight: 500;
                                 text-align: right;
                                 display: -webkit-box;
@@ -681,17 +682,17 @@
                                 display: flex;
                                 justify-content: space-between;
                                 align-items: center;
-                                margin-top: 10px;
-                                padding-top: 8px;
-                                border-top: 1px solid #f1f5f9;
+                                margin-top: 12px;
+                                padding-top: 10px;
+                                border-top: 1.5px solid #f1f5f9;
                             }
                             .price-tag {
-                                font-size: 12px;
+                                font-size: 14px;
                                 font-weight: 900;
                                 color: #15803d;
                             }
                             .label-price {
-                                font-size: 8px;
+                                font-size: 10px;
                                 color: #94a3b8;
                                 font-weight: 700;
                             }
@@ -700,7 +701,7 @@
                                 padding-top: 20px;
                                 border-top: 1px solid #e2e8f0;
                                 margin-top: 30px;
-                                font-size: 10px;
+                                font-size: 11px;
                                 color: #94a3b8;
                                 font-weight: 700;
                             }
@@ -824,7 +825,7 @@
                         filename:     'Bello-Smash-Menu.pdf',
                         image:        { type: 'jpeg', quality: 1.0 }, // Max JPEG quality
                         html2canvas:  { 
-                            scale: 3, // Increased scale to 3x for ultra-sharp high-definition image quality
+                            scale: 4, // Increased scale to 4x for extreme ultra-high-definition sharpness
                             useCORS: true, 
                             letterRendering: true,
                             logging: false,
