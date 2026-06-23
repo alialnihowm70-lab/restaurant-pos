@@ -697,17 +697,16 @@
                             }
                             .product-image-wrapper {
                                 width: 100%;
-                                height: 220px;
-                                overflow: hidden;
-                                background: #f1f5f9;
+                                height: 230px;
+                                background-size: cover;
+                                background-position: center center;
+                                background-repeat: no-repeat;
+                                background-color: #f1f5f9;
                                 position: relative;
                                 display: block;
                             }
                             .product-image {
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                                display: block;
+                                display: none; /* hidden — we use background-image instead */
                             }
                             .product-image-placeholder {
                                 width: 100%;
@@ -824,12 +823,9 @@
                             htmlContent += `
                                 <!-- Product Card -->
                                 <div class="product-card">
-                                    <!-- Large Top Image (matches live menu card) -->
-                                    <div class="product-image-wrapper">
-                                        ${imgSrc 
-                                            ? `<img src="${imgSrc}" class="product-image" crossorigin="anonymous">`
-                                            : `<div class="product-image-placeholder">🍔</div>`
-                                        }
+                                    <!-- Image as background-image (html2canvas supports cover correctly) -->
+                                    <div class="product-image-wrapper" ${imgSrc ? `style="background-image: url('${imgSrc}');"` : ''}>
+                                        ${!imgSrc ? `<div class="product-image-placeholder">🍔</div>` : ''}
                                         <div class="category-badge">${product.category}</div>
                                     </div>
                                     
