@@ -643,7 +643,7 @@
                     // Dynamically calculate and distribute categories and products into explicit A4 pages
                     const maxPageHeight = 1000; // max height per page including padding
                     const titleBlockHeight = 35;
-                    const rowHeight = 255; // card height 240px + gap 15px
+                    const rowHeight = 145; // card height 130px + gap 15px
                     const headerHeight = 170;
 
                     let pages = [];
@@ -846,22 +846,22 @@
                                 display: flex;
                                 gap: 15px;
                                 width: 100%;
-                                height: 240px;
+                                height: 130px;
                                 margin-bottom: 15px;
                                 box-sizing: border-box;
                                 direction: rtl !important;
                             }
                             
-                            /* Product Card exactly matching Web menu cards */
+                            /* Product Card - Horizontal Tile Layout */
                             .pdf-card {
                                 background: white;
                                 border: 1px solid #f1f5f9;
                                 border-radius: 20px;
                                 width: calc(50% - 7.5px);
-                                height: 240px;
+                                height: 130px;
                                 box-sizing: border-box;
                                 display: flex;
-                                flex-direction: column;
+                                flex-direction: row-reverse; /* RTL: image on the right, text on the left */
                                 overflow: hidden;
                                 box-shadow: 0 4px 12px rgba(0,0,0,0.02);
                                 text-align: right !important;
@@ -870,14 +870,15 @@
                             }
                             
                             .pdf-card-image-wrapper {
-                                width: 100%;
+                                width: 130px;
                                 height: 130px;
-                                background-size: contain;
+                                background-size: cover;
                                 background-position: center center;
                                 background-repeat: no-repeat;
-                                background-color: #ffffff;
+                                background-color: #f8fafc;
                                 position: relative;
-                                border-bottom: 1px solid #f1f5f9;
+                                flex-shrink: 0;
+                                border-left: 1px solid #f1f5f9;
                             }
                             
                             .pdf-card-image-placeholder {
@@ -896,7 +897,7 @@
                                 flex-direction: column;
                                 justify-content: space-between;
                                 flex-grow: 1;
-                                height: 110px;
+                                height: 130px;
                                 box-sizing: border-box;
                                 text-align: right !important;
                                 direction: rtl !important;
