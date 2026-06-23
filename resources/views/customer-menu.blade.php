@@ -90,10 +90,17 @@
         }
         .cart-pop { animation: cartPop 0.3s ease; }
 
-        /* Category chip active indicator */
-        .cat-active {
-            box-shadow: 0 4px 14px -4px rgba(21,128,61,0.45);
+        /* Card image box — perfect 1:1 square */
+        .card-img-box {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            position: relative;
+            background: #f1f5f9;
         }
+        .dark .card-img-box { background: #27272a; }
+        /* Category chip active shadow */
+        .cat-active { box-shadow: 0 4px 14px -4px rgba(21,128,61,0.45); }
     </style>
 </head>
 <body x-data="menuApp()" x-init="initMenu()" :class="{ 'dark': theme === 'dark' }" class="bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 min-h-screen transition-colors duration-300">
@@ -250,10 +257,10 @@
                      class="premium-card bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden cursor-pointer flex flex-col shadow-[0_2px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.25)] border border-slate-100/80 dark:border-zinc-800/60 relative group">
 
                     <!-- Product Image Container -->
-                    <div class="relative w-full overflow-hidden" style="padding-top: 100%;">
+                    <div class="card-img-box">
                         <img :src="product.image_url || ''"
                              :alt="product.name"
-                             class="card-img absolute inset-0 w-full h-full object-cover"
+                             class="card-img w-full h-full object-cover"
                              x-on:error.once="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                         <!-- Fallback -->
                         <div class="absolute inset-0 bg-slate-100 dark:bg-zinc-800 text-4xl flex items-center justify-center" style="display:none">🍔</div>
@@ -690,22 +697,19 @@
                             }
                             .product-image-wrapper {
                                 width: 100%;
-                                padding-top: 100%; /* 1:1 square ratio — works in html2canvas */
-                                position: relative;
+                                height: 220px;
                                 overflow: hidden;
                                 background: #f1f5f9;
+                                position: relative;
+                                display: block;
                             }
                             .product-image {
-                                position: absolute;
-                                top: 0; left: 0;
                                 width: 100%;
                                 height: 100%;
                                 object-fit: cover;
                                 display: block;
                             }
                             .product-image-placeholder {
-                                position: absolute;
-                                top: 0; left: 0;
                                 width: 100%;
                                 height: 100%;
                                 display: flex;
